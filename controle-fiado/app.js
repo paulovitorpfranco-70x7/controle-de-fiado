@@ -9,6 +9,16 @@
     paymentMethod: "Pix"
   };
 
+  const primaryViews = [
+    { id: "dashboard", label: "Inicio", icon: "house" },
+    { id: "clientes", label: "Clientes", icon: "users" }
+  ];
+
+  const secondaryViews = [
+    { id: "relatorios", label: "Relatorios", icon: "bar-chart-3", hint: "Ver totais e periodo" },
+    { id: "cobrancas", label: "Cobrancas", icon: "message-circle-more", hint: "Lembretes e WhatsApp" }
+  ];
+
   const root = document.getElementById("app-root");
   const pageTitle = document.getElementById("page-title");
   const desktopNav = document.getElementById("desktop-nav");
@@ -40,8 +50,8 @@
   function statusLabel(status) {
     const labels = {
       emdia: "Em dia",
-      proximo: "Proximo do vencimento",
-      vencido: "Vencido",
+      proximo: "Vencendo",
+      vencido: "Atrasado",
       confirmado: "Confirmado",
       agendado: "Agendado",
       enviado: "Enviado",
@@ -53,19 +63,26 @@
   }
 
   function renderNav() {
-    desktopNav.innerHTML = mocks.nav.map((item) => `
+    desktopNav.innerHTML = [
+      `<div class="text-[10px] font-bold tracking-[0.28em] uppercase text-white/35 px-4 pb-2">Acoes principais</div>`,
+      ...primaryViews.map((item) => `
       <button class="nav-link ${state.view === item.id ? "active" : ""}" data-view="${item.id}" type="button">
         <i data-lucide="${item.icon}" class="w-4 h-4"></i>
         <span class="text-sm font-medium">${item.label}</span>
       </button>
-    `).join("");
+    `),
+      `<button class="nav-link" data-open-drawer="menu" type="button"><i data-lucide="ellipsis" class="w-4 h-4"></i><span class="text-sm font-medium">Mais opcoes</span></button>`
+    ].join("");
 
-    mobileNav.innerHTML = mocks.nav.slice(0, 4).map((item) => `
+    mobileNav.innerHTML = [
+      ...primaryViews.map((item) => `
       <button class="mobile-link ${state.view === item.id ? "active" : ""}" data-view="${item.id}" type="button">
         <i data-lucide="${item.icon}" class="w-4 h-4"></i>
         <span>${item.label}</span>
       </button>
-    `).join("");
+    `),
+      `<button class="mobile-link" data-open-drawer="menu" type="button"><i data-lucide="ellipsis" class="w-4 h-4"></i><span>Mais</span></button>`
+    ].join("");
   }
 
   function renderSectionHeader(title, copy, extra = "") {
@@ -82,17 +99,20 @@
   }
 
   function renderDashboard() {
-    const metrics = mocks.dashboard.metrics.map((item) => `
-      <article class="surface-card kpi-card">
-        <div class="flex items-center justify-between gap-4">
-          <div class="text-[10px] font-bold tracking-[0.28em] uppercase text-white/45">${item.label}</div>
-          <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-orange-400">
-            <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-          </div>
+    const primaryActions = [
+      { id: "sale", title: "Nova venda fiado", text: "Escolha o cliente, digite o valor e confirme.", icon: "plus", tone: "is-primary" },
+      { id: "payment", title: "Registrar pagamento", text: "Recebeu? Baixe o saldo em poucos toques.", icon: "wallet" },
+      { id: "clientes", title: "Ver clientes", text: "Procure pelo nome e abra a ficha.", icon: "users", view: true }
+    ].map((item) => `
+      <button class="primary-action-card ${item.tone || ""}" ${item.view ? `data-view="${item.id}"` : `data-open-drawer="${item.id}"`} type="button">
+        <div class="w-14 h-14 rounded-[20px] bg-white/5 border border-white/10 flex items-center justify-center text-orange-400">
+          <i data-lucide="${item.icon}" class="w-6 h-6"></i>
         </div>
-        <div class="mt-6 kpi-value">${item.value}</div>
-        <div class="kpi-delta ${item.tone === "positive" ? "positive" : "neutral"}">${item.delta}</div>
-      </article>
+        <div>
+          <div class="text-2xl font-medium tracking-tighter text-white">${item.title}</div>
+          <div class="mt-3 text-sm leading-relaxed text-white/58">${item.text}</div>
+        </div>
+      </button>
     `).join("");
 
     const topDebtors = mocks.dashboard.topDebtors.map((item) => `
@@ -106,56 +126,55 @@
       </div>
     `).join("");
 
-    const quickActions = mocks.dashboard.quickActions.map((item) => `
-      <button class="quick-action" data-quick-action="${item.id}" type="button">
-        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-orange-400">
-          <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-        </div>
-        <div class="text-left">
-          <div class="text-base font-medium tracking-tight text-white">${item.title}</div>
-          <div class="mt-1 text-sm leading-relaxed text-white/55">${item.text}</div>
-        </div>
-      </button>
-    `).join("");
+    const todaySummary = `
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="simple-stat"><div><div class="text-xs uppercase tracking-[0.22em] text-white/40">Em aberto</div><div class="mt-2 text-xl font-medium tracking-tight text-white">R$ 18.740</div></div><span class="status-chip status-warning">Acompanhar</span></div>
+        <div class="simple-stat"><div><div class="text-xs uppercase tracking-[0.22em] text-white/40">Vencendo</div><div class="mt-2 text-xl font-medium tracking-tight text-white">5 clientes</div></div><span class="status-chip status-warning">Hoje</span></div>
+        <div class="simple-stat"><div><div class="text-xs uppercase tracking-[0.22em] text-white/40">Atrasados</div><div class="mt-2 text-xl font-medium tracking-tight text-white">12 clientes</div></div><span class="status-chip status-danger">Prioridade</span></div>
+      </div>
+    `;
 
     return `
       <section class="section-block">
         ${renderSectionHeader(
-          "Operacao rapida para o balcao",
-          "O dashboard resume o fiado do mes, destaca clientes atrasados e deixa as acoes principais em um toque no celular e um clique no desktop."
+          "Tres acoes e pronto",
+          "Quem esta no caixa precisa fazer so tres coisas: vender fiado, registrar pagamento e achar cliente. O resto fica secundario."
         )}
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">${metrics}</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">${primaryActions}</div>
       </section>
-      <section class="section-block grid grid-cols-1 xl:grid-cols-[1.3fr_0.9fr] gap-5">
+      <section class="section-block">
+        <div class="surface-panel p-5 md:p-6">
+          <div class="text-xl font-medium tracking-tight text-white">Resumo de hoje</div>
+          <div class="mt-1 text-sm text-white/50">So o que ajuda a decidir rapido</div>
+          <div class="mt-5">${todaySummary}</div>
+        </div>
+      </section>
+      <section class="section-block grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-5">
         <div class="surface-panel overflow-hidden">
           <div class="px-5 pt-5 md:px-6 md:pt-6 flex items-center justify-between gap-4">
             <div>
-              <div class="text-xl font-medium tracking-tight text-white">Quem mais deve</div>
-              <div class="mt-1 text-sm text-white/50">Clientes priorizados para cobranca</div>
+              <div class="text-xl font-medium tracking-tight text-white">Clientes para olhar agora</div>
+              <div class="mt-1 text-sm text-white/50">Quem esta vencendo ou atrasado</div>
             </div>
             <span class="status-chip status-warning">12 vencidos</span>
           </div>
           <div class="data-list mt-4">${topDebtors}</div>
         </div>
         <div class="surface-panel p-5 md:p-6">
-          <div class="text-xl font-medium tracking-tight text-white">Acoes rapidas</div>
-          <div class="mt-1 text-sm text-white/50">Rotina pensada para o caixa</div>
-          <div class="mt-5 grid grid-cols-1 gap-3">${quickActions}</div>
+          <div class="text-xl font-medium tracking-tight text-white">Como usar</div>
+          <div class="mt-1 text-sm text-white/50">Fluxo simples para quem esta com pressa</div>
+          <div class="mt-5 step-flow">
+            <div class="step-card"><div class="step-badge">1</div><div><div class="text-base font-medium text-white">Venda</div><div class="mt-1 text-sm text-white/55">Cliente, valor e prazo.</div></div></div>
+            <div class="step-card"><div class="step-badge">2</div><div><div class="text-base font-medium text-white">Pagamento</div><div class="mt-1 text-sm text-white/55">Valor pago e forma.</div></div></div>
+            <div class="step-card"><div class="step-badge">3</div><div><div class="text-base font-medium text-white">Clientes</div><div class="mt-1 text-sm text-white/55">Buscar nome e abrir ficha.</div></div></div>
+            <div class="step-card"><div class="step-badge">4</div><div><div class="text-base font-medium text-white">Mais opcoes</div><div class="mt-1 text-sm text-white/55">Relatorios e cobrancas ficam no menu.</div></div></div>
+          </div>
         </div>
       </section>
     `;
   }
 
   function renderClients() {
-    const controls = `
-      <div class="flex flex-wrap items-center gap-2">
-        <button class="tag-switch px-4 min-h-[42px] ${state.clientsState === "success" ? "action-pill-primary" : ""}" type="button" data-client-state="success">Sucesso</button>
-        <button class="tag-switch px-4 min-h-[42px] ${state.clientsState === "loading" ? "action-pill-primary" : ""}" type="button" data-client-state="loading">Loading</button>
-        <button class="tag-switch px-4 min-h-[42px] ${state.clientsState === "empty" ? "action-pill-primary" : ""}" type="button" data-client-state="empty">Vazio</button>
-        <button class="tag-switch px-4 min-h-[42px] ${state.clientsState === "error" ? "action-pill-primary" : ""}" type="button" data-client-state="error">Erro</button>
-      </div>
-    `;
-
     let body = "";
     if (state.clientsState === "loading") {
       body = document.getElementById("state-loading").innerHTML;
@@ -197,8 +216,7 @@
       <section class="section-block">
         ${renderSectionHeader(
           "Clientes cadastrados",
-          "Busca rapida, estados de loading, vazio e erro e uma lista simples para nao atrapalhar a operacao.",
-          controls
+          "Busca rapida e lista simples. O foco aqui e achar o cliente sem pensar demais."
         )}
         <div class="surface-panel p-4 md:p-5">
           <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3">
@@ -290,7 +308,7 @@
       <section class="section-block">
         ${renderSectionHeader(
           "Historico de transacoes",
-          "Compras e pagamentos em ordem cronologica, com status visual suficiente para entender a situacao do cliente sem abrir outra tela."
+          "Compras e pagamentos em ordem cronologica, com leitura curta e status simples: Em dia, Vencendo ou Atrasado."
         )}
         <div class="timeline-list">${history}</div>
       </section>
@@ -393,11 +411,17 @@
 
       return `
         <form class="space-y-5">
+          <div class="step-flow">
+            <div class="step-card"><div class="step-badge">1</div><div><div class="text-sm font-medium text-white">Escolha o cliente</div><div class="mt-1 text-xs text-white/55">Ja vem um cliente selecionado.</div></div></div>
+            <div class="step-card"><div class="step-badge">2</div><div><div class="text-sm font-medium text-white">Digite o valor</div><div class="mt-1 text-xs text-white/55">Sem campos desnecessarios.</div></div></div>
+            <div class="step-card"><div class="step-badge">3</div><div><div class="text-sm font-medium text-white">Escolha o prazo</div><div class="mt-1 text-xs text-white/55">15 dias ja fica marcado.</div></div></div>
+            <div class="step-card"><div class="step-badge">4</div><div><div class="text-sm font-medium text-white">Confirme</div><div class="mt-1 text-xs text-white/55">Veja o valor final antes de salvar.</div></div></div>
+          </div>
           <div class="form-grid two-col">
             <label class="field-group"><span class="field-label">Cliente</span><select class="field-control">${clientOptions}</select></label>
             <label class="field-group"><span class="field-label">Prazo</span><div class="choice-row">${mocks.saleTerms.map((item) => `<button class="choice-chip ${item.label === state.saleTerm ? "active" : ""}" data-term="${item.label}" type="button">${item.label} <span class="text-white/50">${item.fee}</span></button>`).join("")}</div></label>
           </div>
-          <label class="field-group"><span class="field-label">Descricao da compra</span><input class="field-control" value="Compra de balcao" placeholder="Ex.: mercearia da semana" /></label>
+          <label class="field-group"><span class="field-label">Descricao</span><input class="field-control" value="Compra de balcao" placeholder="Ex.: mercearia da semana" /></label>
           <div class="form-grid two-col">
             <label class="field-group"><span class="field-label">Valor da compra</span><input class="field-control" value="120,00" /></label>
             <label class="field-group"><span class="field-label">Data de vencimento</span><input class="field-control" value="${state.saleTerm === "15 dias" ? "12/04/2026" : "27/04/2026"}" /></label>
@@ -426,6 +450,12 @@
 
       return `
         <form class="space-y-5">
+          <div class="step-flow">
+            <div class="step-card"><div class="step-badge">1</div><div><div class="text-sm font-medium text-white">Confirme o cliente</div><div class="mt-1 text-xs text-white/55">O ultimo cliente aberto ja aparece.</div></div></div>
+            <div class="step-card"><div class="step-badge">2</div><div><div class="text-sm font-medium text-white">Digite o valor pago</div><div class="mt-1 text-xs text-white/55">O novo saldo aparece automaticamente.</div></div></div>
+            <div class="step-card"><div class="step-badge">3</div><div><div class="text-sm font-medium text-white">Escolha a forma</div><div class="mt-1 text-xs text-white/55">Pix ja fica marcado por padrao.</div></div></div>
+            <div class="step-card"><div class="step-badge">4</div><div><div class="text-sm font-medium text-white">Salvar</div><div class="mt-1 text-xs text-white/55">Pronto para voltar ao caixa.</div></div></div>
+          </div>
           <div class="form-grid two-col">
             <label class="field-group"><span class="field-label">Cliente</span><select class="field-control">${clientOptions}</select></label>
             <label class="field-group"><span class="field-label">Data do pagamento</span><input class="field-control" value="28/03/2026" /></label>
@@ -449,10 +479,43 @@
       `;
     }
 
+    if (state.drawer === "menu") {
+      drawerKicker.textContent = "Secundario";
+      drawerTitle.textContent = "Mais opcoes";
+      return `
+        <div class="space-y-5">
+          <div class="secondary-menu-list">
+            ${secondaryViews.map((item) => `
+              <button class="secondary-menu-item" data-menu-view="${item.id}" type="button">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-orange-400">
+                    <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-medium tracking-tight text-white">${item.label}</div>
+                    <div class="mt-1 text-sm text-white/50">${item.hint}</div>
+                  </div>
+                </div>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-white/50"></i>
+              </button>
+            `).join("")}
+          </div>
+          <div class="surface-panel p-5">
+            <div class="text-sm font-medium text-white">Regra da tela inicial</div>
+            <div class="mt-2 text-sm leading-relaxed text-white/55">Na entrada aparecem so venda, pagamento e clientes. O restante fica aqui para reduzir erro e hesitacao.</div>
+          </div>
+        </div>
+      `;
+    }
+
     drawerKicker.textContent = "Cadastro";
     drawerTitle.textContent = "Cliente";
     return `
       <form class="space-y-5">
+        <div class="step-flow">
+          <div class="step-card"><div class="step-badge">1</div><div><div class="text-sm font-medium text-white">Nome e telefone</div><div class="mt-1 text-xs text-white/55">So o essencial primeiro.</div></div></div>
+          <div class="step-card"><div class="step-badge">2</div><div><div class="text-sm font-medium text-white">Detalhes opcionais</div><div class="mt-1 text-xs text-white/55">Endereco, limite e observacoes.</div></div></div>
+        </div>
         <div class="form-grid two-col">
           <label class="field-group"><span class="field-label">Nome</span><input class="field-control" value="${client.name}" placeholder="Nome completo" /></label>
           <label class="field-group"><span class="field-label">Telefone</span><input class="field-control" value="${client.phone}" placeholder="(11) 99999-9999" /></label>
@@ -522,6 +585,11 @@
   }
 
   function routeQuickAction(action) {
+    if (action === "clientes") {
+      state.view = "clientes";
+      render();
+      return;
+    }
     if (action === "reports") {
       state.view = "relatorios";
       render();
@@ -557,6 +625,14 @@
       item.onclick = () => {
         mocks.selectedClientId = Number(item.dataset.viewClient);
         state.view = "cliente";
+        render();
+      };
+    });
+
+    document.querySelectorAll("[data-menu-view]").forEach((item) => {
+      item.onclick = () => {
+        state.view = item.dataset.menuView;
+        state.drawer = null;
         render();
       };
     });

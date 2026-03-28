@@ -14,10 +14,10 @@ window.CONTROLE_FIADO_MOCKS = {
       { label: "Vencidos", value: "12 clientes", delta: "7 precisam de contato hoje", tone: "warning", icon: "triangle-alert" }
     ],
     topDebtors: [
-      { name: "Maria da Silva", phone: "(11) 98811-2201", balance: "R$ 1.420", status: "Vencido", tone: "danger" },
-      { name: "João Pereira", phone: "(11) 99755-6120", balance: "R$ 1.120", status: "Próximo", tone: "warning" },
+      { name: "Maria da Silva", phone: "(11) 98811-2201", balance: "R$ 1.420", status: "Atrasado", tone: "danger" },
+      { name: "João Pereira", phone: "(11) 99755-6120", balance: "R$ 1.120", status: "Vencendo", tone: "warning" },
       { name: "Ana Souza", phone: "(11) 98441-0045", balance: "R$ 980", status: "Em dia", tone: "good" },
-      { name: "Mercinho da Esquina", phone: "(11) 97710-1920", balance: "R$ 875", status: "Vencido", tone: "danger" }
+      { name: "Mercinho da Esquina", phone: "(11) 97710-1920", balance: "R$ 875", status: "Atrasado", tone: "danger" }
     ],
     quickActions: [
       { id: "sale", title: "Nova venda fiado", text: "Registrar compra com prazo e cálculo automático.", icon: "receipt-text" },
