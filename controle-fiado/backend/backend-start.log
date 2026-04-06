@@ -1,0 +1,10 @@
+
+> @controle-fiado/backend@0.1.0 start
+> node dist/server.js
+
+{"level":30,"time":1775469224912,"pid":21512,"hostname":"DESKTOP-NTD1N2U","msg":"Server listening at http://127.0.0.1:3333"}
+{"level":30,"time":1775469224918,"pid":21512,"hostname":"DESKTOP-NTD1N2U","msg":"Server listening at http://192.168.10.16:3333"}
+{"level":30,"time":1775469235483,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":56357},"msg":"incoming request"}
+{"level":30,"time":1775469235492,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-1","res":{"statusCode":200},"responseTime":8.304199934005737,"msg":"request completed"}
+{"level":30,"time":1775469235510,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-2","req":{"method":"GET","url":"/api/customers","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":56358},"msg":"incoming request"}
+{"level":30,"time":1775469235571,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-2","res":{"statusCode":200},"responseTime":61.20260000228882,"msg":"request completed"}

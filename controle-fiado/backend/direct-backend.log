@@ -1,0 +1,4 @@
+
+> @controle-fiado/backend@0.1.0 dev
+> node --import tsx src/server.ts
+

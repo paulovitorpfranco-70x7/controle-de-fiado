@@ -1,0 +1,28 @@
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+Error [TransformError]: spawn EPERM
+    at ChildProcess.spawn (node:internal/child_process:421:11)
+    at Object.spawn (node:child_process:796:9)
+    at ensureServiceIsRunning (C:\Users\User\Desktop\PAULO\dev\Controle de Fiado\controle-fiado\node_modules\esbuild\lib\main.js:2268:29)
+    at transform (C:\Users\User\Desktop\PAULO\dev\Controle de Fiado\controle-fiado\node_modules\esbuild\lib\main.js:2168:37)
+    at file:///C:/Users/User/Desktop/PAULO/dev/Controle%20de%20Fiado/controle-fiado/node_modules/tsx/dist/index-7AaEi15b.mjs:14:2865
+    at applyTransformers (file:///C:/Users/User/Desktop/PAULO/dev/Controle%20de%20Fiado/controle-fiado/node_modules/tsx/dist/index-7AaEi15b.mjs:14:1266)
+    at transform (file:///C:/Users/User/Desktop/PAULO/dev/Controle%20de%20Fiado/controle-fiado/node_modules/tsx/dist/index-7AaEi15b.mjs:14:2812)
+    at load (file:///C:/Users/User/Desktop/PAULO/dev/Controle%20de%20Fiado/controle-fiado/node_modules/tsx/dist/esm/index.mjs?1775469095135:2:2348)
+    at async nextLoad (node:internal/modules/esm/hooks:785:22)
+    at async AsyncLoaderHooksOnLoaderHookWorker.load (node:internal/modules/esm/hooks:416:20) {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'spawn'
+}
+
+Node.js v24.11.1
+npm error Lifecycle script `dev` failed with error:
+npm error code 1
+npm error path C:\Users\User\Desktop\PAULO\dev\Controle de Fiado\controle-fiado\backend
+npm error workspace @controle-fiado/backend@0.1.0
+npm error location C:\Users\User\Desktop\PAULO\dev\Controle de Fiado\controle-fiado\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c node --import tsx src/server.ts

@@ -1,0 +1,8 @@
+
+> controle-fiado@0.1.0 dev:backend
+> npm --workspace backend run dev
+
+
+> @controle-fiado/backend@0.1.0 dev
+> tsx watch src/server.ts
+

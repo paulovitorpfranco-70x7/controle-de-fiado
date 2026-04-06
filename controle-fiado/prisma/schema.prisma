@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  STAFF
+}
+
+enum SaleStatus {
+  OPEN
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum PaymentMethod {
+  CASH
+  PIX
+  CARD
+}
+
+enum WhatsAppTriggerType {
+  AUTO_3_DAYS
+  AUTO_DUE_DATE
+  MANUAL
+}
+
+enum WhatsAppSendStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELED
+}
+
+model User {
+  id                String             @id @default(cuid())
+  name              String
+  login             String             @unique
+  passwordHash      String
+  role              UserRole           @default(STAFF)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sales             Sale[]
+  payments          Payment[]
+  messages          WhatsAppMessage[]  @relation("MessageCreatedBy")
+  auditLogs         AuditLog[]
+}
+
+model Customer {
+  id                String             @id @default(cuid())
+  name              String
+  phone             String
+  phoneE164         String?
+  address           String?
+  creditLimitCents  Int?
+  notes             String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sales             Sale[]
+  payments          Payment[]
+  messages          WhatsAppMessage[]
+}
+
+model Sale {
+  id                String             @id @default(cuid())
+  customerId        String
+  description       String
+  originalAmountCents  Int
+  feeAmountCents       Int            @default(0)
+  finalAmountCents     Int
+  remainingAmountCents Int
+  saleDate          DateTime
+  dueDate           DateTime
+  status            SaleStatus         @default(OPEN)
+  createdById       String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  customer          Customer           @relation(fields: [customerId], references: [id])
+  createdBy         User               @relation(fields: [createdById], references: [id])
+  paymentAllocations PaymentAllocation[]
+  messages          WhatsAppMessage[]
+
+  @@index([customerId, dueDate])
+  @@index([status, dueDate])
+}
+
+model Payment {
+  id                String             @id @default(cuid())
+  customerId        String
+  amountCents       Int
+  paymentDate       DateTime
+  method            PaymentMethod
+  notes             String?
+  createdById       String
+  createdAt         DateTime           @default(now())
+  customer          Customer           @relation(fields: [customerId], references: [id])
+  createdBy         User               @relation(fields: [createdById], references: [id])
+  allocations       PaymentAllocation[]
+
+  @@index([customerId, paymentDate])
+}
+
+model PaymentAllocation {
+  id                String             @id @default(cuid())
+  paymentId         String
+  saleId            String
+  amountCents       Int
+  payment           Payment            @relation(fields: [paymentId], references: [id])
+  sale              Sale               @relation(fields: [saleId], references: [id])
+
+  @@index([paymentId])
+  @@index([saleId])
+}
+
+model WhatsAppMessage {
+  id                String             @id @default(cuid())
+  customerId        String
+  saleId            String?
+  triggerType       WhatsAppTriggerType
+  templateCode      String?
+  messageBody       String
+  sendStatus        WhatsAppSendStatus @default(PENDING)
+  providerName      String?
+  providerMessageId String?
+  providerResponse  String?
+  scheduledFor      DateTime?
+  sentAt            DateTime?
+  createdById       String?
+  createdAt         DateTime           @default(now())
+  customer          Customer           @relation(fields: [customerId], references: [id])
+  sale              Sale?              @relation(fields: [saleId], references: [id])
+  createdBy         User?              @relation("MessageCreatedBy", fields: [createdById], references: [id])
+
+  @@index([customerId, createdAt])
+  @@index([sendStatus, scheduledFor])
+}
+
+model AuditLog {
+  id                String             @id @default(cuid())
+  actorUserId       String?
+  action            String
+  entityType        String
+  entityId          String
+  payloadJson       String?
+  createdAt         DateTime           @default(now())
+  actorUser         User?              @relation(fields: [actorUserId], references: [id])
+
+  @@index([entityType, entityId])
+}
