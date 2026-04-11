@@ -6,3 +6,5 @@
 > @controle-fiado/backend@0.1.0 dev
 > tsx watch src/server.ts
 
+03:53:03 [tsx] change in ./src\server.ts Rerunning...
+c
