@@ -109,6 +109,12 @@ body {
   padding: 10px 14px;
 }
 
+.message-copy {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.74);
+  line-height: 1.5;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;

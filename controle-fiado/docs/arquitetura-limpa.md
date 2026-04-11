@@ -145,6 +145,8 @@ Esses contratos existem para que as proximas features nascam no desenho certo.
 - `SendManualChargeUseCase`
 - `RunDailyChargeJobUseCase`
 - persistir historico antes e depois do envio
+- overview operacional de `dueSoon`, `dueToday` e `overdue`
+- historico de mensagens por cliente e por operacao
 
 ### Auth
 

@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { env } from "./config/env.js";
+import { chargeRoutes } from "./interfaces/http/modules/charges/charge.routes.js";
 import { customerRoutes } from "./interfaces/http/modules/customers/customer.routes.js";
 import { paymentRoutes } from "./interfaces/http/modules/payments/payment.routes.js";
 import { saleRoutes } from "./interfaces/http/modules/sales/sale.routes.js";
@@ -33,6 +34,10 @@ export function buildApp() {
 
   app.register(paymentRoutes, {
     prefix: "/api/payments"
+  });
+
+  app.register(chargeRoutes, {
+    prefix: "/api/charges"
   });
 
   return app;

@@ -5,6 +5,12 @@ import { fetchCustomers } from "../features/customers/api/fetch-customers";
 import { CustomerList } from "../features/customers/components/CustomerList";
 import type { CustomerDetail } from "../features/customers/types/customer-detail";
 import type { Customer } from "../features/customers/types/customer";
+import { fetchChargeMessages } from "../features/charges/api/fetch-charge-messages";
+import { fetchChargeOverview } from "../features/charges/api/fetch-charge-overview";
+import { ChargeMessageList } from "../features/charges/components/ChargeMessageList";
+import { ChargeOverviewPanel } from "../features/charges/components/ChargeOverviewPanel";
+import type { ChargeMessage } from "../features/charges/types/charge-message";
+import type { ChargeOverview } from "../features/charges/types/charge-overview";
 import { fetchPayments } from "../features/payments/api/fetch-payments";
 import { RecentPaymentsList } from "../features/payments/components/RecentPaymentsList";
 import type { Payment } from "../features/payments/types/payment";
@@ -14,6 +20,8 @@ import type { Sale } from "../features/sales/types/sale";
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [chargeMessages, setChargeMessages] = useState<ChargeMessage[]>([]);
+  const [chargeOverview, setChargeOverview] = useState<ChargeOverview | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [customerDetail, setCustomerDetail] = useState<CustomerDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -22,14 +30,15 @@ export function CustomersPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([fetchCustomers(), fetchSales(), fetchPayments()])
-      .then(([customerData, salesData, paymentData]) => {
+    Promise.all([fetchCustomers(), fetchSales(), fetchPayments(), fetchChargeOverview()])
+      .then(([customerData, salesData, paymentData, overviewData]) => {
         setCustomers(customerData);
         if (customerData.length > 0) {
           setSelectedCustomerId(customerData[0].id);
         }
         setSales(salesData.slice(0, 3));
         setPayments(paymentData.slice(0, 3));
+        setChargeOverview(overviewData);
         setError(null);
       })
       .catch((err: Error) => {
@@ -48,6 +57,14 @@ export function CustomersPage() {
     fetchCustomerDetail(selectedCustomerId)
       .then((data) => {
         setCustomerDetail(data);
+      })
+      .catch((err: Error) => {
+        setError(err.message);
+      });
+
+    fetchChargeMessages(selectedCustomerId)
+      .then((data) => {
+        setChargeMessages(data.slice(0, 5));
       })
       .catch((err: Error) => {
         setError(err.message);
@@ -99,6 +116,10 @@ export function CustomersPage() {
                 }))}
               />
             ) : null}
+
+            {chargeOverview ? <ChargeOverviewPanel overview={chargeOverview} /> : null}
+
+            {chargeMessages.length ? <ChargeMessageList messages={chargeMessages} /> : null}
 
             <section className="section-block">
               <div className="page-header page-header-section">
