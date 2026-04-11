@@ -2,6 +2,8 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { env } from "./config/env.js";
 import { customerRoutes } from "./interfaces/http/modules/customers/customer.routes.js";
+import { paymentRoutes } from "./interfaces/http/modules/payments/payment.routes.js";
+import { saleRoutes } from "./interfaces/http/modules/sales/sale.routes.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -23,6 +25,14 @@ export function buildApp() {
 
   app.register(customerRoutes, {
     prefix: "/api/customers"
+  });
+
+  app.register(saleRoutes, {
+    prefix: "/api/sales"
+  });
+
+  app.register(paymentRoutes, {
+    prefix: "/api/payments"
   });
 
   return app;

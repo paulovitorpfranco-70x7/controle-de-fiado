@@ -86,13 +86,26 @@ As dependencias devem sempre apontar para dentro:
 
 ## Exemplo adotado agora
 
-O modulo de clientes foi reorganizado nesse padrao:
+Os modulos de clientes, vendas e pagamentos ja seguem esse padrao:
 
 - `domain/customers/customer.ts`
+- `domain/sales/sale.ts`
+- `domain/payments/payment.ts`
+- `domain/payments/payment-allocation.ts`
 - `application/customers/use-cases/*`
+- `application/sales/use-cases/*`
+- `application/payments/use-cases/*`
 - `application/ports/customer-repository.ts`
+- `application/ports/sale-repository.ts`
+- `application/ports/payment-repository.ts`
+- `application/ports/sale-balance-repository.ts`
 - `infra/db/prisma/repositories/prisma-customer-repository.ts`
+- `infra/db/prisma/repositories/prisma-sale-repository.ts`
+- `infra/db/prisma/repositories/prisma-payment-repository.ts`
+- `infra/db/prisma/repositories/prisma-sale-balance-repository.ts`
 - `interfaces/http/modules/customers/*`
+- `interfaces/http/modules/sales/*`
+- `interfaces/http/modules/payments/*`
 
 ## Contratos que ja existem para crescer
 
@@ -119,6 +132,12 @@ Esses contratos existem para que as proximas features nascam no desenho certo.
 - `PaymentRepository`
 - `PaymentAllocationRepository`
 - testes obrigatorios de rateio
+
+### Customer Detail / Statement
+
+- leitura agregada do cliente por porta dedicada
+- ficha deve consolidar cliente, vendas e pagamentos
+- extrato deve ser derivado da base real, nunca de mock
 
 ### Charges
 
