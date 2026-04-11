@@ -90,7 +90,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Registrar auditoria do envio manual
 - [x] Permitir preview da mensagem antes do envio
 - [x] Permitir edicao manual da mensagem no frontend
-- [ ] Permitir reenvio manual de falhas
+- [x] Permitir reenvio manual de falhas
 
 ### Envio automatico
 

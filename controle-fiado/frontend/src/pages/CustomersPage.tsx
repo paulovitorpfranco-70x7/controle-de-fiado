@@ -313,7 +313,16 @@ export function CustomersPage() {
             ) : null}
 
             {chargeOverview ? <ChargeOverviewPanel overview={chargeOverview} /> : null}
-            {chargeMessages.length ? <ChargeMessageList messages={chargeMessages} /> : null}
+            {chargeMessages.length ? (
+              <ChargeMessageList
+                messages={chargeMessages}
+                canRetry={authUser.role === "OWNER" || authUser.role === "STAFF"}
+                onRetried={(message) => setNotice({ tone: "success", message })}
+                onCompleted={async () => {
+                  await refreshOperationalData(selectedCustomerId);
+                }}
+              />
+            ) : null}
 
             <section className="section-block">
               <div className="page-header page-header-section">

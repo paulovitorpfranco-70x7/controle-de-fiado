@@ -19,6 +19,16 @@ export class PrismaChargeMessageRepository implements ChargeMessageRepository {
     return messages.map(mapMessage);
   }
 
+  async findById(messageId: string) {
+    const message = await prisma.whatsAppMessage.findUnique({
+      where: {
+        id: messageId
+      }
+    });
+
+    return message ? mapMessage(message) : null;
+  }
+
   async findSuccessfulBySaleAndTrigger(input: {
     saleId: string;
     triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE" | "MANUAL";
