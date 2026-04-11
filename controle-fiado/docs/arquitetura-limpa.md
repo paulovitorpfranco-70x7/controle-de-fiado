@@ -79,10 +79,11 @@ As dependencias devem sempre apontar para dentro:
 
 1. rota/controller recebe request HTTP
 2. schema valida input
-3. controller chama um use case
-4. use case usa portas como repositores, auditoria e provider externo
-5. infraestrutura implementa essas portas com Prisma, jobs e WhatsApp
-6. resposta volta sem expor detalhes de infraestrutura
+3. guard de autenticacao protege modulos de negocio
+4. controller chama um use case
+5. use case usa portas como repositores, auditoria e provider externo
+6. infraestrutura implementa essas portas com Prisma, jobs e WhatsApp
+7. resposta volta sem expor detalhes de infraestrutura
 
 ## Exemplo adotado agora
 

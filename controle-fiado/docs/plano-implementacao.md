@@ -1,188 +1,185 @@
 # Plano de Implementacao
 
-## Diagnostico atual
+## Objetivo
 
-O projeto atual e um prototipo estatico:
+Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduzindo risco de erro operacional, financeiro e de integracao.
 
-- `index.html`, `styles.css` e `app.js` concentram a interface
-- `mocks.js` simula todos os dados
-- `server.js` apenas serve arquivos estaticos
-- nao existe banco, API, autenticacao ou persistencia
+## Como usar este plano
 
-Isso significa que a UI pode ser reaproveitada como referencia visual, mas a aplicacao precisa ser reconstruida sobre uma base real.
+- tarefas marcadas com `[x]` ja foram implementadas na base atual
+- tarefas com `[ ]` ainda precisam ser executadas
+- este arquivo deve ser atualizado conforme o projeto avancar
 
-## Arquitetura alvo
+## Fase 1: Fundacao tecnica e arquitetura
 
-### Frontend
+- [x] Separar a nova base em `frontend`, `backend`, `prisma` e `docs`
+- [x] Manter o prototipo antigo isolado como referencia visual
+- [x] Estruturar o backend em `domain`, `application`, `infra` e `interfaces`
+- [x] Estruturar o frontend em `pages`, `features` e `shared`
+- [x] Documentar a arquitetura limpa em `docs/arquitetura-limpa.md`
+- [x] Configurar backend com Fastify
+- [x] Configurar frontend com React + Vite
+- [x] Configurar Prisma como camada de persistencia
+- [x] Configurar schema inicial do banco
+- [x] Criar seeds de desenvolvimento
 
-- React com Vite
-- `pages`, `features` e `shared`
-- rotas para dashboard, clientes, cliente detalhado e cobrancas
-- camada de servicos para consumir API
-- componentes reaproveitando a linguagem visual atual
+## Fase 2: Operacao principal
 
-### Backend
+### Clientes
 
-- Node.js com Fastify
-- validacao com Zod
-- Prisma para acesso ao banco
-- jobs agendados para cobranca automatica
-- organizacao em `domain`, `application`, `infra` e `interfaces`
-- use cases para cada operacao principal
-- portas para repositorios, auditoria e WhatsApp
+- [x] Listar clientes pela API
+- [x] Criar cliente
+- [x] Atualizar cliente
+- [x] Normalizar telefone para formato de integracao
+- [x] Calcular saldo aberto do cliente a partir das vendas
+- [x] Exibir listagem de clientes no frontend
+- [x] Exibir ficha detalhada do cliente
 
-### Banco
+### Vendas
 
-- PostgreSQL
+- [x] Criar modulo de vendas na arquitetura limpa
+- [x] Implementar calculo de valor final da venda
+- [x] Suportar acrescimo por valor ou percentual
+- [x] Definir status inicial da venda
+- [x] Expor `GET /api/sales`
+- [x] Expor `POST /api/sales`
+- [x] Exibir ultimas vendas no frontend
 
-## Modelo inicial de dados
+### Pagamentos
 
-### `users`
+- [x] Criar modulo de pagamentos na arquitetura limpa
+- [x] Implementar rateio automatico por debitos mais antigos
+- [x] Persistir `payment_allocations`
+- [x] Atualizar saldo remanescente da venda apos pagamento
+- [x] Atualizar status da venda apos pagamento
+- [x] Expor `GET /api/payments`
+- [x] Expor `POST /api/payments`
+- [x] Exibir ultimos pagamentos no frontend
 
-- id
-- name
-- email ou login
-- password_hash
-- role
-- created_at
+### Extrato
 
-### `customers`
+- [x] Consolidar vendas e pagamentos por cliente
+- [x] Expor detalhe do cliente com extrato real
+- [x] Exibir extrato inicial no frontend
+- [ ] Melhorar visual e navegacao da ficha do cliente para uso operacional
 
-- id
-- name
-- phone
-- phone_e164
-- address
-- credit_limit
-- notes
-- is_active
-- created_at
-- updated_at
+## Fase 3: Cobranca e WhatsApp
 
-### `sales`
+### Historico e fila
 
-- id
-- customer_id
-- description
-- original_amount
-- fee_amount
-- final_amount
-- sale_date
-- due_date
-- status
-- created_by
-- created_at
+- [x] Criar modulo de cobrancas na arquitetura limpa
+- [x] Persistir historico de mensagens WhatsApp
+- [x] Listar cobrancas vencendo em 3 dias
+- [x] Listar cobrancas vencendo hoje
+- [x] Listar cobrancas em atraso
+- [x] Exibir overview operacional de cobrancas no frontend
+- [x] Exibir historico de mensagens no frontend
 
-### `payments`
+### Envio manual
 
-- id
-- customer_id
-- amount
-- payment_date
-- method
-- notes
-- created_by
-- created_at
+- [x] Implementar envio manual de cobranca com provider mock
+- [x] Registrar auditoria do envio manual
+- [ ] Permitir preview da mensagem antes do envio
+- [ ] Permitir edicao manual da mensagem no frontend
+- [ ] Permitir reenvio manual de falhas
 
-### `payment_allocations`
+### Envio automatico
 
-- id
-- payment_id
-- sale_id
-- amount
+- [x] Criar caso de uso de job diario de cobranca
+- [x] Disparar mensagens automaticas de 3 dias antes do vencimento
+- [x] Disparar mensagens automaticas no dia do vencimento
+- [x] Evitar reenvio automatico duplicado por `saleId + triggerType`
+- [x] Expor endpoint manual para rodar o job diario
+- [x] Exibir resultado do job no frontend
+- [ ] Ligar scheduler real para execucao diaria automatica
+- [ ] Implementar politica de retry para falhas de envio
 
-### `whatsapp_messages`
+### Integracao real
 
-- id
-- customer_id
-- sale_id
-- trigger_type
-- template_code
-- message_body
-- send_status
-- provider_name
-- provider_message_id
-- provider_response
-- scheduled_for
-- sent_at
-- created_by
-- created_at
+- [ ] Substituir provider mock por provider real de WhatsApp
+- [ ] Definir provedor inicial de producao
+- [ ] Persistir `providerMessageId` real
+- [ ] Tratar falhas reais da API externa
+- [ ] Validar templates e conteudo de mensagens reais
 
-### `audit_logs`
+## Fase 4: Autenticacao, autorizacao e auditoria
 
-- id
-- actor_user_id
-- action
-- entity_type
-- entity_id
-- payload_json
-- created_at
+- [x] Criar modulo de autenticacao
+- [x] Implementar login com `login + senha`
+- [x] Implementar token assinado
+- [x] Implementar `GET /api/auth/me`
+- [x] Proteger rotas de negocio com autenticacao
+- [x] Persistir auditoria real em banco
+- [x] Registrar auditoria nas operacoes principais
+- [x] Exibir sessao autenticada no frontend
+- [ ] Implementar logout explicito no frontend
+- [ ] Definir expiracao de token
+- [ ] Implementar autorizacao por perfil
+- [ ] Restringir execucao do job diario a perfis permitidos
+- [ ] Remover credenciais fracas de desenvolvimento fora de ambiente local
 
-## Fases
+## Fase 5: Qualidade e testes
 
-### Fase 1: Fundacao tecnica
+- [ ] Adicionar framework de testes automatizados
+- [ ] Testar calculo de venda e acrescimo
+- [ ] Testar rateio automatico de pagamentos
+- [ ] Testar atualizacao de saldo do cliente
+- [ ] Testar deduplicacao de cobrancas automaticas
+- [ ] Testar autenticacao e protecao de rotas
+- [ ] Testar auditoria persistida
+- [ ] Testar job diario de cobranca
 
-- inicializar app frontend moderno
-- criar backend com API
-- configurar banco e migracoes
-- criar modelo inicial de dados
-- criar seeds de desenvolvimento
+## Fase 6: Banco e dados de producao
 
-### Fase 2: Operacao principal
+- [ ] Migrar de `sqlite` para PostgreSQL
+- [ ] Revisar tipos e constraints para producao
+- [ ] Revisar indices do banco
+- [ ] Criar fluxo seguro de migracoes
+- [ ] Validar timezone e datas de vencimento
+- [ ] Revisar seed para separar dados de desenvolvimento de producao
 
-- cadastrar cliente
-- editar cliente
-- listar clientes
-- registrar venda fiado
-- registrar pagamento
-- calcular saldo real
-- exibir extrato do cliente
+## Fase 7: Observabilidade e operacao
 
-### Fase 3: Cobranca e vencimento
+- [ ] Melhorar logs estruturados do backend
+- [ ] Registrar falhas de integracao com contexto suficiente
+- [ ] Configurar monitoramento do backend
+- [ ] Configurar monitoramento do job diario
+- [ ] Criar alertas para falhas de cobranca
+- [ ] Configurar backup do banco
+- [ ] Testar restauracao de backup
 
-- listar debitos vencendo em 3 dias
-- listar debitos no vencimento
-- registrar historico de mensagens
-- integrar provedor de WhatsApp
-- envio manual de cobranca
-- job diario de envio automatico
+## Fase 8: Frontend operacional
 
-### Fase 4: Gestao e confiabilidade
+- [ ] Criar formulario real de nova venda
+- [ ] Criar formulario real de novo pagamento
+- [ ] Criar fluxo real de envio manual de cobranca
+- [ ] Melhorar dashboard com dados reais do banco
+- [ ] Refinar UX para uso rapido no caixa
+- [ ] Revisar responsividade mobile
+- [ ] Revisar feedbacks de loading, erro e sucesso
 
-- autenticacao
-- autorizacao basica
-- auditoria
-- testes de regras financeiras
-- tratamento de erro
-- logs
+## Fase 9: Deploy e producao
 
-## Ordem recomendada de execucao
+- [ ] Criar ambiente de staging
+- [ ] Configurar deploy do backend
+- [ ] Configurar deploy do frontend
+- [ ] Configurar variaveis de ambiente de producao
+- [ ] Validar execucao de migracoes em staging
+- [ ] Validar integracao WhatsApp em staging
+- [ ] Executar piloto com uso real controlado
+- [ ] Ajustar com base no piloto
+- [ ] Publicar producao
 
-1. Criar backend, banco e migracoes.
-2. Consolidar a arquitetura limpa base.
-3. Implementar clientes nesse padrao.
-4. Implementar vendas e calculo de saldo.
-5. Implementar pagamentos e rateio automatico.
-6. Trocar o frontend de mocks para API real.
-7. Implementar tela de cobrancas com dados reais.
-8. Integrar WhatsApp.
-9. Adicionar autenticacao e auditoria.
+## Checklist de liberacao para producao
 
-## Decisoes tecnicas recomendadas
-
-- nao usar `localStorage` como persistencia principal
-- nao acoplar regra de cobranca ao frontend
-- nao disparar WhatsApp diretamente da tela sem registrar em banco
-- nao calcular saldo apenas por campo salvo no cliente
-
-## Proximo passo de desenvolvimento
-
-O proximo passo pratico deve ser montar a nova base da aplicacao com:
-
-- `frontend/`
-- `backend/`
-- `prisma/`
-- schema inicial
-- API minima de clientes
-
-Depois disso, a UI atual pode ser portada modulo por modulo.
+- [ ] Testes criticos passando
+- [ ] PostgreSQL configurado
+- [ ] Migracoes revisadas
+- [ ] Rotas protegidas por autenticacao
+- [ ] Auditoria persistida ativa
+- [ ] Provider real de WhatsApp validado
+- [ ] Scheduler real ativo
+- [ ] Logs e monitoramento funcionando
+- [ ] Backup validado
+- [ ] Staging aprovado
+- [ ] Piloto executado com sucesso
