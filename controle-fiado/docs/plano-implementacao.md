@@ -16,6 +16,7 @@ Isso significa que a UI pode ser reaproveitada como referencia visual, mas a apl
 ### Frontend
 
 - React com Vite
+- `pages`, `features` e `shared`
 - rotas para dashboard, clientes, cliente detalhado e cobrancas
 - camada de servicos para consumir API
 - componentes reaproveitando a linguagem visual atual
@@ -26,6 +27,9 @@ Isso significa que a UI pode ser reaproveitada como referencia visual, mas a apl
 - validacao com Zod
 - Prisma para acesso ao banco
 - jobs agendados para cobranca automatica
+- organizacao em `domain`, `application`, `infra` e `interfaces`
+- use cases para cada operacao principal
+- portas para repositorios, auditoria e WhatsApp
 
 ### Banco
 
@@ -155,13 +159,14 @@ Isso significa que a UI pode ser reaproveitada como referencia visual, mas a apl
 ## Ordem recomendada de execucao
 
 1. Criar backend, banco e migracoes.
-2. Implementar clientes.
-3. Implementar vendas e calculo de saldo.
-4. Implementar pagamentos e rateio automatico.
-5. Trocar o frontend de mocks para API real.
-6. Implementar tela de cobrancas com dados reais.
-7. Integrar WhatsApp.
-8. Adicionar autenticacao e auditoria.
+2. Consolidar a arquitetura limpa base.
+3. Implementar clientes nesse padrao.
+4. Implementar vendas e calculo de saldo.
+5. Implementar pagamentos e rateio automatico.
+6. Trocar o frontend de mocks para API real.
+7. Implementar tela de cobrancas com dados reais.
+8. Integrar WhatsApp.
+9. Adicionar autenticacao e auditoria.
 
 ## Decisoes tecnicas recomendadas
 
@@ -181,4 +186,3 @@ O proximo passo pratico deve ser montar a nova base da aplicacao com:
 - API minima de clientes
 
 Depois disso, a UI atual pode ser portada modulo por modulo.
-

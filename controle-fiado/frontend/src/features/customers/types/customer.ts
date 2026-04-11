@@ -10,4 +10,3 @@ export type Customer = {
   openBalance: number;
   createdAt: string;
 };
-

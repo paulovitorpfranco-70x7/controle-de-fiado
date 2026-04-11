@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { env } from "./config/env.js";
-import { customerRoutes } from "./modules/customers/customer.routes.js";
+import { customerRoutes } from "./interfaces/http/modules/customers/customer.routes.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -27,4 +27,3 @@ export function buildApp() {
 
   return app;
 }
-
