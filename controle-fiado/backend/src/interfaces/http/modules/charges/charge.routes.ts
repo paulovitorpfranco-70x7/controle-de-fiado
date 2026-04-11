@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { ListChargeMessagesUseCase } from "../../../../application/charges/use-cases/list-charge-messages.js";
 import { ListChargeOverviewUseCase } from "../../../../application/charges/use-cases/list-charge-overview.js";
+import { RunDailyChargeJobUseCase } from "../../../../application/charges/use-cases/run-daily-charge-job.js";
 import { SendManualChargeUseCase } from "../../../../application/charges/use-cases/send-manual-charge.js";
 import { PrismaChargeMessageRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-message-repository.js";
 import { PrismaChargeOverviewRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-overview-repository.js";
@@ -17,6 +18,12 @@ export async function chargeRoutes(app: FastifyInstance) {
   const controller = createChargeController({
     listChargeOverviewUseCase: new ListChargeOverviewUseCase(chargeOverviewRepository),
     listChargeMessagesUseCase: new ListChargeMessagesUseCase(chargeMessageRepository),
+    runDailyChargeJobUseCase: new RunDailyChargeJobUseCase(
+      chargeOverviewRepository,
+      chargeMessageRepository,
+      whatsAppProvider,
+      auditLogService
+    ),
     sendManualChargeUseCase: new SendManualChargeUseCase(
       chargeOverviewRepository,
       chargeMessageRepository,
@@ -28,4 +35,5 @@ export async function chargeRoutes(app: FastifyInstance) {
   app.get("/overview", controller.listOverview);
   app.get("/messages", controller.listMessages);
   app.post("/messages/manual", controller.sendManual);
+  app.post("/jobs/daily", controller.runDailyJob);
 }

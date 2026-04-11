@@ -1,4 +1,8 @@
 import { useEffect, useState } from "react";
+import { fetchMe } from "../features/auth/api/fetch-me";
+import { login } from "../features/auth/api/login";
+import { AuthPanel } from "../features/auth/components/AuthPanel";
+import type { AuthUser } from "../features/auth/types/auth";
 import { fetchCustomerDetail } from "../features/customers/api/fetch-customer-detail";
 import { CustomerDetailPanel } from "../features/customers/components/CustomerDetailPanel";
 import { fetchCustomers } from "../features/customers/api/fetch-customers";
@@ -7,6 +11,7 @@ import type { CustomerDetail } from "../features/customers/types/customer-detail
 import type { Customer } from "../features/customers/types/customer";
 import { fetchChargeMessages } from "../features/charges/api/fetch-charge-messages";
 import { fetchChargeOverview } from "../features/charges/api/fetch-charge-overview";
+import { ChargeAutomationPanel } from "../features/charges/components/ChargeAutomationPanel";
 import { ChargeMessageList } from "../features/charges/components/ChargeMessageList";
 import { ChargeOverviewPanel } from "../features/charges/components/ChargeOverviewPanel";
 import type { ChargeMessage } from "../features/charges/types/charge-message";
@@ -17,8 +22,10 @@ import type { Payment } from "../features/payments/types/payment";
 import { fetchSales } from "../features/sales/api/fetch-sales";
 import { RecentSalesList } from "../features/sales/components/RecentSalesList";
 import type { Sale } from "../features/sales/types/sale";
+import { setAuthToken } from "../shared/api/http";
 
 export function CustomersPage() {
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [chargeMessages, setChargeMessages] = useState<ChargeMessage[]>([]);
   const [chargeOverview, setChargeOverview] = useState<ChargeOverview | null>(null);
@@ -29,7 +36,45 @@ export function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function refreshChargeData(customerId: string) {
+    const [overviewData, messageData] = await Promise.all([
+      fetchChargeOverview(),
+      fetchChargeMessages(customerId)
+    ]);
+
+    setChargeOverview(overviewData);
+    setChargeMessages(messageData.slice(0, 5));
+  }
+
   useEffect(() => {
+    const storedToken = sessionStorage.getItem("controle-fiado-token");
+
+    if (!storedToken) {
+      setLoading(false);
+      return;
+    }
+
+    setAuthToken(storedToken);
+
+    fetchMe()
+      .then((user) => {
+        setAuthUser(user);
+      })
+      .catch(() => {
+        sessionStorage.removeItem("controle-fiado-token");
+        setAuthToken("");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!authUser) {
+      return;
+    }
+
+    setLoading(true);
     Promise.all([fetchCustomers(), fetchSales(), fetchPayments(), fetchChargeOverview()])
       .then(([customerData, salesData, paymentData, overviewData]) => {
         setCustomers(customerData);
@@ -47,7 +92,7 @@ export function CustomersPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [authUser]);
 
   useEffect(() => {
     if (!selectedCustomerId) {
@@ -77,6 +122,16 @@ export function CustomersPage() {
         <div className="eyebrow">Controle de Fiado</div>
         <h1>Mercadinho do Tonhao</h1>
         <p>Base real do sistema com API, banco e integracao futura com WhatsApp.</p>
+        <AuthPanel
+          user={authUser}
+          onLogin={async (input) => {
+            const result = await login(input);
+            setAuthToken(result.token);
+            sessionStorage.setItem("controle-fiado-token", result.token);
+            const user = await fetchMe();
+            setAuthUser(user);
+          }}
+        />
       </aside>
 
       <main className="content-panel">
@@ -91,9 +146,10 @@ export function CustomersPage() {
           </div>
         </header>
 
+        {!authUser && !loading ? <div className="empty-card">Faça login para acessar o sistema.</div> : null}
         {loading ? <div className="empty-card">Carregando clientes...</div> : null}
         {error ? <div className="empty-card error-card">{error}</div> : null}
-        {!loading && !error ? (
+        {!loading && !error && authUser ? (
           <>
             <section className="section-block">
               <div className="page-header page-header-section">
@@ -114,6 +170,14 @@ export function CustomersPage() {
                   id: customer.id,
                   name: customer.name
                 }))}
+              />
+            ) : null}
+
+            {selectedCustomerId ? (
+              <ChargeAutomationPanel
+                onCompleted={async () => {
+                  await refreshChargeData(selectedCustomerId);
+                }}
               />
             ) : null}
 

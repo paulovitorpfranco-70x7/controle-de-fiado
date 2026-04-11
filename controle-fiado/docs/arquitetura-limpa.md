@@ -147,6 +147,7 @@ Esses contratos existem para que as proximas features nascam no desenho certo.
 - persistir historico antes e depois do envio
 - overview operacional de `dueSoon`, `dueToday` e `overdue`
 - historico de mensagens por cliente e por operacao
+- endpoint manual do job existe para validar a automacao antes do scheduler real
 
 ### Auth
 
@@ -154,6 +155,8 @@ Esses contratos existem para que as proximas features nascam no desenho certo.
 - `PasswordHasher`
 - `TokenService`
 - middleware HTTP apenas valida identidade, nao decide regra de negocio
+- login e leitura de `me` ja existem como base inicial
+- token assinado fica isolado em servico proprio
 
 ## Regras arquiteturais obrigatorias
 
@@ -163,6 +166,7 @@ Esses contratos existem para que as proximas features nascam no desenho certo.
 - saldo do cliente sempre deriva de vendas e pagamentos
 - WhatsApp sempre passa por provider + persistencia de historico
 - auditoria deve entrar pelos use cases, nao pela UI
+- auditoria deve persistir em banco, nunca ser apenas log efemero
 
 ## Ordem recomendada
 

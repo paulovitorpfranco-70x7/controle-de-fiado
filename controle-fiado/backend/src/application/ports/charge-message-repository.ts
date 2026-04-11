@@ -3,6 +3,10 @@ import type { ChargeMessage } from "../../domain/charges/charge.js";
 export interface ChargeMessageRepository {
   list(): Promise<ChargeMessage[]>;
   listByCustomer(customerId: string): Promise<ChargeMessage[]>;
+  findSuccessfulBySaleAndTrigger(input: {
+    saleId: string;
+    triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE" | "MANUAL";
+  }): Promise<ChargeMessage | null>;
   create(input: {
     customerId: string;
     saleId?: string;
