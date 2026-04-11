@@ -162,7 +162,7 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 - [x] Criar fluxo real de envio manual de cobranca
 - [x] Melhorar dashboard com dados reais do banco
 - [x] Refinar UX para uso rapido no caixa
-- [ ] Revisar responsividade mobile
+- [x] Revisar responsividade mobile
 - [x] Revisar feedbacks de loading, erro e sucesso
 
 ## Fase 9: Deploy e producao
