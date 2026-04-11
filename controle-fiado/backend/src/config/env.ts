@@ -14,5 +14,7 @@ export const env = {
   whatsappProvider: getEnv("WHATSAPP_PROVIDER", "mock"),
   authSecret: getEnv("AUTH_SECRET", "dev-secret-change-me"),
   logLevel: getEnv("LOG_LEVEL", "info"),
-  authTtlSeconds: Number(getEnv("AUTH_TTL_SECONDS", "28800"))
+  authTtlSeconds: Number(getEnv("AUTH_TTL_SECONDS", "28800")),
+  enableDailyChargeScheduler: getEnv("ENABLE_DAILY_CHARGE_SCHEDULER", "false") === "true",
+  dailyChargeScheduleTime: getEnv("DAILY_CHARGE_SCHEDULE_TIME", "09:00")
 };

@@ -47,6 +47,8 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 - restauracao do SQLite: ver `docs/operacao-sqlite.md`
 - `LOG_LEVEL` pode ser ajustado em `backend/.env`
 - `AUTH_TTL_SECONDS` controla a expiracao do token em segundos
+- `ENABLE_DAILY_CHARGE_SCHEDULER=true` liga o scheduler diario local
+- `DAILY_CHARGE_SCHEDULE_TIME="09:00"` define o horario diario do job
 
 ## Observacao
 

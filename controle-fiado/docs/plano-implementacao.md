@@ -100,7 +100,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Evitar reenvio automatico duplicado por `saleId + triggerType`
 - [x] Expor endpoint manual para rodar o job diario
 - [x] Exibir resultado do job no frontend
-- [ ] Ligar scheduler real para execucao diaria automatica
+- [x] Ligar scheduler real para execucao diaria automatica
 - [ ] Implementar politica de retry para falhas de envio
 
 ### Integracao real
@@ -187,7 +187,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [ ] Rotas protegidas por autenticacao
 - [ ] Auditoria persistida ativa
 - [ ] Provider real de WhatsApp validado
-- [ ] Scheduler real ativo
+- [x] Scheduler real ativo
 - [ ] Logs e monitoramento funcionando
 - [ ] Backup validado
 - [ ] Staging aprovado

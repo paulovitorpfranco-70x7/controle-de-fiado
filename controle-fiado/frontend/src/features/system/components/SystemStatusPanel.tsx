@@ -33,6 +33,18 @@ export function SystemStatusPanel({ status }: SystemStatusPanelProps) {
             <strong>{status.integrations.whatsappProvider}</strong>
           </div>
           <div>
+            <span className="label">Scheduler</span>
+            <strong>{status.scheduler.enabled ? "Ativo" : "Desligado"}</strong>
+          </div>
+          <div>
+            <span className="label">Horario</span>
+            <strong>{status.scheduler.scheduleTime}</strong>
+          </div>
+          <div>
+            <span className="label">Proxima execucao</span>
+            <strong>{status.scheduler.nextRunAt ? new Date(status.scheduler.nextRunAt).toLocaleString("pt-BR") : "Nao agendado"}</strong>
+          </div>
+          <div>
             <span className="label">TTL do token</span>
             <strong>{formatTtl(status.auth.ttlSeconds)}</strong>
           </div>

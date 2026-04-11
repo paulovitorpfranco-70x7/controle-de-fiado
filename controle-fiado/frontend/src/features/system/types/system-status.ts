@@ -12,6 +12,11 @@ export type SystemStatus = {
   integrations: {
     whatsappProvider: string;
   };
+  scheduler: {
+    enabled: boolean;
+    scheduleTime: string;
+    nextRunAt: string | null;
+  };
   logging: {
     level: string;
   };
