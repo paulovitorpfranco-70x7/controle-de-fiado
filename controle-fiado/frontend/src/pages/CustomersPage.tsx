@@ -3,15 +3,6 @@ import { fetchMe } from "../features/auth/api/fetch-me";
 import { login } from "../features/auth/api/login";
 import { AuthPanel } from "../features/auth/components/AuthPanel";
 import type { AuthUser } from "../features/auth/types/auth";
-import { fetchDashboardSummary } from "../features/dashboard/api/fetch-dashboard-summary";
-import { DashboardSummaryPanel } from "../features/dashboard/components/DashboardSummaryPanel";
-import type { DashboardSummary } from "../features/dashboard/types/dashboard-summary";
-import { fetchCustomerDetail } from "../features/customers/api/fetch-customer-detail";
-import { CustomerDetailPanel } from "../features/customers/components/CustomerDetailPanel";
-import { fetchCustomers } from "../features/customers/api/fetch-customers";
-import { CustomerList } from "../features/customers/components/CustomerList";
-import type { CustomerDetail } from "../features/customers/types/customer-detail";
-import type { Customer } from "../features/customers/types/customer";
 import { fetchChargeMessages } from "../features/charges/api/fetch-charge-messages";
 import { fetchChargeOverview } from "../features/charges/api/fetch-charge-overview";
 import { ChargeAutomationPanel } from "../features/charges/components/ChargeAutomationPanel";
@@ -20,6 +11,16 @@ import { ChargeOverviewPanel } from "../features/charges/components/ChargeOvervi
 import { ManualChargeForm } from "../features/charges/components/ManualChargeForm";
 import type { ChargeMessage } from "../features/charges/types/charge-message";
 import type { ChargeOverview } from "../features/charges/types/charge-overview";
+import { fetchDashboardSummary } from "../features/dashboard/api/fetch-dashboard-summary";
+import { DashboardSummaryPanel } from "../features/dashboard/components/DashboardSummaryPanel";
+import type { DashboardSummary } from "../features/dashboard/types/dashboard-summary";
+import { fetchCustomerDetail } from "../features/customers/api/fetch-customer-detail";
+import { CurrentCustomerBar } from "../features/customers/components/CurrentCustomerBar";
+import { CustomerDetailPanel } from "../features/customers/components/CustomerDetailPanel";
+import { fetchCustomers } from "../features/customers/api/fetch-customers";
+import { CustomerList } from "../features/customers/components/CustomerList";
+import type { CustomerDetail } from "../features/customers/types/customer-detail";
+import type { Customer } from "../features/customers/types/customer";
 import { fetchPayments } from "../features/payments/api/fetch-payments";
 import { CreatePaymentForm } from "../features/payments/components/CreatePaymentForm";
 import { RecentPaymentsList } from "../features/payments/components/RecentPaymentsList";
@@ -28,6 +29,7 @@ import { fetchSales } from "../features/sales/api/fetch-sales";
 import { CreateSaleForm } from "../features/sales/components/CreateSaleForm";
 import { RecentSalesList } from "../features/sales/components/RecentSalesList";
 import type { Sale } from "../features/sales/types/sale";
+import { OperationNotice } from "../shared/components/OperationNotice";
 import { setAuthToken } from "../shared/api/http";
 
 export function CustomersPage() {
@@ -36,12 +38,13 @@ export function CustomersPage() {
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(null);
   const [chargeMessages, setChargeMessages] = useState<ChargeMessage[]>([]);
   const [chargeOverview, setChargeOverview] = useState<ChargeOverview | null>(null);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [customerDetail, setCustomerDetail] = useState<CustomerDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
 
   async function refreshOperationalData(customerId: string) {
     const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData] = await Promise.all([
@@ -64,11 +67,7 @@ export function CustomersPage() {
   }
 
   async function refreshChargeData(customerId: string) {
-    const [overviewData, messageData] = await Promise.all([
-      fetchChargeOverview(),
-      fetchChargeMessages(customerId)
-    ]);
-
+    const [overviewData, messageData] = await Promise.all([fetchChargeOverview(), fetchChargeMessages(customerId)]);
     setChargeOverview(overviewData);
     setChargeMessages(messageData.slice(0, 5));
   }
@@ -116,6 +115,7 @@ export function CustomersPage() {
       })
       .catch((err: Error) => {
         setError(err.message);
+        setNotice({ tone: "error", message: err.message });
       })
       .finally(() => {
         setLoading(false);
@@ -133,6 +133,7 @@ export function CustomersPage() {
       })
       .catch((err: Error) => {
         setError(err.message);
+        setNotice({ tone: "error", message: err.message });
       });
 
     fetchChargeMessages(selectedCustomerId)
@@ -141,6 +142,7 @@ export function CustomersPage() {
       })
       .catch((err: Error) => {
         setError(err.message);
+        setNotice({ tone: "error", message: err.message });
       });
   }, [selectedCustomerId]);
 
@@ -158,6 +160,7 @@ export function CustomersPage() {
             sessionStorage.setItem("controle-fiado-token", result.token);
             const user = await fetchMe();
             setAuthUser(user);
+            setNotice({ tone: "success", message: "Sessao iniciada com sucesso." });
           }}
         />
       </aside>
@@ -174,12 +177,15 @@ export function CustomersPage() {
           </div>
         </header>
 
-        {!authUser && !loading ? <div className="empty-card">Faça login para acessar o sistema.</div> : null}
+        {!authUser && !loading ? <div className="empty-card">Faca login para acessar o sistema.</div> : null}
         {loading ? <div className="empty-card">Carregando clientes...</div> : null}
         {error ? <div className="empty-card error-card">{error}</div> : null}
+
         {!loading && !error && authUser ? (
           <>
+            {notice ? <OperationNotice tone={notice.tone} message={notice.message} /> : null}
             {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
+            {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
 
             <section className="section-block">
               <div className="page-header page-header-section">
@@ -208,6 +214,7 @@ export function CustomersPage() {
                 <CreateSaleForm
                   customerId={selectedCustomerId}
                   createdById={authUser.id}
+                  onSuccess={(message) => setNotice({ tone: "success", message })}
                   onCreated={async () => {
                     await refreshOperationalData(selectedCustomerId);
                   }}
@@ -215,6 +222,7 @@ export function CustomersPage() {
                 <CreatePaymentForm
                   customerId={selectedCustomerId}
                   createdById={authUser.id}
+                  onSuccess={(message) => setNotice({ tone: "success", message })}
                   onCreated={async () => {
                     await refreshOperationalData(selectedCustomerId);
                   }}
@@ -224,6 +232,7 @@ export function CustomersPage() {
 
             {selectedCustomerId ? (
               <ChargeAutomationPanel
+                onSuccess={(message) => setNotice({ tone: "success", message })}
                 onCompleted={async () => {
                   await refreshChargeData(selectedCustomerId);
                 }}
@@ -237,6 +246,7 @@ export function CustomersPage() {
                 saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
                 openBalance={customerDetail.openBalance}
                 createdById={authUser.id}
+                onSuccess={(message) => setNotice({ tone: "success", message })}
                 onSent={async () => {
                   await refreshOperationalData(customerDetail.id);
                 }}
@@ -244,7 +254,6 @@ export function CustomersPage() {
             ) : null}
 
             {chargeOverview ? <ChargeOverviewPanel overview={chargeOverview} /> : null}
-
             {chargeMessages.length ? <ChargeMessageList messages={chargeMessages} /> : null}
 
             <section className="section-block">

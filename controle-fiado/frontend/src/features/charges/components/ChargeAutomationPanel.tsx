@@ -3,9 +3,10 @@ import { runDailyChargeJob, type DailyChargeJobResult } from "../api/run-daily-c
 
 type ChargeAutomationPanelProps = {
   onCompleted: () => Promise<void> | void;
+  onSuccess?: (message: string) => void;
 };
 
-export function ChargeAutomationPanel({ onCompleted }: ChargeAutomationPanelProps) {
+export function ChargeAutomationPanel({ onCompleted, onSuccess }: ChargeAutomationPanelProps) {
   const [result, setResult] = useState<DailyChargeJobResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +18,7 @@ export function ChargeAutomationPanel({ onCompleted }: ChargeAutomationPanelProp
     try {
       const data = await runDailyChargeJob();
       setResult(data);
+      onSuccess?.("Job diario executado com sucesso.");
       await onCompleted();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao rodar job.");

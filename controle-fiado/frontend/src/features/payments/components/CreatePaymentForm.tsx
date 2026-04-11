@@ -5,24 +5,27 @@ type CreatePaymentFormProps = {
   customerId: string;
   createdById: string;
   onCreated: () => Promise<void> | void;
+  onSuccess?: (message: string) => void;
 };
 
 function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function CreatePaymentForm({ customerId, createdById, onCreated }: CreatePaymentFormProps) {
+export function CreatePaymentForm({ customerId, createdById, onCreated, onSuccess }: CreatePaymentFormProps) {
   const [amount, setAmount] = useState("0");
   const [paymentDate, setPaymentDate] = useState(todayIsoDate());
   const [method, setMethod] = useState<"CASH" | "PIX" | "CARD">("PIX");
   const [notes, setNotes] = useState("Pagamento registrado no caixa.");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       await createPayment({
@@ -34,6 +37,8 @@ export function CreatePaymentForm({ customerId, createdById, onCreated }: Create
         createdById
       });
       setAmount("0");
+      setSuccess("Pagamento registrado com sucesso.");
+      onSuccess?.("Pagamento registrado com sucesso.");
       await onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao registrar pagamento.");
@@ -73,6 +78,7 @@ export function CreatePaymentForm({ customerId, createdById, onCreated }: Create
       <button className="auth-button" type="submit" disabled={loading}>
         {loading ? "Salvando..." : "Registrar pagamento"}
       </button>
+      {success ? <div className="success-copy">{success}</div> : null}
       {error ? <div className="error-copy">{error}</div> : null}
     </form>
   );

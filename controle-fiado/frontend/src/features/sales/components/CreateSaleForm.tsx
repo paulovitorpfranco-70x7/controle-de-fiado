@@ -5,6 +5,7 @@ type CreateSaleFormProps = {
   customerId: string;
   createdById: string;
   onCreated: () => Promise<void> | void;
+  onSuccess?: (message: string) => void;
 };
 
 function todayIsoDate() {
@@ -17,7 +18,7 @@ function plusDaysIsoDate(days: number) {
   return value.toISOString().slice(0, 10);
 }
 
-export function CreateSaleForm({ customerId, createdById, onCreated }: CreateSaleFormProps) {
+export function CreateSaleForm({ customerId, createdById, onCreated, onSuccess }: CreateSaleFormProps) {
   const [description, setDescription] = useState("Compra de balcão");
   const [originalAmount, setOriginalAmount] = useState("0");
   const [feePercent, setFeePercent] = useState("0");
@@ -25,11 +26,13 @@ export function CreateSaleForm({ customerId, createdById, onCreated }: CreateSal
   const [dueDate, setDueDate] = useState(plusDaysIsoDate(15));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       await createSale({
@@ -43,6 +46,8 @@ export function CreateSaleForm({ customerId, createdById, onCreated }: CreateSal
       });
       setOriginalAmount("0");
       setFeePercent("0");
+      setSuccess("Venda registrada com sucesso.");
+      onSuccess?.("Venda registrada com sucesso.");
       await onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao criar venda.");
@@ -83,6 +88,7 @@ export function CreateSaleForm({ customerId, createdById, onCreated }: CreateSal
       <button className="auth-button" type="submit" disabled={loading}>
         {loading ? "Salvando..." : "Registrar venda"}
       </button>
+      {success ? <div className="success-copy">{success}</div> : null}
       {error ? <div className="error-copy">{error}</div> : null}
     </form>
   );

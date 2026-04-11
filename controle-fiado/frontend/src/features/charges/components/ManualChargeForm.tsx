@@ -8,6 +8,7 @@ type ManualChargeFormProps = {
   openBalance: number;
   createdById: string;
   onSent: () => Promise<void> | void;
+  onSuccess?: (message: string) => void;
 };
 
 function formatMoney(value: number) {
@@ -27,7 +28,8 @@ export function ManualChargeForm({
   saleId,
   openBalance,
   createdById,
-  onSent
+  onSent,
+  onSuccess
 }: ManualChargeFormProps) {
   const [messageBody, setMessageBody] = useState(buildDefaultMessage(customerName, openBalance));
   const [loading, setLoading] = useState(false);
@@ -54,6 +56,7 @@ export function ManualChargeForm({
         createdById
       });
       setSuccess("Cobranca enviada com sucesso.");
+      onSuccess?.("Cobranca enviada com sucesso.");
       await onSent();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao enviar cobranca.");
