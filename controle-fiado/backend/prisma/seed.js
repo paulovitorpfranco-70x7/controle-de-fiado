@@ -9,7 +9,7 @@ async function main() {
     create: {
       name: "Tonhao",
       login: "tonhao",
-      passwordHash: "definir-hash-real",
+      passwordHash: "plain:tonhao123",
       role: UserRole.OWNER
     }
   });
