@@ -41,6 +41,12 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 
 - backend: `npm run test:backend`
 
+## Operacao local
+
+- backup do SQLite: `npm run db:backup`
+- restauracao do SQLite: ver `docs/operacao-sqlite.md`
+- `LOG_LEVEL` pode ser ajustado em `backend/.env`
+
 ## Observacao
 
 O prototipo antigo continua nos arquivos da raiz (`index.html`, `app.js`, `styles.css`) como referencia visual. A implementacao real deve evoluir dentro de `frontend/` e `backend/`.

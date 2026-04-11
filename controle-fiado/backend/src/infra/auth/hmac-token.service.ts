@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { unauthorized } from "../../application/errors/app-error.js";
 import { env } from "../../config/env.js";
 import type { TokenPayload, TokenService } from "../../application/ports/token-service.js";
 
@@ -22,13 +23,13 @@ export class HmacTokenService implements TokenService {
     const [header, body, signature] = token.split(".");
 
     if (!header || !body || !signature) {
-      throw new Error("Token invalido.");
+      throw unauthorized("Token invalido.");
     }
 
     const expectedSignature = this.signValue(`${header}.${body}`);
 
     if (signature !== expectedSignature) {
-      throw new Error("Token invalido.");
+      throw unauthorized("Token invalido.");
     }
 
     return fromBase64Url<TokenPayload>(body);

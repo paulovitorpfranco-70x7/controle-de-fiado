@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { env } from "./config/env.js";
+import { buildFastifyLoggerOptions, registerObservability } from "./infra/observability/fastify-observability.js";
 import { authGuard } from "./interfaces/http/auth/auth.guard.js";
 import { authRoutes } from "./interfaces/http/modules/auth/auth.routes.js";
 import { chargeRoutes } from "./interfaces/http/modules/charges/charge.routes.js";
@@ -11,8 +12,11 @@ import { saleRoutes } from "./interfaces/http/modules/sales/sale.routes.js";
 
 export function buildApp() {
   const app = Fastify({
-    logger: true
+    logger: buildFastifyLoggerOptions(),
+    disableRequestLogging: true
   });
+
+  registerObservability(app);
 
   app.register(cors, {
     origin: env.corsOrigin

@@ -1,3 +1,4 @@
+import { unauthorized } from "../../errors/app-error.js";
 import type { AuditLogService } from "../../ports/audit-log-service.js";
 import type { PasswordHasher } from "../../ports/password-hasher.js";
 import type { TokenService } from "../../ports/token-service.js";
@@ -16,13 +17,13 @@ export class LoginUseCase {
     const user = await this.userRepository.findByLogin(input.login);
 
     if (!user) {
-      throw new Error("Credenciais invalidas.");
+      throw unauthorized("Credenciais invalidas.");
     }
 
     const isValid = await this.passwordHasher.compare(input.password, user.passwordHash);
 
     if (!isValid) {
-      throw new Error("Credenciais invalidas.");
+      throw unauthorized("Credenciais invalidas.");
     }
 
     const token = await this.tokenService.sign({

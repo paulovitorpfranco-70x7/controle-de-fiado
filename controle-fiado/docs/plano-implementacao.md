@@ -147,13 +147,13 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 
 ## Fase 7: Observabilidade e operacao
 
-- [ ] Melhorar logs estruturados do backend
+- [x] Melhorar logs estruturados do backend
 - [ ] Registrar falhas de integracao com contexto suficiente
 - [ ] Configurar monitoramento do backend
 - [ ] Configurar monitoramento do job diario
 - [ ] Criar alertas para falhas de cobranca
-- [ ] Configurar backup do banco
-- [ ] Testar restauracao de backup
+- [x] Configurar backup do banco
+- [x] Testar restauracao de backup
 
 ## Fase 8: Frontend operacional
 

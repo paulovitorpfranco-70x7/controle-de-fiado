@@ -1,4 +1,5 @@
 import { buildManualChargeMessage } from "../../../domain/charges/charge.js";
+import { notFound } from "../../errors/app-error.js";
 import type { AuditLogService } from "../../ports/audit-log-service.js";
 import type { ChargeMessageRepository } from "../../ports/charge-message-repository.js";
 import type { ChargeOverviewRepository } from "../../ports/charge-overview-repository.js";
@@ -17,7 +18,7 @@ export class SendManualChargeUseCase {
     const context = await this.chargeOverviewRepository.findCustomerChargeContext(input.customerId, input.saleId);
 
     if (!context) {
-      throw new Error("Contexto de cobranca nao encontrado.");
+      throw notFound("Contexto de cobranca nao encontrado.");
     }
 
     const messageBody =
