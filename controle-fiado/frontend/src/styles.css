@@ -144,6 +144,27 @@ body {
   font-size: 0.92rem;
 }
 
+.operation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.operation-form {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -257,7 +278,9 @@ body {
   .page-header,
   .customer-main,
   .customer-grid,
-  .detail-columns {
+  .detail-columns,
+  .operation-grid,
+  .form-grid {
     grid-template-columns: 1fr;
     display: grid;
   }

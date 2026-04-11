@@ -4,6 +4,13 @@
 
 Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduzindo risco de erro operacional, financeiro e de integracao.
 
+## Premissa atual
+
+- este sistema esta sendo construido para um unico usuario
+- nao ha necessidade de escala neste momento
+- para evitar custo agora, o banco padrao da fase atual sera `SQLite`
+- a migracao para `PostgreSQL` fica adiada para quando houver necessidade real de hospedagem online, multiusuario ou maior robustez operacional
+
 ## Como usar este plano
 
 - tarefas marcadas com `[x]` ja foram implementadas na base atual
@@ -123,15 +130,15 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 - [x] Adicionar framework de testes automatizados
 - [x] Testar calculo de venda e acrescimo
 - [x] Testar rateio automatico de pagamentos
-- [ ] Testar atualizacao de saldo do cliente
+- [x] Testar atualizacao de saldo do cliente
 - [x] Testar deduplicacao de cobrancas automaticas
 - [x] Testar autenticacao e protecao de rotas
-- [ ] Testar auditoria persistida
-- [ ] Testar job diario de cobranca
+- [x] Testar auditoria persistida
+- [x] Testar job diario de cobranca
 
 ## Fase 6: Banco e dados de producao
 
-- [ ] Migrar de `sqlite` para PostgreSQL
+- [ ] Reavaliar necessidade de migrar de `sqlite` para PostgreSQL
 - [ ] Revisar tipos e constraints para producao
 - [ ] Revisar indices do banco
 - [ ] Criar fluxo seguro de migracoes
@@ -150,8 +157,8 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 
 ## Fase 8: Frontend operacional
 
-- [ ] Criar formulario real de nova venda
-- [ ] Criar formulario real de novo pagamento
+- [x] Criar formulario real de nova venda
+- [x] Criar formulario real de novo pagamento
 - [ ] Criar fluxo real de envio manual de cobranca
 - [ ] Melhorar dashboard com dados reais do banco
 - [ ] Refinar UX para uso rapido no caixa

@@ -17,9 +17,11 @@ import { ChargeOverviewPanel } from "../features/charges/components/ChargeOvervi
 import type { ChargeMessage } from "../features/charges/types/charge-message";
 import type { ChargeOverview } from "../features/charges/types/charge-overview";
 import { fetchPayments } from "../features/payments/api/fetch-payments";
+import { CreatePaymentForm } from "../features/payments/components/CreatePaymentForm";
 import { RecentPaymentsList } from "../features/payments/components/RecentPaymentsList";
 import type { Payment } from "../features/payments/types/payment";
 import { fetchSales } from "../features/sales/api/fetch-sales";
+import { CreateSaleForm } from "../features/sales/components/CreateSaleForm";
 import { RecentSalesList } from "../features/sales/components/RecentSalesList";
 import type { Sale } from "../features/sales/types/sale";
 import { setAuthToken } from "../shared/api/http";
@@ -35,6 +37,24 @@ export function CustomersPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  async function refreshOperationalData(customerId: string) {
+    const [customerData, salesData, paymentData, overviewData, detailData, messageData] = await Promise.all([
+      fetchCustomers(),
+      fetchSales(),
+      fetchPayments(),
+      fetchChargeOverview(),
+      fetchCustomerDetail(customerId),
+      fetchChargeMessages(customerId)
+    ]);
+
+    setCustomers(customerData);
+    setSales(salesData.slice(0, 3));
+    setPayments(paymentData.slice(0, 3));
+    setChargeOverview(overviewData);
+    setCustomerDetail(detailData);
+    setChargeMessages(messageData.slice(0, 5));
+  }
 
   async function refreshChargeData(customerId: string) {
     const [overviewData, messageData] = await Promise.all([
@@ -171,6 +191,25 @@ export function CustomersPage() {
                   name: customer.name
                 }))}
               />
+            ) : null}
+
+            {authUser && selectedCustomerId ? (
+              <section className="section-block operation-grid">
+                <CreateSaleForm
+                  customerId={selectedCustomerId}
+                  createdById={authUser.id}
+                  onCreated={async () => {
+                    await refreshOperationalData(selectedCustomerId);
+                  }}
+                />
+                <CreatePaymentForm
+                  customerId={selectedCustomerId}
+                  createdById={authUser.id}
+                  onCreated={async () => {
+                    await refreshOperationalData(selectedCustomerId);
+                  }}
+                />
+              </section>
             ) : null}
 
             {selectedCustomerId ? (
