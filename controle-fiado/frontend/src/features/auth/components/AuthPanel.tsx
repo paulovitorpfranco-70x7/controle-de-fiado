@@ -4,9 +4,10 @@ import type { AuthUser } from "../types/auth";
 type AuthPanelProps = {
   user: AuthUser | null;
   onLogin: (input: { login: string; password: string }) => Promise<void>;
+  onLogout?: () => void;
 };
 
-export function AuthPanel({ user, onLogin }: AuthPanelProps) {
+export function AuthPanel({ user, onLogin, onLogout }: AuthPanelProps) {
   const [loginValue, setLoginValue] = useState("tonhao");
   const [password, setPassword] = useState("tonhao123");
   const [submitting, setSubmitting] = useState(false);
@@ -35,8 +36,11 @@ export function AuthPanel({ user, onLogin }: AuthPanelProps) {
         <div className="eyebrow">Sessao</div>
         <strong>{user.name}</strong>
         <div className="customer-meta">
-          {user.login} · {user.role}
+          {user.login} | {user.role}
         </div>
+        <button className="auth-button" type="button" onClick={onLogout}>
+          Sair
+        </button>
       </div>
     );
   }

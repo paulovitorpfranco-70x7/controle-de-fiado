@@ -8,4 +8,5 @@ export type AuthUser = {
 export type LoginResponse = {
   token: string;
   user: AuthUser;
+  expiresAt?: string;
 };

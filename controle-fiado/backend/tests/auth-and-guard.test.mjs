@@ -26,11 +26,11 @@ test("token service signs and verifies payload", async () => {
   });
 
   const payload = await tokenService.verify(token);
-  assert.deepEqual(payload, {
-    sub: "user-1",
-    login: "tonhao",
-    role: "OWNER"
-  });
+  assert.equal(payload.sub, "user-1");
+  assert.equal(payload.login, "tonhao");
+  assert.equal(payload.role, "OWNER");
+  assert.equal(typeof payload.iat, "number");
+  assert.equal(typeof payload.exp, "number");
 });
 
 test("business routes require authentication", async () => {

@@ -2,14 +2,16 @@
 
 ## Objetivo
 
-Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduzindo risco de erro operacional, financeiro e de integracao.
+Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e
+reduzindo risco de erro operacional, financeiro e de integracao.
 
 ## Premissa atual
 
 - este sistema esta sendo construido para um unico usuario
 - nao ha necessidade de escala neste momento
 - para evitar custo agora, o banco padrao da fase atual sera `SQLite`
-- a migracao para `PostgreSQL` fica adiada para quando houver necessidade real de hospedagem online, multiusuario ou maior robustez operacional
+- a migracao para `PostgreSQL` fica adiada para quando houver necessidade real
+  de hospedagem online, multiusuario ou maior robustez operacional
 
 ## Como usar este plano
 
@@ -119,8 +121,8 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 - [x] Persistir auditoria real em banco
 - [x] Registrar auditoria nas operacoes principais
 - [x] Exibir sessao autenticada no frontend
-- [ ] Implementar logout explicito no frontend
-- [ ] Definir expiracao de token
+- [x] Implementar logout explicito no frontend
+- [x] Definir expiracao de token
 - [ ] Implementar autorizacao por perfil
 - [ ] Restringir execucao do job diario a perfis permitidos
 - [ ] Remover credenciais fracas de desenvolvimento fora de ambiente local
@@ -149,7 +151,7 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 
 - [x] Melhorar logs estruturados do backend
 - [x] Registrar falhas de integracao com contexto suficiente
-- [ ] Configurar monitoramento do backend
+- [x] Configurar monitoramento do backend
 - [x] Configurar monitoramento do job diario
 - [ ] Criar alertas para falhas de cobranca
 - [x] Configurar backup do banco

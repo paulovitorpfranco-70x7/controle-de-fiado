@@ -9,6 +9,7 @@ import { customerRoutes } from "./interfaces/http/modules/customers/customer.rou
 import { dashboardRoutes } from "./interfaces/http/modules/dashboard/dashboard.routes.js";
 import { paymentRoutes } from "./interfaces/http/modules/payments/payment.routes.js";
 import { saleRoutes } from "./interfaces/http/modules/sales/sale.routes.js";
+import { systemRoutes } from "./interfaces/http/modules/system/system.routes.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -40,6 +41,10 @@ export function buildApp() {
 
     protectedApp.register(dashboardRoutes, {
       prefix: "/api/dashboard"
+    });
+
+    protectedApp.register(systemRoutes, {
+      prefix: "/api/system"
     });
 
     protectedApp.register(customerRoutes, {

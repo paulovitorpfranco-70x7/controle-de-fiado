@@ -2,6 +2,8 @@ export type TokenPayload = {
   sub: string;
   login: string;
   role: "OWNER" | "STAFF";
+  iat?: number;
+  exp?: number;
 };
 
 export interface TokenService {

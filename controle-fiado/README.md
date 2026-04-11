@@ -46,6 +46,7 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 - backup do SQLite: `npm run db:backup`
 - restauracao do SQLite: ver `docs/operacao-sqlite.md`
 - `LOG_LEVEL` pode ser ajustado em `backend/.env`
+- `AUTH_TTL_SECONDS` controla a expiracao do token em segundos
 
 ## Observacao
 

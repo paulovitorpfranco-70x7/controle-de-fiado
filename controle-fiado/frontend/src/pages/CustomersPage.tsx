@@ -31,8 +31,11 @@ import { fetchSales } from "../features/sales/api/fetch-sales";
 import { CreateSaleForm } from "../features/sales/components/CreateSaleForm";
 import { RecentSalesList } from "../features/sales/components/RecentSalesList";
 import type { Sale } from "../features/sales/types/sale";
-import { OperationNotice } from "../shared/components/OperationNotice";
+import { fetchSystemStatus } from "../features/system/api/fetch-system-status";
+import { SystemStatusPanel } from "../features/system/components/SystemStatusPanel";
+import type { SystemStatus } from "../features/system/types/system-status";
 import { setAuthToken } from "../shared/api/http";
+import { OperationNotice } from "../shared/components/OperationNotice";
 
 export function CustomersPage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -45,21 +48,24 @@ export function CustomersPage() {
   const [customerDetail, setCustomerDetail] = useState<CustomerDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
 
   async function refreshOperationalData(customerId: string) {
-    const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData, jobMonitorData] = await Promise.all([
-      fetchCustomers(),
-      fetchDashboardSummary(),
-      fetchSales(),
-      fetchPayments(),
-      fetchChargeOverview(),
-      fetchCustomerDetail(customerId),
-      fetchChargeMessages(customerId),
-      fetchDailyChargeJobMonitor()
-    ]);
+    const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData, jobMonitorData, systemStatusData] =
+      await Promise.all([
+        fetchCustomers(),
+        fetchDashboardSummary(),
+        fetchSales(),
+        fetchPayments(),
+        fetchChargeOverview(),
+        fetchCustomerDetail(customerId),
+        fetchChargeMessages(customerId),
+        fetchDailyChargeJobMonitor(),
+        fetchSystemStatus()
+      ]);
 
     setCustomers(customerData);
     setDashboardSummary(dashboardData);
@@ -69,6 +75,7 @@ export function CustomersPage() {
     setCustomerDetail(detailData);
     setChargeMessages(messageData.slice(0, 5));
     setDailyChargeJobMonitor(jobMonitorData);
+    setSystemStatus(systemStatusData);
   }
 
   async function refreshChargeData(customerId: string) {
@@ -77,9 +84,26 @@ export function CustomersPage() {
       fetchChargeMessages(customerId),
       fetchDailyChargeJobMonitor()
     ]);
+
     setChargeOverview(overviewData);
     setChargeMessages(messageData.slice(0, 5));
     setDailyChargeJobMonitor(jobMonitorData);
+  }
+
+  function clearSession() {
+    sessionStorage.removeItem("controle-fiado-token");
+    setAuthToken("");
+    setAuthUser(null);
+    setCustomers([]);
+    setDashboardSummary(null);
+    setChargeMessages([]);
+    setChargeOverview(null);
+    setDailyChargeJobMonitor(null);
+    setSelectedCustomerId("");
+    setCustomerDetail(null);
+    setPayments([]);
+    setSales([]);
+    setSystemStatus(null);
   }
 
   useEffect(() => {
@@ -97,8 +121,7 @@ export function CustomersPage() {
         setAuthUser(user);
       })
       .catch(() => {
-        sessionStorage.removeItem("controle-fiado-token");
-        setAuthToken("");
+        clearSession();
       })
       .finally(() => {
         setLoading(false);
@@ -111,8 +134,16 @@ export function CustomersPage() {
     }
 
     setLoading(true);
-    Promise.all([fetchCustomers(), fetchDashboardSummary(), fetchSales(), fetchPayments(), fetchChargeOverview(), fetchDailyChargeJobMonitor()])
-      .then(([customerData, dashboardData, salesData, paymentData, overviewData, jobMonitorData]) => {
+    Promise.all([
+      fetchCustomers(),
+      fetchDashboardSummary(),
+      fetchSales(),
+      fetchPayments(),
+      fetchChargeOverview(),
+      fetchDailyChargeJobMonitor(),
+      fetchSystemStatus()
+    ])
+      .then(([customerData, dashboardData, salesData, paymentData, overviewData, jobMonitorData, systemStatusData]) => {
         setCustomers(customerData);
         if (customerData.length > 0) {
           setSelectedCustomerId(customerData[0].id);
@@ -122,9 +153,13 @@ export function CustomersPage() {
         setPayments(paymentData.slice(0, 3));
         setChargeOverview(overviewData);
         setDailyChargeJobMonitor(jobMonitorData);
+        setSystemStatus(systemStatusData);
         setError(null);
       })
       .catch((err: Error) => {
+        if (err.message.includes("Token")) {
+          clearSession();
+        }
         setError(err.message);
         setNotice({ tone: "error", message: err.message });
       })
@@ -143,6 +178,9 @@ export function CustomersPage() {
         setCustomerDetail(data);
       })
       .catch((err: Error) => {
+        if (err.message.includes("Token")) {
+          clearSession();
+        }
         setError(err.message);
         setNotice({ tone: "error", message: err.message });
       });
@@ -152,6 +190,9 @@ export function CustomersPage() {
         setChargeMessages(data.slice(0, 5));
       })
       .catch((err: Error) => {
+        if (err.message.includes("Token")) {
+          clearSession();
+        }
         setError(err.message);
         setNotice({ tone: "error", message: err.message });
       });
@@ -165,6 +206,10 @@ export function CustomersPage() {
         <p>Base real do sistema com API, banco e integracao futura com WhatsApp.</p>
         <AuthPanel
           user={authUser}
+          onLogout={() => {
+            clearSession();
+            setNotice({ tone: "success", message: "Sessao encerrada com sucesso." });
+          }}
           onLogin={async (input) => {
             const result = await login(input);
             setAuthToken(result.token);
@@ -196,6 +241,7 @@ export function CustomersPage() {
           <>
             {notice ? <OperationNotice tone={notice.tone} message={notice.message} /> : null}
             {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
+            {systemStatus ? <SystemStatusPanel status={systemStatus} /> : null}
             {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
 
             <section className="section-block">

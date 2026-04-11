@@ -13,5 +13,6 @@ export const env = {
   corsOrigin: getEnv("CORS_ORIGIN", "http://127.0.0.1:5173"),
   whatsappProvider: getEnv("WHATSAPP_PROVIDER", "mock"),
   authSecret: getEnv("AUTH_SECRET", "dev-secret-change-me"),
-  logLevel: getEnv("LOG_LEVEL", "info")
+  logLevel: getEnv("LOG_LEVEL", "info"),
+  authTtlSeconds: Number(getEnv("AUTH_TTL_SECONDS", "28800"))
 };

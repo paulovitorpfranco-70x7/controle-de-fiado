@@ -13,8 +13,14 @@ function fromBase64Url<T>(value: string): T {
 
 export class HmacTokenService implements TokenService {
   async sign(payload: TokenPayload) {
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const fullPayload: TokenPayload = {
+      ...payload,
+      iat: issuedAt,
+      exp: issuedAt + env.authTtlSeconds
+    };
     const header = toBase64Url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-    const body = toBase64Url(JSON.stringify(payload));
+    const body = toBase64Url(JSON.stringify(fullPayload));
     const signature = this.signValue(`${header}.${body}`);
     return `${header}.${body}.${signature}`;
   }
@@ -32,7 +38,13 @@ export class HmacTokenService implements TokenService {
       throw unauthorized("Token invalido.");
     }
 
-    return fromBase64Url<TokenPayload>(body);
+    const payload = fromBase64Url<TokenPayload>(body);
+
+    if (payload.exp && payload.exp <= Math.floor(Date.now() / 1000)) {
+      throw unauthorized("Token expirado.");
+    }
+
+    return payload;
   }
 
   private signValue(value: string) {
