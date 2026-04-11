@@ -86,8 +86,8 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 
 - [x] Implementar envio manual de cobranca com provider mock
 - [x] Registrar auditoria do envio manual
-- [ ] Permitir preview da mensagem antes do envio
-- [ ] Permitir edicao manual da mensagem no frontend
+- [x] Permitir preview da mensagem antes do envio
+- [x] Permitir edicao manual da mensagem no frontend
 - [ ] Permitir reenvio manual de falhas
 
 ### Envio automatico
@@ -159,7 +159,7 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 
 - [x] Criar formulario real de nova venda
 - [x] Criar formulario real de novo pagamento
-- [ ] Criar fluxo real de envio manual de cobranca
+- [x] Criar fluxo real de envio manual de cobranca
 - [ ] Melhorar dashboard com dados reais do banco
 - [ ] Refinar UX para uso rapido no caixa
 - [ ] Revisar responsividade mobile

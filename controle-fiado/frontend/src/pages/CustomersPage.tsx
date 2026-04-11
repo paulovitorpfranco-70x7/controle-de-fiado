@@ -14,6 +14,7 @@ import { fetchChargeOverview } from "../features/charges/api/fetch-charge-overvi
 import { ChargeAutomationPanel } from "../features/charges/components/ChargeAutomationPanel";
 import { ChargeMessageList } from "../features/charges/components/ChargeMessageList";
 import { ChargeOverviewPanel } from "../features/charges/components/ChargeOverviewPanel";
+import { ManualChargeForm } from "../features/charges/components/ManualChargeForm";
 import type { ChargeMessage } from "../features/charges/types/charge-message";
 import type { ChargeOverview } from "../features/charges/types/charge-overview";
 import { fetchPayments } from "../features/payments/api/fetch-payments";
@@ -216,6 +217,19 @@ export function CustomersPage() {
               <ChargeAutomationPanel
                 onCompleted={async () => {
                   await refreshChargeData(selectedCustomerId);
+                }}
+              />
+            ) : null}
+
+            {authUser && customerDetail ? (
+              <ManualChargeForm
+                customerId={customerDetail.id}
+                customerName={customerDetail.name}
+                saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
+                openBalance={customerDetail.openBalance}
+                createdById={authUser.id}
+                onSent={async () => {
+                  await refreshOperationalData(customerDetail.id);
                 }}
               />
             ) : null}
