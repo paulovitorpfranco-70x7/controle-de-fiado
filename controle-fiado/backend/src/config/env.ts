@@ -16,5 +16,7 @@ export const env = {
   logLevel: getEnv("LOG_LEVEL", "info"),
   authTtlSeconds: Number(getEnv("AUTH_TTL_SECONDS", "28800")),
   enableDailyChargeScheduler: getEnv("ENABLE_DAILY_CHARGE_SCHEDULER", "false") === "true",
-  dailyChargeScheduleTime: getEnv("DAILY_CHARGE_SCHEDULE_TIME", "09:00")
+  dailyChargeScheduleTime: getEnv("DAILY_CHARGE_SCHEDULE_TIME", "09:00"),
+  whatsappMaxRetries: Number(getEnv("WHATSAPP_MAX_RETRIES", "2")),
+  whatsappRetryDelayMs: Number(getEnv("WHATSAPP_RETRY_DELAY_MS", "1500"))
 };

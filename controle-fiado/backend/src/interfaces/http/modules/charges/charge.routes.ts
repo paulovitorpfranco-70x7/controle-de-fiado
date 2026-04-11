@@ -9,7 +9,7 @@ import { PrismaChargeJobMonitorRepository } from "../../../../infra/db/prisma/re
 import { PrismaChargeMessageRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-message-repository.js";
 import { PrismaChargeOverviewRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-overview-repository.js";
 import { PrismaAuditLogService } from "../../../../infra/observability/prisma-audit-log.service.js";
-import { MockWhatsAppProvider } from "../../../../infra/whatsapp/mock-whatsapp-provider.js";
+import { buildWhatsAppProvider } from "../../../../infra/whatsapp/build-whatsapp-provider.js";
 import { requireRole } from "../../auth/role.guard.js";
 import { createChargeController } from "./charge.controller.js";
 
@@ -17,7 +17,7 @@ export async function chargeRoutes(app: FastifyInstance) {
   const chargeMessageRepository = new PrismaChargeMessageRepository();
   const chargeOverviewRepository = new PrismaChargeOverviewRepository();
   const chargeJobMonitorRepository = new PrismaChargeJobMonitorRepository();
-  const whatsAppProvider = new MockWhatsAppProvider();
+  const whatsAppProvider = buildWhatsAppProvider(app.log);
   const auditLogService = new PrismaAuditLogService();
 
   const controller = createChargeController({

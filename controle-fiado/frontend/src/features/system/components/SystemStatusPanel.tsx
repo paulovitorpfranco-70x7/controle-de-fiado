@@ -33,6 +33,14 @@ export function SystemStatusPanel({ status }: SystemStatusPanelProps) {
             <strong>{status.integrations.whatsappProvider}</strong>
           </div>
           <div>
+            <span className="label">Retries WhatsApp</span>
+            <strong>{status.integrations.whatsappMaxRetries}</strong>
+          </div>
+          <div>
+            <span className="label">Delay retry</span>
+            <strong>{status.integrations.whatsappRetryDelayMs} ms</strong>
+          </div>
+          <div>
             <span className="label">Scheduler</span>
             <strong>{status.scheduler.enabled ? "Ativo" : "Desligado"}</strong>
           </div>

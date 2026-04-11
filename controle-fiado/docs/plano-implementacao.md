@@ -101,7 +101,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Expor endpoint manual para rodar o job diario
 - [x] Exibir resultado do job no frontend
 - [x] Ligar scheduler real para execucao diaria automatica
-- [ ] Implementar politica de retry para falhas de envio
+- [x] Implementar politica de retry para falhas de envio
 
 ### Integracao real
 

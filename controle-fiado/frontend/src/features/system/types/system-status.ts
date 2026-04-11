@@ -11,6 +11,8 @@ export type SystemStatus = {
   };
   integrations: {
     whatsappProvider: string;
+    whatsappMaxRetries: number;
+    whatsappRetryDelayMs: number;
   };
   scheduler: {
     enabled: boolean;

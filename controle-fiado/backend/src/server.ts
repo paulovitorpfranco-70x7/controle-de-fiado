@@ -5,7 +5,7 @@ import { PrismaChargeMessageRepository } from "./infra/db/prisma/repositories/pr
 import { PrismaChargeOverviewRepository } from "./infra/db/prisma/repositories/prisma-charge-overview-repository.js";
 import { DailyChargeScheduler } from "./infra/jobs/daily-charge-scheduler.js";
 import { PrismaAuditLogService } from "./infra/observability/prisma-audit-log.service.js";
-import { MockWhatsAppProvider } from "./infra/whatsapp/mock-whatsapp-provider.js";
+import { buildWhatsAppProvider } from "./infra/whatsapp/build-whatsapp-provider.js";
 
 const app = buildApp();
 
@@ -13,7 +13,7 @@ const dailyChargeScheduler = new DailyChargeScheduler(
   new RunDailyChargeJobUseCase(
     new PrismaChargeOverviewRepository(),
     new PrismaChargeMessageRepository(),
-    new MockWhatsAppProvider(),
+    buildWhatsAppProvider(app.log),
     new PrismaAuditLogService()
   ),
   app.log

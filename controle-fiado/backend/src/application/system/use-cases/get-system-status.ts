@@ -27,7 +27,9 @@ export class GetSystemStatusUseCase {
         provider: "sqlite"
       },
       integrations: {
-        whatsappProvider: env.whatsappProvider
+        whatsappProvider: env.whatsappProvider,
+        whatsappMaxRetries: env.whatsappMaxRetries,
+        whatsappRetryDelayMs: env.whatsappRetryDelayMs
       },
       scheduler: {
         enabled: this.schedulerStatus.enabled,
