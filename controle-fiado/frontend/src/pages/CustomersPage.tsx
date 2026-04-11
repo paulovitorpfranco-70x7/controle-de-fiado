@@ -3,6 +3,9 @@ import { fetchMe } from "../features/auth/api/fetch-me";
 import { login } from "../features/auth/api/login";
 import { AuthPanel } from "../features/auth/components/AuthPanel";
 import type { AuthUser } from "../features/auth/types/auth";
+import { fetchDashboardSummary } from "../features/dashboard/api/fetch-dashboard-summary";
+import { DashboardSummaryPanel } from "../features/dashboard/components/DashboardSummaryPanel";
+import type { DashboardSummary } from "../features/dashboard/types/dashboard-summary";
 import { fetchCustomerDetail } from "../features/customers/api/fetch-customer-detail";
 import { CustomerDetailPanel } from "../features/customers/components/CustomerDetailPanel";
 import { fetchCustomers } from "../features/customers/api/fetch-customers";
@@ -30,6 +33,7 @@ import { setAuthToken } from "../shared/api/http";
 export function CustomersPage() {
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(null);
   const [chargeMessages, setChargeMessages] = useState<ChargeMessage[]>([]);
   const [chargeOverview, setChargeOverview] = useState<ChargeOverview | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
@@ -40,8 +44,9 @@ export function CustomersPage() {
   const [error, setError] = useState<string | null>(null);
 
   async function refreshOperationalData(customerId: string) {
-    const [customerData, salesData, paymentData, overviewData, detailData, messageData] = await Promise.all([
+    const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData] = await Promise.all([
       fetchCustomers(),
+      fetchDashboardSummary(),
       fetchSales(),
       fetchPayments(),
       fetchChargeOverview(),
@@ -50,6 +55,7 @@ export function CustomersPage() {
     ]);
 
     setCustomers(customerData);
+    setDashboardSummary(dashboardData);
     setSales(salesData.slice(0, 3));
     setPayments(paymentData.slice(0, 3));
     setChargeOverview(overviewData);
@@ -96,12 +102,13 @@ export function CustomersPage() {
     }
 
     setLoading(true);
-    Promise.all([fetchCustomers(), fetchSales(), fetchPayments(), fetchChargeOverview()])
-      .then(([customerData, salesData, paymentData, overviewData]) => {
+    Promise.all([fetchCustomers(), fetchDashboardSummary(), fetchSales(), fetchPayments(), fetchChargeOverview()])
+      .then(([customerData, dashboardData, salesData, paymentData, overviewData]) => {
         setCustomers(customerData);
         if (customerData.length > 0) {
           setSelectedCustomerId(customerData[0].id);
         }
+        setDashboardSummary(dashboardData);
         setSales(salesData.slice(0, 3));
         setPayments(paymentData.slice(0, 3));
         setChargeOverview(overviewData);
@@ -172,6 +179,8 @@ export function CustomersPage() {
         {error ? <div className="empty-card error-card">{error}</div> : null}
         {!loading && !error && authUser ? (
           <>
+            {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
+
             <section className="section-block">
               <div className="page-header page-header-section">
                 <div>

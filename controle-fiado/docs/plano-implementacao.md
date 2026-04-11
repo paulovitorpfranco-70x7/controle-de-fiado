@@ -160,7 +160,7 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 - [x] Criar formulario real de nova venda
 - [x] Criar formulario real de novo pagamento
 - [x] Criar fluxo real de envio manual de cobranca
-- [ ] Melhorar dashboard com dados reais do banco
+- [x] Melhorar dashboard com dados reais do banco
 - [ ] Refinar UX para uso rapido no caixa
 - [ ] Revisar responsividade mobile
 - [ ] Revisar feedbacks de loading, erro e sucesso

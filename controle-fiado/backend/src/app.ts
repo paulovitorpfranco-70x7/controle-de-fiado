@@ -5,6 +5,7 @@ import { authGuard } from "./interfaces/http/auth/auth.guard.js";
 import { authRoutes } from "./interfaces/http/modules/auth/auth.routes.js";
 import { chargeRoutes } from "./interfaces/http/modules/charges/charge.routes.js";
 import { customerRoutes } from "./interfaces/http/modules/customers/customer.routes.js";
+import { dashboardRoutes } from "./interfaces/http/modules/dashboard/dashboard.routes.js";
 import { paymentRoutes } from "./interfaces/http/modules/payments/payment.routes.js";
 import { saleRoutes } from "./interfaces/http/modules/sales/sale.routes.js";
 
@@ -32,6 +33,10 @@ export function buildApp() {
 
   app.register(async (protectedApp) => {
     protectedApp.addHook("preHandler", authGuard);
+
+    protectedApp.register(dashboardRoutes, {
+      prefix: "/api/dashboard"
+    });
 
     protectedApp.register(customerRoutes, {
       prefix: "/api/customers"
