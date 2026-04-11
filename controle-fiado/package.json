@@ -11,9 +11,9 @@
     "dev:backend": "npm --workspace backend run dev",
     "build:frontend": "npm --workspace frontend run build",
     "build:backend": "npm --workspace backend run build",
+    "test:backend": "npm --workspace backend run test",
     "db:generate": "npm --workspace backend run prisma:generate",
     "db:migrate": "npm --workspace backend run prisma:migrate",
     "db:seed": "npm --workspace backend run prisma:seed"
   }
 }
-

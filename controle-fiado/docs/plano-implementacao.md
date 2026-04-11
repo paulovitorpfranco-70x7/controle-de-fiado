@@ -120,12 +120,12 @@ Levar o sistema ate producao com seguranca, mantendo a arquitetura limpa e reduz
 
 ## Fase 5: Qualidade e testes
 
-- [ ] Adicionar framework de testes automatizados
-- [ ] Testar calculo de venda e acrescimo
-- [ ] Testar rateio automatico de pagamentos
+- [x] Adicionar framework de testes automatizados
+- [x] Testar calculo de venda e acrescimo
+- [x] Testar rateio automatico de pagamentos
 - [ ] Testar atualizacao de saldo do cliente
-- [ ] Testar deduplicacao de cobrancas automaticas
-- [ ] Testar autenticacao e protecao de rotas
+- [x] Testar deduplicacao de cobrancas automaticas
+- [x] Testar autenticacao e protecao de rotas
 - [ ] Testar auditoria persistida
 - [ ] Testar job diario de cobranca
 

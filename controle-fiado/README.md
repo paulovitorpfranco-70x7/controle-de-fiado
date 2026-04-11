@@ -37,6 +37,10 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 - usuario: `tonhao`
 - senha: `tonhao123`
 
+## Testes
+
+- backend: `npm run test:backend`
+
 ## Observacao
 
 O prototipo antigo continua nos arquivos da raiz (`index.html`, `app.js`, `styles.css`) como referencia visual. A implementacao real deve evoluir dentro de `frontend/` e `backend/`.
