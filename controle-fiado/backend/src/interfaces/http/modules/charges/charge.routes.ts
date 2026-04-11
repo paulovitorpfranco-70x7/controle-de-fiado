@@ -9,6 +9,7 @@ import { PrismaChargeMessageRepository } from "../../../../infra/db/prisma/repos
 import { PrismaChargeOverviewRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-overview-repository.js";
 import { PrismaAuditLogService } from "../../../../infra/observability/prisma-audit-log.service.js";
 import { MockWhatsAppProvider } from "../../../../infra/whatsapp/mock-whatsapp-provider.js";
+import { requireRole } from "../../auth/role.guard.js";
 import { createChargeController } from "./charge.controller.js";
 
 export async function chargeRoutes(app: FastifyInstance) {
@@ -40,5 +41,5 @@ export async function chargeRoutes(app: FastifyInstance) {
   app.get("/messages", controller.listMessages);
   app.post("/messages/manual", controller.sendManual);
   app.get("/jobs/daily/status", controller.getDailyJobMonitor);
-  app.post("/jobs/daily", controller.runDailyJob);
+  app.post("/jobs/daily", { preHandler: requireRole("OWNER") }, controller.runDailyJob);
 }

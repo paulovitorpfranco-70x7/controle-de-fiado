@@ -289,6 +289,7 @@ export function CustomersPage() {
 
             {selectedCustomerId ? (
               <ChargeAutomationPanel
+                canRun={authUser.role === "OWNER"}
                 monitor={dailyChargeJobMonitor}
                 onSuccess={(message) => setNotice({ tone: "success", message })}
                 onCompleted={async () => {

@@ -6,9 +6,10 @@ type ChargeAutomationPanelProps = {
   onCompleted: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
   monitor: DailyChargeJobMonitor | null;
+  canRun: boolean;
 };
 
-export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor }: ChargeAutomationPanelProps) {
+export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun }: ChargeAutomationPanelProps) {
   const [result, setResult] = useState<DailyChargeJobResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,10 +38,12 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor }: Charg
             <div className="eyebrow">Automacao</div>
             <h2>Job diario de cobranca</h2>
           </div>
-          <button className="auth-button" type="button" onClick={handleRun} disabled={loading}>
+          <button className="auth-button" type="button" onClick={handleRun} disabled={loading || !canRun}>
             {loading ? "Rodando..." : "Executar agora"}
           </button>
         </div>
+
+        {!canRun ? <p className="muted-copy">Somente perfil OWNER pode executar o job manualmente.</p> : null}
 
         {result ? (
           <div className="customer-grid">

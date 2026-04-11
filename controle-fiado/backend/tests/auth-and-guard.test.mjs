@@ -9,6 +9,7 @@ process.env.WHATSAPP_PROVIDER = "mock";
 
 const { SimplePasswordHasher } = await import("../dist/infra/auth/simple-password-hasher.js");
 const { HmacTokenService } = await import("../dist/infra/auth/hmac-token.service.js");
+const { requireRole } = await import("../dist/interfaces/http/auth/role.guard.js");
 const { buildApp } = await import("../dist/app.js");
 
 test("password hasher validates plain dev passwords", async () => {
@@ -46,4 +47,40 @@ test("business routes require authentication", async () => {
   } finally {
     await app.close();
   }
+});
+
+test("role guard denies staff user from owner-only action", async () => {
+  let sentPayload = null;
+  let sentStatusCode = null;
+  const roleGuard = requireRole("OWNER");
+
+  const request = {
+    authUser: {
+      id: "staff-1",
+      name: "Caixa",
+      login: "caixa",
+      role: "STAFF"
+    },
+    log: {
+      warn: () => undefined
+    }
+  };
+
+  const reply = {
+    code(statusCode) {
+      sentStatusCode = statusCode;
+      return this;
+    },
+    send(payload) {
+      sentPayload = payload;
+      return this;
+    }
+  };
+
+  await roleGuard(request, reply);
+
+  assert.equal(sentStatusCode, 403);
+  assert.deepEqual(sentPayload, {
+    message: "Usuario sem permissao para executar esta acao."
+  });
 });

@@ -123,8 +123,8 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Exibir sessao autenticada no frontend
 - [x] Implementar logout explicito no frontend
 - [x] Definir expiracao de token
-- [ ] Implementar autorizacao por perfil
-- [ ] Restringir execucao do job diario a perfis permitidos
+- [x] Implementar autorizacao por perfil
+- [x] Restringir execucao do job diario a perfis permitidos
 - [ ] Remover credenciais fracas de desenvolvimento fora de ambiente local
 
 ## Fase 5: Qualidade e testes
