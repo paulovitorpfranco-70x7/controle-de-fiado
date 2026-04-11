@@ -3,4 +3,5 @@ export type RunDailyChargeJobResult = {
   auto3DaysSent: number;
   autoDueDateSent: number;
   skippedDuplicates: number;
+  failedMessages: number;
 };

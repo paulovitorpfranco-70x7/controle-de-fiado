@@ -21,3 +21,7 @@ export function unauthorized(message: string) {
 export function notFound(message: string) {
   return new AppError(message, 404, "NOT_FOUND");
 }
+
+export function integrationError(message: string, details?: unknown) {
+  return new AppError(message, 502, "INTEGRATION_ERROR", details);
+}

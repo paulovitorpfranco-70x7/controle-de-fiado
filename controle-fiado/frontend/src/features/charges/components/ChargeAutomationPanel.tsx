@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { runDailyChargeJob, type DailyChargeJobResult } from "../api/run-daily-charge-job";
+import type { DailyChargeJobMonitor } from "../types/daily-charge-job-monitor";
 
 type ChargeAutomationPanelProps = {
   onCompleted: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
+  monitor: DailyChargeJobMonitor | null;
 };
 
-export function ChargeAutomationPanel({ onCompleted, onSuccess }: ChargeAutomationPanelProps) {
+export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor }: ChargeAutomationPanelProps) {
   const [result, setResult] = useState<DailyChargeJobResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,11 +56,48 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess }: ChargeAutomati
               <span className="label">Duplicadas</span>
               <strong>{result.skippedDuplicates}</strong>
             </div>
+            <div>
+              <span className="label">Falhas</span>
+              <strong>{result.failedMessages}</strong>
+            </div>
           </div>
+        ) : null}
+
+        {monitor ? (
+          <div className="customer-grid">
+            <div>
+              <span className="label">Ultima execucao</span>
+              <strong>{monitor.lastRunAt ? new Date(monitor.lastRunAt).toLocaleString("pt-BR") : "Nunca"}</strong>
+            </div>
+            <div>
+              <span className="label">Status</span>
+              <strong>{renderStatus(monitor.lastRunStatus)}</strong>
+            </div>
+            <div>
+              <span className="label">Falhas total</span>
+              <strong>{monitor.failedMessagesTotal}</strong>
+            </div>
+            <div>
+              <span className="label">Falhas 7 dias</span>
+              <strong>{monitor.failedMessagesLast7Days}</strong>
+            </div>
+          </div>
+        ) : null}
+
+        {monitor?.lastFailureMessage ? (
+          <p className="muted-copy">
+            Ultima falha: {monitor.lastFailureMessage}
+          </p>
         ) : null}
 
         {error ? <div className="error-copy">{error}</div> : null}
       </div>
     </section>
   );
+}
+
+function renderStatus(status: DailyChargeJobMonitor["lastRunStatus"]) {
+  if (status === "success") return "Sucesso";
+  if (status === "failed") return "Falhou";
+  return "Nunca executado";
 }

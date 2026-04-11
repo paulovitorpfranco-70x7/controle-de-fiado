@@ -5,6 +5,12 @@ export type WhatsAppMessageRequest = {
   triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE" | "MANUAL";
 };
 
+export type WhatsAppMessageResponse = {
+  providerName?: string;
+  providerMessageId?: string;
+  providerResponse?: string;
+};
+
 export interface WhatsAppProvider {
-  sendMessage(input: WhatsAppMessageRequest): Promise<void>;
+  sendMessage(input: WhatsAppMessageRequest): Promise<WhatsAppMessageResponse | void>;
 }

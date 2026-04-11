@@ -4,12 +4,14 @@ import { login } from "../features/auth/api/login";
 import { AuthPanel } from "../features/auth/components/AuthPanel";
 import type { AuthUser } from "../features/auth/types/auth";
 import { fetchChargeMessages } from "../features/charges/api/fetch-charge-messages";
+import { fetchDailyChargeJobMonitor } from "../features/charges/api/fetch-daily-charge-job-monitor";
 import { fetchChargeOverview } from "../features/charges/api/fetch-charge-overview";
 import { ChargeAutomationPanel } from "../features/charges/components/ChargeAutomationPanel";
 import { ChargeMessageList } from "../features/charges/components/ChargeMessageList";
 import { ChargeOverviewPanel } from "../features/charges/components/ChargeOverviewPanel";
 import { ManualChargeForm } from "../features/charges/components/ManualChargeForm";
 import type { ChargeMessage } from "../features/charges/types/charge-message";
+import type { DailyChargeJobMonitor } from "../features/charges/types/daily-charge-job-monitor";
 import type { ChargeOverview } from "../features/charges/types/charge-overview";
 import { fetchDashboardSummary } from "../features/dashboard/api/fetch-dashboard-summary";
 import { DashboardSummaryPanel } from "../features/dashboard/components/DashboardSummaryPanel";
@@ -38,6 +40,7 @@ export function CustomersPage() {
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(null);
   const [chargeMessages, setChargeMessages] = useState<ChargeMessage[]>([]);
   const [chargeOverview, setChargeOverview] = useState<ChargeOverview | null>(null);
+  const [dailyChargeJobMonitor, setDailyChargeJobMonitor] = useState<DailyChargeJobMonitor | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [customerDetail, setCustomerDetail] = useState<CustomerDetail | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -47,14 +50,15 @@ export function CustomersPage() {
   const [notice, setNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
 
   async function refreshOperationalData(customerId: string) {
-    const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData] = await Promise.all([
+    const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData, jobMonitorData] = await Promise.all([
       fetchCustomers(),
       fetchDashboardSummary(),
       fetchSales(),
       fetchPayments(),
       fetchChargeOverview(),
       fetchCustomerDetail(customerId),
-      fetchChargeMessages(customerId)
+      fetchChargeMessages(customerId),
+      fetchDailyChargeJobMonitor()
     ]);
 
     setCustomers(customerData);
@@ -64,12 +68,18 @@ export function CustomersPage() {
     setChargeOverview(overviewData);
     setCustomerDetail(detailData);
     setChargeMessages(messageData.slice(0, 5));
+    setDailyChargeJobMonitor(jobMonitorData);
   }
 
   async function refreshChargeData(customerId: string) {
-    const [overviewData, messageData] = await Promise.all([fetchChargeOverview(), fetchChargeMessages(customerId)]);
+    const [overviewData, messageData, jobMonitorData] = await Promise.all([
+      fetchChargeOverview(),
+      fetchChargeMessages(customerId),
+      fetchDailyChargeJobMonitor()
+    ]);
     setChargeOverview(overviewData);
     setChargeMessages(messageData.slice(0, 5));
+    setDailyChargeJobMonitor(jobMonitorData);
   }
 
   useEffect(() => {
@@ -101,8 +111,8 @@ export function CustomersPage() {
     }
 
     setLoading(true);
-    Promise.all([fetchCustomers(), fetchDashboardSummary(), fetchSales(), fetchPayments(), fetchChargeOverview()])
-      .then(([customerData, dashboardData, salesData, paymentData, overviewData]) => {
+    Promise.all([fetchCustomers(), fetchDashboardSummary(), fetchSales(), fetchPayments(), fetchChargeOverview(), fetchDailyChargeJobMonitor()])
+      .then(([customerData, dashboardData, salesData, paymentData, overviewData, jobMonitorData]) => {
         setCustomers(customerData);
         if (customerData.length > 0) {
           setSelectedCustomerId(customerData[0].id);
@@ -111,6 +121,7 @@ export function CustomersPage() {
         setSales(salesData.slice(0, 3));
         setPayments(paymentData.slice(0, 3));
         setChargeOverview(overviewData);
+        setDailyChargeJobMonitor(jobMonitorData);
         setError(null);
       })
       .catch((err: Error) => {
@@ -232,6 +243,7 @@ export function CustomersPage() {
 
             {selectedCustomerId ? (
               <ChargeAutomationPanel
+                monitor={dailyChargeJobMonitor}
                 onSuccess={(message) => setNotice({ tone: "success", message })}
                 onCompleted={async () => {
                   await refreshChargeData(selectedCustomerId);

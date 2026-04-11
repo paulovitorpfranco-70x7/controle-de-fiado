@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ZodError } from "zod";
+import type { GetDailyChargeJobMonitorUseCase } from "../../../../application/charges/use-cases/get-daily-charge-job-monitor.js";
 import type { ListChargeMessagesUseCase } from "../../../../application/charges/use-cases/list-charge-messages.js";
 import type { ListChargeOverviewUseCase } from "../../../../application/charges/use-cases/list-charge-overview.js";
 import type { RunDailyChargeJobUseCase } from "../../../../application/charges/use-cases/run-daily-charge-job.js";
@@ -11,6 +11,7 @@ type ChargeControllerDeps = {
   listChargeMessagesUseCase: ListChargeMessagesUseCase;
   sendManualChargeUseCase: SendManualChargeUseCase;
   runDailyChargeJobUseCase: RunDailyChargeJobUseCase;
+  getDailyChargeJobMonitorUseCase: GetDailyChargeJobMonitorUseCase;
 };
 
 export function createChargeController(deps: ChargeControllerDeps) {
@@ -23,24 +24,18 @@ export function createChargeController(deps: ChargeControllerDeps) {
     },
 
     sendManual: async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        const payload = sendManualChargeSchema.parse(request.body);
-        const result = await deps.sendManualChargeUseCase.execute(payload);
-        return reply.code(201).send(result);
-      } catch (error) {
-        if (error instanceof ZodError) {
-          return reply.code(400).send({
-            message: "Dados invalidos para cobranca manual.",
-            issues: error.issues
-          });
-        }
-
-        throw error;
-      }
+      const payload = sendManualChargeSchema.parse(request.body);
+      const result = await deps.sendManualChargeUseCase.execute(payload);
+      return reply.code(201).send(result);
     },
 
     runDailyJob: async (_request: FastifyRequest, reply: FastifyReply) => {
       const result = await deps.runDailyChargeJobUseCase.execute();
+      return reply.send(result);
+    },
+
+    getDailyJobMonitor: async (_request: FastifyRequest, reply: FastifyReply) => {
+      const result = await deps.getDailyChargeJobMonitorUseCase.execute();
       return reply.send(result);
     }
   };

@@ -1,5 +1,5 @@
 import { buildManualChargeMessage } from "../../../domain/charges/charge.js";
-import { notFound } from "../../errors/app-error.js";
+import { integrationError, notFound } from "../../errors/app-error.js";
 import type { AuditLogService } from "../../ports/audit-log-service.js";
 import type { ChargeMessageRepository } from "../../ports/charge-message-repository.js";
 import type { ChargeOverviewRepository } from "../../ports/charge-overview-repository.js";
@@ -30,36 +30,70 @@ export class SendManualChargeUseCase {
         dueDate: context.dueDate
       });
 
-    await this.whatsAppProvider.sendMessage({
-      customerId: context.customerId,
-      phoneE164: context.phoneE164 ?? "",
-      message: messageBody,
-      triggerType: "MANUAL"
-    });
-
-    const message = await this.chargeMessageRepository.create({
-      customerId: context.customerId,
-      saleId: context.saleId,
-      triggerType: "MANUAL",
-      messageBody,
-      sendStatus: "SENT",
-      providerName: "mock",
-      providerResponse: "Mensagem enviada pelo provedor mock.",
-      sentAt: new Date(),
-      createdById: input.createdById
-    });
-
-    await this.auditLogService.register({
-      action: "manual_charge_sent",
-      entityType: "whatsapp_message",
-      entityId: message.id,
-      actorUserId: input.createdById,
-      payload: {
+    try {
+      const providerResult = await this.whatsAppProvider.sendMessage({
         customerId: context.customerId,
-        saleId: context.saleId
-      }
-    });
+        phoneE164: context.phoneE164 ?? "",
+        message: messageBody,
+        triggerType: "MANUAL"
+      });
 
-    return message;
+      const message = await this.chargeMessageRepository.create({
+        customerId: context.customerId,
+        saleId: context.saleId,
+        triggerType: "MANUAL",
+        messageBody,
+        sendStatus: "SENT",
+        providerName: providerResult?.providerName ?? "mock",
+        providerMessageId: providerResult?.providerMessageId,
+        providerResponse: providerResult?.providerResponse ?? "Mensagem enviada.",
+        sentAt: new Date(),
+        createdById: input.createdById
+      });
+
+      await this.auditLogService.register({
+        action: "manual_charge_sent",
+        entityType: "whatsapp_message",
+        entityId: message.id,
+        actorUserId: input.createdById,
+        payload: {
+          customerId: context.customerId,
+          saleId: context.saleId
+        }
+      });
+
+      return message;
+    } catch (error) {
+      const failureMessage = error instanceof Error ? error.message : "Falha desconhecida no provedor.";
+
+      const failedMessage = await this.chargeMessageRepository.create({
+        customerId: context.customerId,
+        saleId: context.saleId,
+        triggerType: "MANUAL",
+        messageBody,
+        sendStatus: "FAILED",
+        providerName: "mock",
+        providerResponse: failureMessage,
+        createdById: input.createdById
+      });
+
+      await this.auditLogService.register({
+        action: "manual_charge_failed",
+        entityType: "whatsapp_message",
+        entityId: failedMessage.id,
+        actorUserId: input.createdById,
+        payload: {
+          customerId: context.customerId,
+          saleId: context.saleId,
+          error: failureMessage
+        }
+      });
+
+      throw integrationError("Falha ao enviar cobranca pelo provedor.", {
+        customerId: context.customerId,
+        saleId: context.saleId,
+        reason: failureMessage
+      });
+    }
   }
 }

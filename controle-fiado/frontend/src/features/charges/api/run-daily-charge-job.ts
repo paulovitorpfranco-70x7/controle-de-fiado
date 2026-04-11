@@ -5,6 +5,7 @@ export type DailyChargeJobResult = {
   auto3DaysSent: number;
   autoDueDateSent: number;
   skippedDuplicates: number;
+  failedMessages: number;
 };
 
 export function runDailyChargeJob() {

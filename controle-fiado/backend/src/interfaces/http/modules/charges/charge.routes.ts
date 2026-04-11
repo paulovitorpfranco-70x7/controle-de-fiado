@@ -1,8 +1,10 @@
 import type { FastifyInstance } from "fastify";
+import { GetDailyChargeJobMonitorUseCase } from "../../../../application/charges/use-cases/get-daily-charge-job-monitor.js";
 import { ListChargeMessagesUseCase } from "../../../../application/charges/use-cases/list-charge-messages.js";
 import { ListChargeOverviewUseCase } from "../../../../application/charges/use-cases/list-charge-overview.js";
 import { RunDailyChargeJobUseCase } from "../../../../application/charges/use-cases/run-daily-charge-job.js";
 import { SendManualChargeUseCase } from "../../../../application/charges/use-cases/send-manual-charge.js";
+import { PrismaChargeJobMonitorRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-job-monitor-repository.js";
 import { PrismaChargeMessageRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-message-repository.js";
 import { PrismaChargeOverviewRepository } from "../../../../infra/db/prisma/repositories/prisma-charge-overview-repository.js";
 import { PrismaAuditLogService } from "../../../../infra/observability/prisma-audit-log.service.js";
@@ -12,6 +14,7 @@ import { createChargeController } from "./charge.controller.js";
 export async function chargeRoutes(app: FastifyInstance) {
   const chargeMessageRepository = new PrismaChargeMessageRepository();
   const chargeOverviewRepository = new PrismaChargeOverviewRepository();
+  const chargeJobMonitorRepository = new PrismaChargeJobMonitorRepository();
   const whatsAppProvider = new MockWhatsAppProvider();
   const auditLogService = new PrismaAuditLogService();
 
@@ -24,6 +27,7 @@ export async function chargeRoutes(app: FastifyInstance) {
       whatsAppProvider,
       auditLogService
     ),
+    getDailyChargeJobMonitorUseCase: new GetDailyChargeJobMonitorUseCase(chargeJobMonitorRepository),
     sendManualChargeUseCase: new SendManualChargeUseCase(
       chargeOverviewRepository,
       chargeMessageRepository,
@@ -35,5 +39,6 @@ export async function chargeRoutes(app: FastifyInstance) {
   app.get("/overview", controller.listOverview);
   app.get("/messages", controller.listMessages);
   app.post("/messages/manual", controller.sendManual);
+  app.get("/jobs/daily/status", controller.getDailyJobMonitor);
   app.post("/jobs/daily", controller.runDailyJob);
 }

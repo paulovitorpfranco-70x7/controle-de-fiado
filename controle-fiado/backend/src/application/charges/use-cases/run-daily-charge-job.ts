@@ -1,3 +1,4 @@
+import { integrationError } from "../../errors/app-error.js";
 import { buildManualChargeMessage } from "../../../domain/charges/charge.js";
 import type { AuditLogService } from "../../ports/audit-log-service.js";
 import type { ChargeMessageRepository } from "../../ports/charge-message-repository.js";
@@ -14,45 +15,68 @@ export class RunDailyChargeJobUseCase {
   ) {}
 
   async execute(referenceDate = new Date()): Promise<RunDailyChargeJobResult> {
-    const [dueSoon, dueToday] = await Promise.all([
-      this.chargeOverviewRepository.listDueSoon(referenceDate),
-      this.chargeOverviewRepository.listDueToday(referenceDate)
-    ]);
+    try {
+      const [dueSoon, dueToday] = await Promise.all([
+        this.chargeOverviewRepository.listDueSoon(referenceDate),
+        this.chargeOverviewRepository.listDueToday(referenceDate)
+      ]);
 
-    let auto3DaysSent = 0;
-    let autoDueDateSent = 0;
-    let skippedDuplicates = 0;
+      let auto3DaysSent = 0;
+      let autoDueDateSent = 0;
+      let skippedDuplicates = 0;
+      let failedMessages = 0;
 
-    for (const item of dueSoon) {
-      const sent = await this.processAutomaticCharge(item, "AUTO_3_DAYS");
-      if (sent === "sent") auto3DaysSent += 1;
-      if (sent === "skipped") skippedDuplicates += 1;
-    }
+      for (const item of dueSoon) {
+        const sent = await this.processAutomaticCharge(item, "AUTO_3_DAYS");
+        if (sent === "sent") auto3DaysSent += 1;
+        if (sent === "skipped") skippedDuplicates += 1;
+        if (sent === "failed") failedMessages += 1;
+      }
 
-    for (const item of dueToday) {
-      const sent = await this.processAutomaticCharge(item, "AUTO_DUE_DATE");
-      if (sent === "sent") autoDueDateSent += 1;
-      if (sent === "skipped") skippedDuplicates += 1;
-    }
+      for (const item of dueToday) {
+        const sent = await this.processAutomaticCharge(item, "AUTO_DUE_DATE");
+        if (sent === "sent") autoDueDateSent += 1;
+        if (sent === "skipped") skippedDuplicates += 1;
+        if (sent === "failed") failedMessages += 1;
+      }
 
-    await this.auditLogService.register({
-      action: "daily_charge_job_ran",
-      entityType: "job",
-      entityId: "daily-charge-job",
-      payload: {
-        processedAt: referenceDate.toISOString(),
+      await this.auditLogService.register({
+        action: "daily_charge_job_ran",
+        entityType: "job",
+        entityId: "daily-charge-job",
+        payload: {
+          processedAt: referenceDate.toISOString(),
+          auto3DaysSent,
+          autoDueDateSent,
+          skippedDuplicates,
+          failedMessages
+        }
+      });
+
+      return {
+        processedAt: referenceDate,
         auto3DaysSent,
         autoDueDateSent,
-        skippedDuplicates
-      }
-    });
+        skippedDuplicates,
+        failedMessages
+      };
+    } catch (error) {
+      const failureMessage = error instanceof Error ? error.message : "Falha desconhecida no job diario.";
 
-    return {
-      processedAt: referenceDate,
-      auto3DaysSent,
-      autoDueDateSent,
-      skippedDuplicates
-    };
+      await this.auditLogService.register({
+        action: "daily_charge_job_failed",
+        entityType: "job",
+        entityId: "daily-charge-job",
+        payload: {
+          processedAt: referenceDate.toISOString(),
+          error: failureMessage
+        }
+      });
+
+      throw integrationError("Falha ao executar job diario de cobranca.", {
+        reason: failureMessage
+      });
+    }
   }
 
   private async processAutomaticCharge(
@@ -82,24 +106,53 @@ export class RunDailyChargeJobUseCase {
       dueDate: item.dueDate
     });
 
-    await this.whatsAppProvider.sendMessage({
-      customerId: item.customerId,
-      phoneE164: item.phoneE164 ?? "",
-      message: messageBody,
-      triggerType
-    });
+    try {
+      const providerResult = await this.whatsAppProvider.sendMessage({
+        customerId: item.customerId,
+        phoneE164: item.phoneE164 ?? "",
+        message: messageBody,
+        triggerType
+      });
 
-    await this.chargeMessageRepository.create({
-      customerId: item.customerId,
-      saleId: item.saleId,
-      triggerType,
-      messageBody,
-      sendStatus: "SENT",
-      providerName: "mock",
-      providerResponse: "Mensagem automatica enviada pelo provedor mock.",
-      sentAt: new Date()
-    });
+      await this.chargeMessageRepository.create({
+        customerId: item.customerId,
+        saleId: item.saleId,
+        triggerType,
+        messageBody,
+        sendStatus: "SENT",
+        providerName: providerResult?.providerName ?? "mock",
+        providerMessageId: providerResult?.providerMessageId,
+        providerResponse: providerResult?.providerResponse ?? "Mensagem automatica enviada.",
+        sentAt: new Date()
+      });
 
-    return "sent" as const;
+      return "sent" as const;
+    } catch (error) {
+      const failureMessage = error instanceof Error ? error.message : "Falha desconhecida no provedor.";
+
+      const failedMessage = await this.chargeMessageRepository.create({
+        customerId: item.customerId,
+        saleId: item.saleId,
+        triggerType,
+        messageBody,
+        sendStatus: "FAILED",
+        providerName: "mock",
+        providerResponse: failureMessage
+      });
+
+      await this.auditLogService.register({
+        action: "automatic_charge_failed",
+        entityType: "whatsapp_message",
+        entityId: failedMessage.id,
+        payload: {
+          customerId: item.customerId,
+          saleId: item.saleId,
+          triggerType,
+          error: failureMessage
+        }
+      });
+
+      return "failed" as const;
+    }
   }
 }
