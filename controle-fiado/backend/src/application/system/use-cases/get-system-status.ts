@@ -29,7 +29,8 @@ export class GetSystemStatusUseCase {
       integrations: {
         whatsappProvider: env.whatsappProvider,
         whatsappMaxRetries: env.whatsappMaxRetries,
-        whatsappRetryDelayMs: env.whatsappRetryDelayMs
+        whatsappRetryDelayMs: env.whatsappRetryDelayMs,
+        metaPhoneNumberConfigured: Boolean(env.metaWhatsAppPhoneNumberId)
       },
       scheduler: {
         enabled: this.schedulerStatus.enabled,

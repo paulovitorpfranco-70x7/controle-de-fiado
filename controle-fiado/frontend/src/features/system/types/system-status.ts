@@ -13,6 +13,7 @@ export type SystemStatus = {
     whatsappProvider: string;
     whatsappMaxRetries: number;
     whatsappRetryDelayMs: number;
+    metaPhoneNumberConfigured: boolean;
   };
   scheduler: {
     enabled: boolean;

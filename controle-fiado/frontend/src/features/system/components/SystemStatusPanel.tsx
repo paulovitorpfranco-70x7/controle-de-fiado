@@ -41,6 +41,10 @@ export function SystemStatusPanel({ status }: SystemStatusPanelProps) {
             <strong>{status.integrations.whatsappRetryDelayMs} ms</strong>
           </div>
           <div>
+            <span className="label">Meta configurado</span>
+            <strong>{status.integrations.metaPhoneNumberConfigured ? "Sim" : "Nao"}</strong>
+          </div>
+          <div>
             <span className="label">Scheduler</span>
             <strong>{status.scheduler.enabled ? "Ativo" : "Desligado"}</strong>
           </div>

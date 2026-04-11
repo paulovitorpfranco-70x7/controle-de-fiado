@@ -105,10 +105,10 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 
 ### Integracao real
 
-- [ ] Substituir provider mock por provider real de WhatsApp
-- [ ] Definir provedor inicial de producao
-- [ ] Persistir `providerMessageId` real
-- [ ] Tratar falhas reais da API externa
+- [x] Substituir provider mock por provider real de WhatsApp
+- [x] Definir provedor inicial de producao
+- [x] Persistir `providerMessageId` real
+- [x] Tratar falhas reais da API externa
 - [ ] Validar templates e conteudo de mensagens reais
 
 ## Fase 4: Autenticacao, autorizacao e auditoria
