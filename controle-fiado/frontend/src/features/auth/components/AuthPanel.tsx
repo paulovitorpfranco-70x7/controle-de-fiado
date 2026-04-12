@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AuthUser } from "../types/auth";
+import { getCurrentAuthMode } from "../api/session";
 
 type AuthPanelProps = {
   user: AuthUser | null;
@@ -8,7 +9,8 @@ type AuthPanelProps = {
 };
 
 export function AuthPanel({ user, onLogin, onLogout }: AuthPanelProps) {
-  const [loginValue, setLoginValue] = useState("tonhao");
+  const authMode = getCurrentAuthMode();
+  const [loginValue, setLoginValue] = useState(authMode === "supabase" ? "" : "tonhao");
   const [password, setPassword] = useState("tonhao123");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export function AuthPanel({ user, onLogin, onLogout }: AuthPanelProps) {
         <div className="eyebrow">Sessao</div>
         <strong>{user.name}</strong>
         <div className="customer-meta">
-          {user.login} | {user.role}
+          {user.login} | {user.role} | {user.authMode ?? authMode}
         </div>
         <button className="auth-button" type="button" onClick={onLogout}>
           Sair
@@ -48,7 +50,13 @@ export function AuthPanel({ user, onLogin, onLogout }: AuthPanelProps) {
   return (
     <form className="auth-panel auth-form" onSubmit={handleSubmit}>
       <div className="eyebrow">Entrar</div>
-      <input className="customer-selector" value={loginValue} onChange={(event) => setLoginValue(event.target.value)} />
+      <input
+        className="customer-selector"
+        type={authMode === "supabase" ? "email" : "text"}
+        placeholder={authMode === "supabase" ? "email" : "login"}
+        value={loginValue}
+        onChange={(event) => setLoginValue(event.target.value)}
+      />
       <input
         className="customer-selector"
         type="password"
@@ -58,6 +66,9 @@ export function AuthPanel({ user, onLogin, onLogout }: AuthPanelProps) {
       <button className="auth-button" type="submit" disabled={submitting}>
         {submitting ? "Entrando..." : "Entrar"}
       </button>
+      <div className="customer-meta">
+        Modo de autenticacao: <strong>{authMode}</strong>
+      </div>
       {error ? <div className="error-copy">{error}</div> : null}
     </form>
   );

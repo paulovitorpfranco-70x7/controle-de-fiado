@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchMe } from "../features/auth/api/fetch-me";
-import { login } from "../features/auth/api/login";
+import { restoreSession, signIn, signOut, subscribeToAuthChanges } from "../features/auth/api/session";
 import { AuthPanel } from "../features/auth/components/AuthPanel";
 import type { AuthUser } from "../features/auth/types/auth";
 import { fetchChargeMessages } from "../features/charges/api/fetch-charge-messages";
@@ -35,7 +34,6 @@ import type { Sale } from "../features/sales/types/sale";
 import { fetchSystemStatus } from "../features/system/api/fetch-system-status";
 import { SystemStatusPanel } from "../features/system/components/SystemStatusPanel";
 import type { SystemStatus } from "../features/system/types/system-status";
-import { setAuthToken } from "../shared/api/http";
 import { OperationNotice } from "../shared/components/OperationNotice";
 
 export function CustomersPage() {
@@ -92,8 +90,6 @@ export function CustomersPage() {
   }
 
   function clearSession() {
-    sessionStorage.removeItem("controle-fiado-token");
-    setAuthToken("");
     setAuthUser(null);
     setCustomers([]);
     setDashboardSummary(null);
@@ -108,18 +104,9 @@ export function CustomersPage() {
   }
 
   useEffect(() => {
-    const storedToken = sessionStorage.getItem("controle-fiado-token");
-
-    if (!storedToken) {
-      setLoading(false);
-      return;
-    }
-
-    setAuthToken(storedToken);
-
-    fetchMe()
+    restoreSession()
       .then((user) => {
-        setAuthUser(user);
+        setAuthUser(user ?? null);
       })
       .catch(() => {
         clearSession();
@@ -127,6 +114,20 @@ export function CustomersPage() {
       .finally(() => {
         setLoading(false);
       });
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAuthChanges(() => {
+      restoreSession()
+        .then((user) => {
+          setAuthUser(user ?? null);
+        })
+        .catch(() => {
+          clearSession();
+        });
+    });
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -207,15 +208,13 @@ export function CustomersPage() {
         <p>Base real do sistema com API, banco e integracao futura com WhatsApp.</p>
         <AuthPanel
           user={authUser}
-          onLogout={() => {
+          onLogout={async () => {
+            await signOut();
             clearSession();
             setNotice({ tone: "success", message: "Sessao encerrada com sucesso." });
           }}
           onLogin={async (input) => {
-            const result = await login(input);
-            setAuthToken(result.token);
-            sessionStorage.setItem("controle-fiado-token", result.token);
-            const user = await fetchMe();
+            const user = await signIn(input);
             setAuthUser(user);
             setNotice({ tone: "success", message: "Sessao iniciada com sucesso." });
           }}

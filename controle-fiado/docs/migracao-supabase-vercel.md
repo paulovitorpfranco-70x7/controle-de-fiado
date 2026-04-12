@@ -279,6 +279,10 @@ Restricoes:
 - criar projeto Supabase
 - criar projeto Vercel
 
+Guia pratico desta fase:
+
+- `docs/setup-supabase-vercel.md`
+
 ### Fase 2: Modelagem no Supabase
 
 - traduzir schema atual para SQL/Postgres
