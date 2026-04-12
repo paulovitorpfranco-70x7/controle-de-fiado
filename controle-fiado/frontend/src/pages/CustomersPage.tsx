@@ -7,6 +7,7 @@ import { fetchChargeMessages } from "../features/charges/api/fetch-charge-messag
 import { fetchDailyChargeJobMonitor } from "../features/charges/api/fetch-daily-charge-job-monitor";
 import { fetchChargeOverview } from "../features/charges/api/fetch-charge-overview";
 import { ChargeAutomationPanel } from "../features/charges/components/ChargeAutomationPanel";
+import { ChargeAlertsPanel } from "../features/charges/components/ChargeAlertsPanel";
 import { ChargeMessageList } from "../features/charges/components/ChargeMessageList";
 import { ChargeOverviewPanel } from "../features/charges/components/ChargeOverviewPanel";
 import { ManualChargeForm } from "../features/charges/components/ManualChargeForm";
@@ -242,6 +243,7 @@ export function CustomersPage() {
             {notice ? <OperationNotice tone={notice.tone} message={notice.message} /> : null}
             {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
             {systemStatus ? <SystemStatusPanel status={systemStatus} /> : null}
+            {chargeOverview ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
             {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
 
             <section className="section-block">

@@ -44,6 +44,7 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 ## Operacao local
 
 - backup do SQLite: `npm run db:backup`
+- migracao segura do SQLite: `npm run db:migrate:safe -- nome_da_migracao`
 - restauracao do SQLite: ver `docs/operacao-sqlite.md`
 - `LOG_LEVEL` pode ser ajustado em `backend/.env`
 - `AUTH_TTL_SECONDS` controla a expiracao do token em segundos
@@ -58,6 +59,12 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 - modo padrao do projeto: `wa_link`
 - o sistema prepara a mensagem, gera o link `wa.me` e o operador envia manualmente no WhatsApp
 - isso reduz custo e risco operacional para o cenario atual de um unico usuario
+
+## Regra de datas
+
+- o sistema considera datas no horario local do comercio
+- `dueDate` e tratado como final do dia local
+- isso evita erro de vencimento por conversao UTC em campos `type="date"`
 
 ## Observacao
 

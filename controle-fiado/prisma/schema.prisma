@@ -140,6 +140,7 @@ model WhatsAppMessage {
   createdBy         User?              @relation("MessageCreatedBy", fields: [createdById], references: [id])
 
   @@index([customerId, createdAt])
+  @@index([saleId, triggerType, sendStatus, createdAt])
   @@index([sendStatus, scheduledFor])
 }
 
@@ -154,4 +155,5 @@ model AuditLog {
   actorUser         User?              @relation(fields: [actorUserId], references: [id])
 
   @@index([entityType, entityId])
+  @@index([action, createdAt])
 }

@@ -1,15 +1,36 @@
+import "dotenv/config";
 import { PrismaClient, PaymentMethod, SaleStatus, UserRole, WhatsAppSendStatus, WhatsAppTriggerType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+function getSeedOwnerCredentials() {
+  const appEnv = process.env.APP_ENV ?? process.env.NODE_ENV ?? "development";
+  const isLocalEnv = appEnv === "development";
+  const login = process.env.SEED_OWNER_LOGIN ?? "tonhao";
+  const name = process.env.SEED_OWNER_NAME ?? "Tonhao";
+  const password = process.env.SEED_OWNER_PASSWORD;
+
+  if (!isLocalEnv && !password) {
+    throw new Error("SEED_OWNER_PASSWORD e obrigatoria fora do ambiente local.");
+  }
+
+  return {
+    login,
+    name,
+    passwordHash: `plain:${password ?? "tonhao123"}`
+  };
+}
+
 async function main() {
+  const ownerSeed = getSeedOwnerCredentials();
+
   const owner = await prisma.user.upsert({
-    where: { login: "tonhao" },
+    where: { login: ownerSeed.login },
     update: {},
     create: {
-      name: "Tonhao",
-      login: "tonhao",
-      passwordHash: "plain:tonhao123",
+      name: ownerSeed.name,
+      login: ownerSeed.login,
+      passwordHash: ownerSeed.passwordHash,
       role: UserRole.OWNER
     }
   });
@@ -95,7 +116,7 @@ async function main() {
       messageBody: "Maria, faltam 3 dias para o vencimento do seu fiado no Mercadinho do Tonhao.",
       sendStatus: WhatsAppSendStatus.PENDING,
       scheduledFor: new Date("2026-04-09T12:00:00.000Z"),
-      providerName: "mock",
+      providerName: "wa_link",
       createdById: owner.id
     }
   });

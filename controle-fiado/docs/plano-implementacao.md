@@ -126,7 +126,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Definir expiracao de token
 - [x] Implementar autorizacao por perfil
 - [x] Restringir execucao do job diario a perfis permitidos
-- [ ] Remover credenciais fracas de desenvolvimento fora de ambiente local
+- [x] Remover credenciais fracas de desenvolvimento fora de ambiente local
 
 ## Fase 5: Qualidade e testes
 
@@ -141,12 +141,12 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 
 ## Fase 6: Banco e dados de producao
 
-- [ ] Reavaliar necessidade de migrar de `sqlite` para PostgreSQL
-- [ ] Revisar tipos e constraints para producao
-- [ ] Revisar indices do banco
-- [ ] Criar fluxo seguro de migracoes
-- [ ] Validar timezone e datas de vencimento
-- [ ] Revisar seed para separar dados de desenvolvimento de producao
+- [x] Reavaliar necessidade de migrar de `sqlite` para PostgreSQL
+- [x] Revisar tipos e constraints para producao
+- [x] Revisar indices do banco
+- [x] Criar fluxo seguro de migracoes
+- [x] Validar timezone e datas de vencimento
+- [x] Revisar seed para separar dados de desenvolvimento de producao
 
 ## Fase 7: Observabilidade e operacao
 
@@ -154,7 +154,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Registrar falhas de integracao com contexto suficiente
 - [x] Configurar monitoramento do backend
 - [x] Configurar monitoramento do job diario
-- [ ] Criar alertas para falhas de cobranca
+- [x] Criar alertas para falhas de cobranca
 - [x] Configurar backup do banco
 - [x] Testar restauracao de backup
 
@@ -183,11 +183,11 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 ## Checklist de liberacao para producao
 
 - [ ] Testes criticos passando
-- [ ] PostgreSQL configurado
+- [ ] Banco validado para o contexto real de uso
 - [ ] Migracoes revisadas
 - [ ] Rotas protegidas por autenticacao
 - [ ] Auditoria persistida ativa
-- [ ] Provider real de WhatsApp validado
+- [ ] Fluxo de cobranca via WhatsApp validado no modo escolhido
 - [x] Scheduler real ativo
 - [ ] Logs e monitoramento funcionando
 - [ ] Backup validado

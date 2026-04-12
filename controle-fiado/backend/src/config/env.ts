@@ -9,6 +9,7 @@ function getEnv(name: string, fallback?: string) {
 }
 
 export const env = {
+  appEnv: getEnv("APP_ENV", process.env.NODE_ENV ?? "development"),
   port: Number(getEnv("PORT", "3333")),
   corsOrigin: getEnv("CORS_ORIGIN", "http://127.0.0.1:5173"),
   whatsappProvider: getEnv("WHATSAPP_PROVIDER", "wa_link"),

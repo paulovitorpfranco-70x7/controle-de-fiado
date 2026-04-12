@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createPayment } from "../api/create-payment";
+import { todayInputDateValue } from "../../../shared/utils/date-input";
 
 type CreatePaymentFormProps = {
   customerId: string;
@@ -8,13 +9,9 @@ type CreatePaymentFormProps = {
   onSuccess?: (message: string) => void;
 };
 
-function todayIsoDate() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 export function CreatePaymentForm({ customerId, createdById, onCreated, onSuccess }: CreatePaymentFormProps) {
   const [amount, setAmount] = useState("0");
-  const [paymentDate, setPaymentDate] = useState(todayIsoDate());
+  const [paymentDate, setPaymentDate] = useState(todayInputDateValue());
   const [method, setMethod] = useState<"CASH" | "PIX" | "CARD">("PIX");
   const [notes, setNotes] = useState("Pagamento registrado no caixa.");
   const [loading, setLoading] = useState(false);

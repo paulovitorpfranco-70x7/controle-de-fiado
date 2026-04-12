@@ -13,6 +13,7 @@
     "build:backend": "npm --workspace backend run build",
     "test:backend": "npm --workspace backend run test",
     "db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup-sqlite.ps1",
+    "db:migrate:safe": "powershell -ExecutionPolicy Bypass -File scripts/migrate-sqlite-safe.ps1",
     "db:generate": "npm --workspace backend run prisma:generate",
     "db:migrate": "npm --workspace backend run prisma:migrate",
     "db:seed": "npm --workspace backend run prisma:seed"

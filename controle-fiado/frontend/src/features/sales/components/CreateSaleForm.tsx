@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createSale } from "../api/create-sale";
+import { addDaysInputDateValue, todayInputDateValue } from "../../../shared/utils/date-input";
 
 type CreateSaleFormProps = {
   customerId: string;
@@ -8,22 +9,12 @@ type CreateSaleFormProps = {
   onSuccess?: (message: string) => void;
 };
 
-function todayIsoDate() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function plusDaysIsoDate(days: number) {
-  const value = new Date();
-  value.setDate(value.getDate() + days);
-  return value.toISOString().slice(0, 10);
-}
-
 export function CreateSaleForm({ customerId, createdById, onCreated, onSuccess }: CreateSaleFormProps) {
   const [description, setDescription] = useState("Compra de balcão");
   const [originalAmount, setOriginalAmount] = useState("0");
   const [feePercent, setFeePercent] = useState("0");
-  const [saleDate, setSaleDate] = useState(todayIsoDate());
-  const [dueDate, setDueDate] = useState(plusDaysIsoDate(15));
+  const [saleDate, setSaleDate] = useState(todayInputDateValue());
+  const [dueDate, setDueDate] = useState(addDaysInputDateValue(15));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
