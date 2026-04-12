@@ -122,7 +122,8 @@ Nesta fase ainda nao colocar:
 Observacao:
 
 - manter `VITE_DATA_MODE=legacy` enquanto os modulos de dados ainda nao forem migrados
-- mudar para `VITE_DATA_MODE=supabase` por modulo, quando estiver pronto
+- quando `customers` e `sales` ja estiverem operando no Supabase, o app pode comecar a rodar parcialmente no modo novo
+- `payments`, `dashboard` e `charges` ainda exigem migracao propria
 
 ## Parte 7: Preparar Vercel
 

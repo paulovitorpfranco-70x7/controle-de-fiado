@@ -1,5 +1,7 @@
 import { httpPost } from "../../../shared/api/http";
+import { isSupabaseDataEnabled } from "../../../shared/config/data";
 import type { Sale } from "../types/sale";
+import { createSupabaseSale } from "./supabase-sales";
 
 export type CreateSalePayload = {
   customerId: string;
@@ -13,5 +15,9 @@ export type CreateSalePayload = {
 };
 
 export function createSale(payload: CreateSalePayload) {
+  if (isSupabaseDataEnabled()) {
+    return createSupabaseSale(payload);
+  }
+
   return httpPost<Sale>("/sales", payload);
 }

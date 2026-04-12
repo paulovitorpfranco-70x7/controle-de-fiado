@@ -330,6 +330,11 @@ Ordem recomendada:
 7. dashboard
 8. auditoria
 
+Referencia para pagamentos:
+
+- `docs/supabase-payments-rpc.md`
+- `supabase/migrations/0002_register_payment_rpc.sql`
+
 ### Fase 6: Rotina diaria
 
 - reimplementar a geracao diaria da fila de cobranca
