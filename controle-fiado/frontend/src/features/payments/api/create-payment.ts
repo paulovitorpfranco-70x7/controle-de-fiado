@@ -1,5 +1,7 @@
 import { httpPost } from "../../../shared/api/http";
+import { isSupabaseDataEnabled } from "../../../shared/config/data";
 import type { Payment } from "../types/payment";
+import { createSupabasePayment } from "./supabase-payments";
 
 export type CreatePaymentPayload = {
   customerId: string;
@@ -11,5 +13,9 @@ export type CreatePaymentPayload = {
 };
 
 export function createPayment(payload: CreatePaymentPayload) {
+  if (isSupabaseDataEnabled()) {
+    return createSupabasePayment(payload);
+  }
+
   return httpPost<Payment>("/payments", payload);
 }

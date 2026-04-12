@@ -356,6 +356,10 @@ Referencia para pagamentos:
 - validar acesso por smartphone
 - validar sessao e logout
 
+Guia de virada:
+
+- `docs/virada-supabase.md`
+
 ### Fase 9: Piloto
 
 - cadastrar os dois usuarios reais
