@@ -180,6 +180,11 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [ ] Ajustar com base no piloto
 - [ ] Publicar producao
 
+Referencia operacional:
+
+- roteiro do piloto em `docs/piloto-operacional.md`
+- estrategia de migracao web em `docs/migracao-supabase-vercel.md`
+
 ## Checklist de liberacao para producao
 
 - [ ] Testes criticos passando
