@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { markChargeMessageSent } from "../api/mark-charge-message-sent";
 import { retryFailedCharge } from "../api/retry-failed-charge";
 import type { ChargeMessage } from "../types/charge-message";
+import { buildWhatsAppUrl } from "../utils/build-whatsapp-url";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -18,6 +20,7 @@ type ChargeMessageListProps = {
 
 export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }: ChargeMessageListProps) {
   const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [markingId, setMarkingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleRetry(messageId: string) {
@@ -32,6 +35,27 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
       setError(err instanceof Error ? err.message : "Falha ao reenviar mensagem.");
     } finally {
       setRetryingId(null);
+    }
+  }
+
+  async function handleOpenAndMark(message: ChargeMessage) {
+    if (!message.phoneE164) {
+      setError("Cliente sem telefone valido para abrir o WhatsApp.");
+      return;
+    }
+
+    setMarkingId(message.id);
+    setError(null);
+
+    try {
+      window.open(buildWhatsAppUrl(message.phoneE164, message.messageBody), "_blank", "noopener,noreferrer");
+      await markChargeMessageSent(message.id);
+      onRetried?.("Mensagem aberta no WhatsApp e marcada como enviada.");
+      await onCompleted();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Falha ao abrir a mensagem no WhatsApp.");
+    } finally {
+      setMarkingId(null);
     }
   }
 
@@ -55,6 +79,16 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
               <div className="customer-meta">{formatDate(message.createdAt)}</div>
               <div className="message-copy">{message.messageBody}</div>
               {message.providerResponse ? <div className="customer-meta">{message.providerResponse}</div> : null}
+              {message.sendStatus === "PENDING" ? (
+                <button
+                  className="auth-button"
+                  type="button"
+                  onClick={() => handleOpenAndMark(message)}
+                  disabled={markingId === message.id}
+                >
+                  {markingId === message.id ? "Abrindo..." : "Abrir no WhatsApp"}
+                </button>
+              ) : null}
               {message.sendStatus === "FAILED" && canRetry ? (
                 <button
                   className="auth-button"

@@ -1,6 +1,9 @@
 export type ChargeMessage = {
   id: string;
   customerId: string;
+  customerName: string | null;
+  phone: string | null;
+  phoneE164: string | null;
   saleId: string | null;
   triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE" | "MANUAL";
   messageBody: string;

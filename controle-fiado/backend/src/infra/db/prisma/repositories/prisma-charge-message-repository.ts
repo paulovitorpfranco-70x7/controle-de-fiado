@@ -4,6 +4,9 @@ import type { ChargeMessageRepository } from "../../../../application/ports/char
 export class PrismaChargeMessageRepository implements ChargeMessageRepository {
   async list() {
     const messages = await prisma.whatsAppMessage.findMany({
+      include: {
+        customer: true
+      },
       orderBy: [{ createdAt: "desc" }]
     });
 
@@ -13,6 +16,9 @@ export class PrismaChargeMessageRepository implements ChargeMessageRepository {
   async listByCustomer(customerId: string) {
     const messages = await prisma.whatsAppMessage.findMany({
       where: { customerId },
+      include: {
+        customer: true
+      },
       orderBy: [{ createdAt: "desc" }]
     });
 
@@ -23,6 +29,32 @@ export class PrismaChargeMessageRepository implements ChargeMessageRepository {
     const message = await prisma.whatsAppMessage.findUnique({
       where: {
         id: messageId
+      },
+      include: {
+        customer: true
+      }
+    });
+
+    return message ? mapMessage(message) : null;
+  }
+
+  async findActiveBySaleAndTrigger(input: {
+    saleId: string;
+    triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE" | "MANUAL";
+  }) {
+    const message = await prisma.whatsAppMessage.findFirst({
+      where: {
+        saleId: input.saleId,
+        triggerType: input.triggerType,
+        sendStatus: {
+          in: ["PENDING", "SENT"]
+        }
+      },
+      include: {
+        customer: true
+      },
+      orderBy: {
+        createdAt: "desc"
       }
     });
 
@@ -39,12 +71,38 @@ export class PrismaChargeMessageRepository implements ChargeMessageRepository {
         triggerType: input.triggerType,
         sendStatus: "SENT"
       },
+      include: {
+        customer: true
+      },
       orderBy: {
         createdAt: "desc"
       }
     });
 
     return message ? mapMessage(message) : null;
+  }
+
+  async updateStatus(input: {
+    messageId: string;
+    sendStatus: "PENDING" | "SENT" | "FAILED" | "CANCELED";
+    providerResponse?: string;
+    sentAt?: Date;
+  }) {
+    const message = await prisma.whatsAppMessage.update({
+      where: {
+        id: input.messageId
+      },
+      data: {
+        sendStatus: input.sendStatus,
+        providerResponse: input.providerResponse,
+        sentAt: input.sentAt
+      },
+      include: {
+        customer: true
+      }
+    });
+
+    return mapMessage(message);
   }
 
   async create(input: {
@@ -73,6 +131,9 @@ export class PrismaChargeMessageRepository implements ChargeMessageRepository {
         scheduledFor: input.scheduledFor,
         sentAt: input.sentAt,
         createdById: input.createdById
+      },
+      include: {
+        customer: true
       }
     });
 
@@ -83,6 +144,11 @@ export class PrismaChargeMessageRepository implements ChargeMessageRepository {
 function mapMessage(message: {
   id: string;
   customerId: string;
+  customer?: {
+    name: string;
+    phone: string;
+    phoneE164: string | null;
+  };
   saleId: string | null;
   triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE" | "MANUAL";
   messageBody: string;
@@ -98,6 +164,9 @@ function mapMessage(message: {
   return {
     id: message.id,
     customerId: message.customerId,
+    customerName: message.customer?.name ?? null,
+    phone: message.customer?.phone ?? null,
+    phoneE164: message.customer?.phoneE164 ?? null,
     saleId: message.saleId,
     triggerType: message.triggerType,
     messageBody: message.messageBody,

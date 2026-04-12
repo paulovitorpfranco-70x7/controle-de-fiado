@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { sendManualCharge } from "../api/send-manual-charge";
+import { markChargeMessageSent } from "../api/mark-charge-message-sent";
+import { buildWhatsAppUrl } from "../utils/build-whatsapp-url";
 
 type ManualChargeFormProps = {
   customerId: string;
@@ -49,14 +51,23 @@ export function ManualChargeForm({
     setSuccess(null);
 
     try {
-      await sendManualCharge({
+      const message = await sendManualCharge({
         customerId,
         saleId,
         messageBody,
         createdById
       });
-      setSuccess("Cobranca enviada com sucesso.");
-      onSuccess?.("Cobranca enviada com sucesso.");
+
+      if (message.phoneE164) {
+        window.open(buildWhatsAppUrl(message.phoneE164, message.messageBody), "_blank", "noopener,noreferrer");
+      }
+
+      if (message.sendStatus === "PENDING") {
+        await markChargeMessageSent(message.id);
+      }
+
+      setSuccess("Mensagem preparada e aberta no WhatsApp.");
+      onSuccess?.("Mensagem preparada e aberta no WhatsApp.");
       await onSent();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao enviar cobranca.");
@@ -89,7 +100,7 @@ export function ManualChargeForm({
         />
 
         <button className="auth-button" type="submit" disabled={loading}>
-          {loading ? "Enviando..." : "Enviar cobranca"}
+          {loading ? "Preparando..." : "Abrir cobranca no WhatsApp"}
         </button>
 
         {success ? <div className="success-copy">{success}</div> : null}

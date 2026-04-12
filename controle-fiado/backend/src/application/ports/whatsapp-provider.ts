@@ -9,6 +9,8 @@ export type WhatsAppMessageResponse = {
   providerName?: string;
   providerMessageId?: string;
   providerResponse?: string;
+  dispatchStatus?: "PENDING" | "SENT";
+  openUrl?: string;
 };
 
 export interface WhatsAppProvider {

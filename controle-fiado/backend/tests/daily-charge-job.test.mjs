@@ -38,8 +38,11 @@ test("daily charge job skips duplicated automatic messages", async () => {
     {
       list: async () => [],
       listByCustomer: async () => [],
-      findSuccessfulBySaleAndTrigger: async ({ saleId, triggerType }) =>
+      findById: async () => null,
+      findActiveBySaleAndTrigger: async ({ saleId, triggerType }) =>
         saleId === "sale-1" && triggerType === "AUTO_3_DAYS" ? { id: "existing" } : null,
+      findSuccessfulBySaleAndTrigger: async () => null,
+      updateStatus: async (input) => input,
       create: async (input) => {
         createdMessages.push(input);
         return { id: `message-${createdMessages.length}`, ...input };
@@ -75,7 +78,10 @@ test("daily charge job audits execution summary", async () => {
     {
       list: async () => [],
       listByCustomer: async () => [],
+      findById: async () => null,
+      findActiveBySaleAndTrigger: async () => null,
       findSuccessfulBySaleAndTrigger: async () => null,
+      updateStatus: async (input) => input,
       create: async (input) => ({ id: "message-1", ...input })
     },
     {

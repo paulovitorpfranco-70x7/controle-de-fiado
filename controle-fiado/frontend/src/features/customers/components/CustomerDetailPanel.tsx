@@ -13,6 +13,18 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function getNextDueDate(customer: CustomerDetail) {
+  const activeSales = customer.sales.filter((sale) => sale.remainingAmount > 0);
+
+  if (!activeSales.length) {
+    return null;
+  }
+
+  return activeSales
+    .map((sale) => new Date(sale.dueDate))
+    .sort((left, right) => left.getTime() - right.getTime())[0];
+}
+
 type CustomerDetailPanelProps = {
   customer: CustomerDetail;
   selectedCustomerId: string;
@@ -26,6 +38,10 @@ export function CustomerDetailPanel({
   onCustomerChange,
   options
 }: CustomerDetailPanelProps) {
+  const openSalesCount = customer.sales.filter((sale) => sale.remainingAmount > 0).length;
+  const overdueSalesCount = customer.sales.filter((sale) => sale.status === "OVERDUE" && sale.remainingAmount > 0).length;
+  const nextDueDate = getNextDueDate(customer);
+
   return (
     <section className="section-block">
       <div className="customer-card">
@@ -60,6 +76,18 @@ export function CustomerDetailPanel({
             <span className="label">Telefone</span>
             <strong>{customer.phone}</strong>
           </div>
+          <div>
+            <span className="label">Titulos em aberto</span>
+            <strong>{openSalesCount}</strong>
+          </div>
+          <div>
+            <span className="label">Em atraso</span>
+            <strong>{overdueSalesCount}</strong>
+          </div>
+          <div>
+            <span className="label">Proximo vencimento</span>
+            <strong>{nextDueDate ? formatDate(nextDueDate.toISOString()) : "Sem vencimento pendente"}</strong>
+          </div>
         </div>
 
         <div className="detail-columns">
@@ -72,8 +100,9 @@ export function CustomerDetailPanel({
                   <span>{formatMoney(sale.remainingAmount)}</span>
                 </div>
                 <div className="customer-meta">
-                  {formatDate(sale.saleDate)} · vence {formatDate(sale.dueDate)} · {sale.status}
+                  {formatDate(sale.saleDate)} | vence {formatDate(sale.dueDate)} | {sale.status}
                 </div>
+                <div className={`sale-status-pill ${sale.status.toLowerCase()}`}>{sale.status}</div>
               </article>
             ))}
           </div>
@@ -87,7 +116,7 @@ export function CustomerDetailPanel({
                   <span>{payment.method}</span>
                 </div>
                 <div className="customer-meta">
-                  {formatDate(payment.paymentDate)} · {payment.allocations.length} alocacoes
+                  {formatDate(payment.paymentDate)} | {payment.allocations.length} alocacoes
                 </div>
               </article>
             ))}

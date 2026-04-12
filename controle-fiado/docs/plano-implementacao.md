@@ -10,6 +10,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - este sistema esta sendo construido para um unico usuario
 - nao ha necessidade de escala neste momento
 - para evitar custo agora, o banco padrao da fase atual sera `SQLite`
+- o modo padrao de cobranca por WhatsApp sera manual via link `wa.me`
 - a migracao para `PostgreSQL` fica adiada para quando houver necessidade real
   de hospedagem online, multiusuario ou maior robustez operacional
 
@@ -70,7 +71,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Consolidar vendas e pagamentos por cliente
 - [x] Expor detalhe do cliente com extrato real
 - [x] Exibir extrato inicial no frontend
-- [ ] Melhorar visual e navegacao da ficha do cliente para uso operacional
+- [x] Melhorar visual e navegacao da ficha do cliente para uso operacional
 
 ## Fase 3: Cobranca e WhatsApp
 

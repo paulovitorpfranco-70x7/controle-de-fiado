@@ -90,7 +90,7 @@ export class RunDailyChargeJobUseCase {
     },
     triggerType: "AUTO_3_DAYS" | "AUTO_DUE_DATE"
   ) {
-    const existing = await this.chargeMessageRepository.findSuccessfulBySaleAndTrigger({
+    const existing = await this.chargeMessageRepository.findActiveBySaleAndTrigger({
       saleId: item.saleId,
       triggerType
     });
@@ -119,11 +119,11 @@ export class RunDailyChargeJobUseCase {
         saleId: item.saleId,
         triggerType,
         messageBody,
-        sendStatus: "SENT",
+        sendStatus: providerResult?.dispatchStatus ?? "SENT",
         providerName: providerResult?.providerName ?? "mock",
         providerMessageId: providerResult?.providerMessageId,
         providerResponse: providerResult?.providerResponse ?? "Mensagem automatica enviada.",
-        sentAt: new Date()
+        sentAt: providerResult?.dispatchStatus === "PENDING" ? undefined : new Date()
       });
 
       return "sent" as const;

@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { GetDailyChargeJobMonitorUseCase } from "../../../../application/charges/use-cases/get-daily-charge-job-monitor.js";
 import type { ListChargeMessagesUseCase } from "../../../../application/charges/use-cases/list-charge-messages.js";
 import type { ListChargeOverviewUseCase } from "../../../../application/charges/use-cases/list-charge-overview.js";
+import type { MarkChargeMessageSentUseCase } from "../../../../application/charges/use-cases/mark-charge-message-sent.js";
 import type { RetryFailedChargeUseCase } from "../../../../application/charges/use-cases/retry-failed-charge.js";
 import type { RunDailyChargeJobUseCase } from "../../../../application/charges/use-cases/run-daily-charge-job.js";
 import type { SendManualChargeUseCase } from "../../../../application/charges/use-cases/send-manual-charge.js";
@@ -11,6 +12,7 @@ type ChargeControllerDeps = {
   listChargeOverviewUseCase: ListChargeOverviewUseCase;
   listChargeMessagesUseCase: ListChargeMessagesUseCase;
   sendManualChargeUseCase: SendManualChargeUseCase;
+  markChargeMessageSentUseCase: MarkChargeMessageSentUseCase;
   retryFailedChargeUseCase: RetryFailedChargeUseCase;
   runDailyChargeJobUseCase: RunDailyChargeJobUseCase;
   getDailyChargeJobMonitorUseCase: GetDailyChargeJobMonitorUseCase;
@@ -38,6 +40,15 @@ export function createChargeController(deps: ChargeControllerDeps) {
         createdById: request.authUser?.id ?? ""
       });
       return reply.code(201).send(result);
+    },
+
+    markSent: async (request: FastifyRequest, reply: FastifyReply) => {
+      const params = request.params as { id: string };
+      const result = await deps.markChargeMessageSentUseCase.execute({
+        messageId: params.id,
+        actorUserId: request.authUser?.id ?? ""
+      });
+      return reply.send(result);
     },
 
     runDailyJob: async (_request: FastifyRequest, reply: FastifyReply) => {

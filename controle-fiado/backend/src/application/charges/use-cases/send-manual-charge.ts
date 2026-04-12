@@ -43,11 +43,11 @@ export class SendManualChargeUseCase {
         saleId: context.saleId,
         triggerType: "MANUAL",
         messageBody,
-        sendStatus: "SENT",
+        sendStatus: providerResult?.dispatchStatus ?? "SENT",
         providerName: providerResult?.providerName ?? "mock",
         providerMessageId: providerResult?.providerMessageId,
         providerResponse: providerResult?.providerResponse ?? "Mensagem enviada.",
-        sentAt: new Date(),
+        sentAt: providerResult?.dispatchStatus === "PENDING" ? undefined : new Date(),
         createdById: input.createdById
       });
 

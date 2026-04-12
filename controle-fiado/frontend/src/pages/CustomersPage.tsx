@@ -312,7 +312,13 @@ export function CustomersPage() {
               />
             ) : null}
 
-            {chargeOverview ? <ChargeOverviewPanel overview={chargeOverview} /> : null}
+            {chargeOverview ? (
+              <ChargeOverviewPanel
+                overview={chargeOverview}
+                selectedCustomerId={selectedCustomerId}
+                onSelectCustomer={setSelectedCustomerId}
+              />
+            ) : null}
             {chargeMessages.length ? (
               <ChargeMessageList
                 messages={chargeMessages}

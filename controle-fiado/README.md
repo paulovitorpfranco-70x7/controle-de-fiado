@@ -49,8 +49,15 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 - `AUTH_TTL_SECONDS` controla a expiracao do token em segundos
 - `ENABLE_DAILY_CHARGE_SCHEDULER=true` liga o scheduler diario local
 - `DAILY_CHARGE_SCHEDULE_TIME="09:00"` define o horario diario do job
+- `WHATSAPP_PROVIDER="wa_link"` usa o fluxo manual com link do WhatsApp como padrao
 - `WHATSAPP_PROVIDER="meta_cloud"` ativa a integracao real com a Meta Cloud API
 - configurar `META_WHATSAPP_ACCESS_TOKEN` e `META_WHATSAPP_PHONE_NUMBER_ID` para envio real
+
+## Estrategia de WhatsApp atual
+
+- modo padrao do projeto: `wa_link`
+- o sistema prepara a mensagem, gera o link `wa.me` e o operador envia manualmente no WhatsApp
+- isso reduz custo e risco operacional para o cenario atual de um unico usuario
 
 ## Observacao
 
