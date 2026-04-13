@@ -6,6 +6,8 @@ import { buildWhatsAppUrl } from "../utils/build-whatsapp-url";
 type ManualChargeFormProps = {
   customerId: string;
   customerName: string;
+  customerPhone?: string | null;
+  customerPhoneE164?: string | null;
   saleId?: string;
   openBalance: number;
   createdById: string;
@@ -27,6 +29,8 @@ function buildDefaultMessage(customerName: string, openBalance: number) {
 export function ManualChargeForm({
   customerId,
   customerName,
+  customerPhone,
+  customerPhoneE164,
   saleId,
   openBalance,
   createdById,
@@ -37,6 +41,8 @@ export function ManualChargeForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const hasWhatsAppTarget = Boolean(customerPhoneE164);
+  const whatsappUrl = customerPhoneE164 ? buildWhatsAppUrl(customerPhoneE164, messageBody) : null;
 
   useEffect(() => {
     setMessageBody(buildDefaultMessage(customerName, openBalance));
@@ -59,15 +65,15 @@ export function ManualChargeForm({
       });
 
       if (message.phoneE164) {
-        window.open(buildWhatsAppUrl(message.phoneE164, message.messageBody), "_blank", "noopener,noreferrer");
+        setMessageBody(message.messageBody);
       }
 
       if (message.sendStatus === "PENDING") {
         await markChargeMessageSent(message.id);
       }
 
-      setSuccess("Mensagem preparada e aberta no WhatsApp.");
-      onSuccess?.("Mensagem preparada e aberta no WhatsApp.");
+      setSuccess("Mensagem preparada com sucesso. Use o botao abaixo para abrir no WhatsApp.");
+      onSuccess?.("Mensagem preparada com sucesso.");
       await onSent();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao enviar cobranca.");
@@ -88,6 +94,10 @@ export function ManualChargeForm({
 
         <div className="customer-meta">Cliente selecionado: {customerName}</div>
         <div className="customer-meta">Saldo atual: {formatMoney(openBalance)}</div>
+        <div className="customer-meta">WhatsApp: {customerPhoneE164 ?? customerPhone ?? "Nao informado"}</div>
+        {!hasWhatsAppTarget ? (
+          <div className="error-copy">Cliente sem telefone valido para abrir o WhatsApp. Ajuste o telefone antes de cobrar.</div>
+        ) : null}
 
         <label className="eyebrow" htmlFor="manual-charge-message">
           Preview da mensagem
@@ -99,9 +109,14 @@ export function ManualChargeForm({
           onChange={(event) => setMessageBody(event.target.value)}
         />
 
-        <button className="auth-button" type="submit" disabled={loading}>
-          {loading ? "Preparando..." : "Abrir cobranca no WhatsApp"}
+        <button className="auth-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
+          {loading ? "Preparando..." : "Preparar cobranca"}
         </button>
+        {whatsappUrl ? (
+          <a className="auth-button inline-link-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+            Abrir no WhatsApp
+          </a>
+        ) : null}
 
         {success ? <div className="success-copy">{success}</div> : null}
         {error ? <div className="error-copy">{error}</div> : null}

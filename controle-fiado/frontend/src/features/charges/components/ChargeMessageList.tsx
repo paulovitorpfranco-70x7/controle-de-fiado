@@ -48,9 +48,8 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
     setError(null);
 
     try {
-      window.open(buildWhatsAppUrl(message.phoneE164, message.messageBody), "_blank", "noopener,noreferrer");
       await markChargeMessageSent(message.id);
-      onRetried?.("Mensagem aberta no WhatsApp e marcada como enviada.");
+      onRetried?.("Mensagem marcada como enviada.");
       await onCompleted();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao abrir a mensagem no WhatsApp.");
@@ -80,14 +79,19 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
               <div className="message-copy">{message.messageBody}</div>
               {message.providerResponse ? <div className="customer-meta">{message.providerResponse}</div> : null}
               {message.sendStatus === "PENDING" ? (
-                <button
-                  className="auth-button"
-                  type="button"
-                  onClick={() => handleOpenAndMark(message)}
-                  disabled={markingId === message.id}
-                >
-                  {markingId === message.id ? "Abrindo..." : "Abrir no WhatsApp"}
-                </button>
+                <div className="queue-actions">
+                  <a className="auth-button inline-link-button" href={buildWhatsAppUrl(message.phoneE164!, message.messageBody)} target="_blank" rel="noreferrer">
+                    Abrir no WhatsApp
+                  </a>
+                  <button
+                    className="ghost-button"
+                    type="button"
+                    onClick={() => handleOpenAndMark(message)}
+                    disabled={markingId === message.id}
+                  >
+                    {markingId === message.id ? "Marcando..." : "Marcar como enviada"}
+                  </button>
+                </div>
               ) : null}
               {message.sendStatus === "FAILED" && canRetry ? (
                 <button

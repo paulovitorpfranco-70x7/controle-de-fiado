@@ -1,4 +1,5 @@
 import { supabase } from "../../../shared/supabase/client";
+import { normalizeBrazilPhoneToE164 } from "../../../shared/utils/phone";
 import type { ChargeMessage } from "../types/charge-message";
 import type { ChargeOverview, ChargeOverviewItem } from "../types/charge-overview";
 import type { DailyChargeJobMonitor } from "../types/daily-charge-job-monitor";
@@ -308,7 +309,7 @@ function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
     customerId: customer?.id ?? sale.customer_id,
     customerName: customer?.name ?? "Cliente",
     phone: customer?.phone ?? "",
-    phoneE164: customer?.phone_e164 ?? null,
+    phoneE164: customer?.phone_e164 ?? normalizeBrazilPhoneToE164(customer?.phone),
     saleId: sale.id,
     dueDate: sale.due_date,
     remainingAmount: sale.remaining_amount_cents / 100,
@@ -324,7 +325,7 @@ function mapMessageRow(message: MessageRow): ChargeMessage {
     customerId: message.customer_id,
     customerName: customer?.name ?? null,
     phone: customer?.phone ?? null,
-    phoneE164: customer?.phone_e164 ?? null,
+    phoneE164: customer?.phone_e164 ?? normalizeBrazilPhoneToE164(customer?.phone),
     saleId: message.sale_id,
     triggerType: message.trigger_type,
     messageBody: message.message_body,

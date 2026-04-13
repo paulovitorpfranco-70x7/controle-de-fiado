@@ -30,13 +30,15 @@ type CustomerDetailPanelProps = {
   selectedCustomerId: string;
   onCustomerChange: (customerId: string) => void;
   options: Array<{ id: string; name: string }>;
+  canViewPayments?: boolean;
 };
 
 export function CustomerDetailPanel({
   customer,
   selectedCustomerId,
   onCustomerChange,
-  options
+  options,
+  canViewPayments = true
 }: CustomerDetailPanelProps) {
   const openSalesCount = customer.sales.filter((sale) => sale.remainingAmount > 0).length;
   const overdueSalesCount = customer.sales.filter((sale) => sale.status === "OVERDUE" && sale.remainingAmount > 0).length;
@@ -125,30 +127,39 @@ export function CustomerDetailPanel({
             })}
           </div>
 
-          <div className="detail-column">
-            <div className="eyebrow">Pagamentos</div>
-            {customer.payments.map((payment) => (
-              <article key={payment.id} className="statement-item">
-                <div className="statement-main">
-                  <strong>{formatMoney(payment.amount)}</strong>
-                  <span>{payment.method}</span>
-                </div>
-                <div className="customer-meta">
-                  {formatDate(payment.paymentDate)} | {payment.allocations.length} alocacoes
-                </div>
-                {payment.allocations.length ? (
-                  <div className="allocation-list">
-                    {payment.allocations.map((allocation) => (
-                      <div key={`${payment.id}-${allocation.saleId}`} className="allocation-item">
-                        <span className="label">Venda {allocation.saleId.slice(0, 8)}</span>
-                        <strong>{formatMoney(allocation.amount)}</strong>
-                      </div>
-                    ))}
+          {canViewPayments ? (
+            <div className="detail-column">
+              <div className="eyebrow">Pagamentos</div>
+              {customer.payments.map((payment) => (
+                <article key={payment.id} className="statement-item">
+                  <div className="statement-main">
+                    <strong>{formatMoney(payment.amount)}</strong>
+                    <span>{payment.method}</span>
                   </div>
-                ) : null}
+                  <div className="customer-meta">
+                    {formatDate(payment.paymentDate)} | {payment.allocations.length} alocacoes
+                  </div>
+                  {payment.allocations.length ? (
+                    <div className="allocation-list">
+                      {payment.allocations.map((allocation) => (
+                        <div key={`${payment.id}-${allocation.saleId}`} className="allocation-item">
+                          <span className="label">Venda {allocation.saleId.slice(0, 8)}</span>
+                          <strong>{formatMoney(allocation.amount)}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="detail-column">
+              <div className="eyebrow">Pagamentos</div>
+              <article className="statement-item">
+                <div className="customer-meta">Visualizacao de pagamentos restrita ao perfil OWNER.</div>
               </article>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

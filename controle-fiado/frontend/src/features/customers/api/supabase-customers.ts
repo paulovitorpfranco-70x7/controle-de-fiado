@@ -1,4 +1,5 @@
 import { supabase } from "../../../shared/supabase/client";
+import { normalizeBrazilPhoneToE164 } from "../../../shared/utils/phone";
 import type { Customer } from "../types/customer";
 import type { CustomerDetail } from "../types/customer-detail";
 import type { CreateCustomerPayload } from "./create-customer";
@@ -76,7 +77,7 @@ export async function createSupabaseCustomer(payload: CreateCustomerPayload): Pr
     .insert({
       name: payload.name,
       phone: payload.phone,
-      phone_e164: toPhoneE164(payload.phone),
+      phone_e164: normalizeBrazilPhoneToE164(payload.phone),
       address: payload.address || null,
       credit_limit_cents: payload.creditLimit !== undefined ? Math.round(payload.creditLimit * 100) : null,
       notes: payload.notes || null
@@ -92,7 +93,7 @@ export async function createSupabaseCustomer(payload: CreateCustomerPayload): Pr
     id: data.id,
     name: data.name,
     phone: data.phone,
-    phoneE164: data.phone_e164,
+    phoneE164: data.phone_e164 ?? normalizeBrazilPhoneToE164(data.phone),
     address: data.address,
     creditLimit: toMoney(data.credit_limit_cents),
     notes: data.notes,
@@ -129,7 +130,7 @@ function mapCustomerRow(customer: CustomerRow): Customer {
     id: customer.id,
     name: customer.name,
     phone: customer.phone,
-    phoneE164: customer.phone_e164,
+    phoneE164: customer.phone_e164 ?? normalizeBrazilPhoneToE164(customer.phone),
     address: customer.address,
     creditLimit: toMoney(customer.credit_limit_cents),
     notes: customer.notes,
@@ -182,7 +183,7 @@ function mapCustomerDetailRow(customer: CustomerDetailRow): CustomerDetail {
     id: customer.id,
     name: customer.name,
     phone: customer.phone,
-    phoneE164: customer.phone_e164,
+    phoneE164: customer.phone_e164 ?? normalizeBrazilPhoneToE164(customer.phone),
     address: customer.address,
     creditLimit: toMoney(customer.credit_limit_cents),
     notes: customer.notes,
@@ -198,14 +199,6 @@ function mapCustomerDetailRow(customer: CustomerDetailRow): CustomerDetail {
 
 function toMoney(value: number | null) {
   return value === null ? null : value / 100;
-}
-
-function toPhoneE164(phone: string) {
-  const digits = phone.replace(/\D/g, "");
-
-  if (!digits) return null;
-  if (digits.startsWith("55")) return `+${digits}`;
-  return `+55${digits}`;
 }
 
 function ensureSupabase() {

@@ -223,6 +223,12 @@ select.customer-selector:focus,
   cursor: pointer;
 }
 
+.inline-link-button {
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .error-copy {
   color: #fecaca;
   font-size: 0.92rem;

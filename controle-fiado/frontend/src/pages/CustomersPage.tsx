@@ -56,19 +56,30 @@ export function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
+  const isOwner = authUser?.role === "OWNER";
 
   async function refreshOperationalData(customerId: string) {
+    const customerDataPromise = fetchCustomers();
+    const detailDataPromise = fetchCustomerDetail(customerId);
+    const salesDataPromise = fetchSales();
+    const dashboardDataPromise = isOwner ? fetchDashboardSummary() : Promise.resolve(null);
+    const paymentDataPromise = isOwner ? fetchPayments() : Promise.resolve([]);
+    const overviewDataPromise = isOwner ? fetchChargeOverview() : Promise.resolve(null);
+    const messageDataPromise = isOwner ? fetchChargeMessages(customerId) : Promise.resolve([]);
+    const jobMonitorDataPromise = isOwner ? fetchDailyChargeJobMonitor() : Promise.resolve(null);
+    const systemStatusDataPromise = isOwner ? fetchSystemStatus() : Promise.resolve(null);
+
     const [customerData, dashboardData, salesData, paymentData, overviewData, detailData, messageData, jobMonitorData, systemStatusData] =
       await Promise.all([
-        fetchCustomers(),
-        fetchDashboardSummary(),
-        fetchSales(),
-        fetchPayments(),
-        fetchChargeOverview(),
-        fetchCustomerDetail(customerId),
-        fetchChargeMessages(customerId),
-        fetchDailyChargeJobMonitor(),
-        fetchSystemStatus()
+        customerDataPromise,
+        dashboardDataPromise,
+        salesDataPromise,
+        paymentDataPromise,
+        overviewDataPromise,
+        detailDataPromise,
+        messageDataPromise,
+        jobMonitorDataPromise,
+        systemStatusDataPromise
       ]);
 
     setCustomers(customerData);
@@ -83,6 +94,10 @@ export function CustomersPage() {
   }
 
   async function refreshChargeData(customerId: string) {
+    if (!isOwner) {
+      return;
+    }
+
     const [overviewData, messageData, jobMonitorData] = await Promise.all([
       fetchChargeOverview(),
       fetchChargeMessages(customerId),
@@ -143,12 +158,12 @@ export function CustomersPage() {
     setLoading(true);
     Promise.all([
       fetchCustomers(),
-      fetchDashboardSummary(),
+      isOwner ? fetchDashboardSummary() : Promise.resolve(null),
       fetchSales(),
-      fetchPayments(),
-      fetchChargeOverview(),
-      fetchDailyChargeJobMonitor(),
-      fetchSystemStatus()
+      isOwner ? fetchPayments() : Promise.resolve([]),
+      isOwner ? fetchChargeOverview() : Promise.resolve(null),
+      isOwner ? fetchDailyChargeJobMonitor() : Promise.resolve(null),
+      isOwner ? fetchSystemStatus() : Promise.resolve(null)
     ])
       .then(([customerData, dashboardData, salesData, paymentData, overviewData, jobMonitorData, systemStatusData]) => {
         setCustomers(customerData);
@@ -173,7 +188,7 @@ export function CustomersPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [authUser]);
+  }, [authUser, isOwner]);
 
   useEffect(() => {
     if (!selectedCustomerId) {
@@ -192,6 +207,11 @@ export function CustomersPage() {
         setNotice({ tone: "error", message: err.message });
       });
 
+    if (!isOwner) {
+      setChargeMessages([]);
+      return;
+    }
+
     fetchChargeMessages(selectedCustomerId)
       .then((data) => {
         setChargeMessages(data.slice(0, 5));
@@ -203,7 +223,7 @@ export function CustomersPage() {
         setError(err.message);
         setNotice({ tone: "error", message: err.message });
       });
-  }, [selectedCustomerId]);
+  }, [selectedCustomerId, isOwner]);
 
   return (
     <div className="page-shell">
@@ -250,6 +270,11 @@ export function CustomersPage() {
             {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
             {systemStatus ? <SystemStatusPanel status={systemStatus} /> : null}
             {chargeOverview ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
+            {!isOwner ? (
+              <div className="empty-card">
+                Voce esta no perfil STAFF. Clientes e vendas estao liberados; pagamentos, cobrancas e controles administrativos ficam com o OWNER.
+              </div>
+            ) : null}
             {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
 
             <section className="section-block">
@@ -275,6 +300,7 @@ export function CustomersPage() {
                 customer={customerDetail}
                 selectedCustomerId={selectedCustomerId}
                 onCustomerChange={setSelectedCustomerId}
+                canViewPayments={isOwner}
                 options={customers.map((customer) => ({
                   id: customer.id,
                   name: customer.name
@@ -292,19 +318,26 @@ export function CustomersPage() {
                     await refreshOperationalData(selectedCustomerId);
                   }}
                 />
-                <CreatePaymentForm
-                  customerId={selectedCustomerId}
-                  createdById={authUser.id}
-                  openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
-                  onSuccess={(message) => setNotice({ tone: "success", message })}
-                  onCreated={async () => {
-                    await refreshOperationalData(selectedCustomerId);
-                  }}
-                />
+                {isOwner ? (
+                  <CreatePaymentForm
+                    customerId={selectedCustomerId}
+                    createdById={authUser.id}
+                    openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
+                    onSuccess={(message) => setNotice({ tone: "success", message })}
+                    onCreated={async () => {
+                      await refreshOperationalData(selectedCustomerId);
+                    }}
+                  />
+                ) : (
+                  <div className="operation-form">
+                    <div className="eyebrow">Pagamentos</div>
+                    <div className="customer-meta">Somente o perfil OWNER pode registrar pagamentos.</div>
+                  </div>
+                )}
               </section>
             ) : null}
 
-            {selectedCustomerId ? (
+            {selectedCustomerId && isOwner ? (
               <ChargeAutomationPanel
                 canRun={authUser.role === "OWNER"}
                 monitor={dailyChargeJobMonitor}
@@ -315,10 +348,12 @@ export function CustomersPage() {
               />
             ) : null}
 
-            {authUser && customerDetail ? (
+            {authUser && customerDetail && isOwner ? (
               <ManualChargeForm
                 customerId={customerDetail.id}
                 customerName={customerDetail.name}
+                customerPhone={customerDetail.phone}
+                customerPhoneE164={customerDetail.phoneE164}
                 saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
                 openBalance={customerDetail.openBalance}
                 createdById={authUser.id}
@@ -329,17 +364,17 @@ export function CustomersPage() {
               />
             ) : null}
 
-            {chargeOverview ? (
+            {chargeOverview && isOwner ? (
               <ChargeOverviewPanel
                 overview={chargeOverview}
                 selectedCustomerId={selectedCustomerId}
                 onSelectCustomer={setSelectedCustomerId}
               />
             ) : null}
-            {chargeMessages.length ? (
+            {chargeMessages.length && isOwner ? (
               <ChargeMessageList
                 messages={chargeMessages}
-                canRetry={authUser.role === "OWNER" || authUser.role === "STAFF"}
+                canRetry={authUser.role === "OWNER"}
                 onRetried={(message) => setNotice({ tone: "success", message })}
                 onCompleted={async () => {
                   await refreshOperationalData(selectedCustomerId);
@@ -357,15 +392,17 @@ export function CustomersPage() {
               <RecentSalesList sales={sales} />
             </section>
 
-            <section className="section-block">
-              <div className="page-header page-header-section">
-                <div>
-                  <div className="eyebrow">Pagamentos</div>
-                  <h2>Ultimos pagamentos</h2>
+            {isOwner ? (
+              <section className="section-block">
+                <div className="page-header page-header-section">
+                  <div>
+                    <div className="eyebrow">Pagamentos</div>
+                    <h2>Ultimos pagamentos</h2>
+                  </div>
                 </div>
-              </div>
-              <RecentPaymentsList payments={payments} />
-            </section>
+                <RecentPaymentsList payments={payments} />
+              </section>
+            ) : null}
           </>
         ) : null}
       </main>
