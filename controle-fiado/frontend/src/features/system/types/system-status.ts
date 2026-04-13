@@ -7,7 +7,7 @@ export type SystemStatus = {
     ttlSeconds: number;
   };
   database: {
-    provider: "sqlite";
+    provider: "sqlite" | "supabase";
   };
   integrations: {
     whatsappProvider: string;

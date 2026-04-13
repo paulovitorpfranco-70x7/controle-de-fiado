@@ -11,7 +11,7 @@ export function SystemStatusPanel({ status }: SystemStatusPanelProps) {
         <div className="page-header page-header-section">
           <div>
             <div className="eyebrow">Operacao</div>
-            <h2>Status do backend</h2>
+            <h2>Status do ambiente</h2>
           </div>
         </div>
 
@@ -58,7 +58,7 @@ export function SystemStatusPanel({ status }: SystemStatusPanelProps) {
           </div>
           <div>
             <span className="label">TTL do token</span>
-            <strong>{formatTtl(status.auth.ttlSeconds)}</strong>
+            <strong>{status.auth.ttlSeconds > 0 ? formatTtl(status.auth.ttlSeconds) : "Gerenciado"}</strong>
           </div>
           <div>
             <span className="label">Log level</span>

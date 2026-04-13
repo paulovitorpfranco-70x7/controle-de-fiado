@@ -34,9 +34,13 @@ import type { Sale } from "../features/sales/types/sale";
 import { fetchSystemStatus } from "../features/system/api/fetch-system-status";
 import { SystemStatusPanel } from "../features/system/components/SystemStatusPanel";
 import type { SystemStatus } from "../features/system/types/system-status";
+import { getAuthMode } from "../shared/config/auth";
+import { getDataMode } from "../shared/config/data";
 import { OperationNotice } from "../shared/components/OperationNotice";
 
 export function CustomersPage() {
+  const authMode = getAuthMode();
+  const dataMode = getDataMode();
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(null);
@@ -225,11 +229,13 @@ export function CustomersPage() {
         <header className="page-header">
           <div>
             <div className="eyebrow">Clientes</div>
-            <h2>Base inicial conectada com API</h2>
+            <h2>{dataMode === "supabase" ? "Base web conectada ao Supabase" : "Base inicial conectada com API"}</h2>
           </div>
           <div className="status-card">
             <span className="status-dot" />
-            Backend esperado em `http://127.0.0.1:3333`
+            {dataMode === "supabase"
+              ? `Auth ${authMode} | Dados ${dataMode}`
+              : "Backend esperado em `http://127.0.0.1:3333`"}
           </div>
         </header>
 
