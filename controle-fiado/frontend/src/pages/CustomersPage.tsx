@@ -18,6 +18,7 @@ import { DashboardSummaryPanel } from "../features/dashboard/components/Dashboar
 import type { DashboardSummary } from "../features/dashboard/types/dashboard-summary";
 import { fetchCustomerDetail } from "../features/customers/api/fetch-customer-detail";
 import { CurrentCustomerBar } from "../features/customers/components/CurrentCustomerBar";
+import { CreateCustomerForm } from "../features/customers/components/CreateCustomerForm";
 import { CustomerDetailPanel } from "../features/customers/components/CustomerDetailPanel";
 import { fetchCustomers } from "../features/customers/api/fetch-customers";
 import { CustomerList } from "../features/customers/components/CustomerList";
@@ -258,6 +259,14 @@ export function CustomersPage() {
                   <h2>Base operacional inicial</h2>
                 </div>
               </div>
+              <CreateCustomerForm
+                onSuccess={(message) => setNotice({ tone: "success", message })}
+                onCreated={async (customer) => {
+                  await refreshOperationalData(customer.id);
+                  setSelectedCustomerId(customer.id);
+                }}
+              />
+              <div style={{ height: 16 }} />
               <CustomerList customers={customers} />
             </section>
 

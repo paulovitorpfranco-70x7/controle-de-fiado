@@ -50,31 +50,51 @@ export function CreateSaleForm({ customerId, createdById, onCreated, onSuccess }
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
       <div className="eyebrow">Nova venda</div>
-      <input className="customer-selector" value={description} onChange={(event) => setDescription(event.target.value)} />
+      <label className="field-block">
+        <span className="label">Descricao</span>
+        <input
+          className="customer-selector"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Descricao da venda"
+        />
+      </label>
       <div className="form-grid">
-        <input
-          className="customer-selector"
-          type="number"
-          min="0.01"
-          step="0.01"
-          value={originalAmount}
-          onChange={(event) => setOriginalAmount(event.target.value)}
-          placeholder="Valor"
-        />
-        <input
-          className="customer-selector"
-          type="number"
-          min="0"
-          max="100"
-          step="0.01"
-          value={feePercent}
-          onChange={(event) => setFeePercent(event.target.value)}
-          placeholder="% acrescimo"
-        />
+        <label className="field-block">
+          <span className="label">Valor da venda</span>
+          <input
+            className="customer-selector"
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={originalAmount}
+            onChange={(event) => setOriginalAmount(event.target.value)}
+            placeholder="Ex: 50,00"
+          />
+        </label>
+        <label className="field-block">
+          <span className="label">% de acrescimo</span>
+          <input
+            className="customer-selector"
+            type="number"
+            min="0"
+            max="100"
+            step="0.01"
+            value={feePercent}
+            onChange={(event) => setFeePercent(event.target.value)}
+            placeholder="Ex: 10"
+          />
+        </label>
       </div>
       <div className="form-grid">
-        <input className="customer-selector" type="date" value={saleDate} onChange={(event) => setSaleDate(event.target.value)} />
-        <input className="customer-selector" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
+        <label className="field-block">
+          <span className="label">Data da venda</span>
+          <input className="customer-selector" type="date" value={saleDate} onChange={(event) => setSaleDate(event.target.value)} />
+        </label>
+        <label className="field-block">
+          <span className="label">Data de vencimento</span>
+          <input className="customer-selector" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
+        </label>
       </div>
       <button className="auth-button" type="submit" disabled={loading}>
         {loading ? "Salvando..." : "Registrar venda"}

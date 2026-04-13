@@ -1,6 +1,7 @@
 import { supabase } from "../../../shared/supabase/client";
 import type { Customer } from "../types/customer";
 import type { CustomerDetail } from "../types/customer-detail";
+import type { CreateCustomerPayload } from "./create-customer";
 
 type CustomerBaseRow = {
   id: string;
@@ -65,6 +66,40 @@ export async function fetchSupabaseCustomers(): Promise<Customer[]> {
   }
 
   return ((data ?? []) as CustomerRow[]).map(mapCustomerRow);
+}
+
+export async function createSupabaseCustomer(payload: CreateCustomerPayload): Promise<Customer> {
+  ensureSupabase();
+
+  const { data, error } = await supabase!
+    .from("customers")
+    .insert({
+      name: payload.name,
+      phone: payload.phone,
+      phone_e164: toPhoneE164(payload.phone),
+      address: payload.address || null,
+      credit_limit_cents: payload.creditLimit !== undefined ? Math.round(payload.creditLimit * 100) : null,
+      notes: payload.notes || null
+    })
+    .select("id, name, phone, phone_e164, address, credit_limit_cents, notes, is_active, created_at")
+    .single();
+
+  if (error) {
+    throw new Error(error.message || "Falha ao criar cliente no Supabase.");
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    phone: data.phone,
+    phoneE164: data.phone_e164,
+    address: data.address,
+    creditLimit: toMoney(data.credit_limit_cents),
+    notes: data.notes,
+    isActive: data.is_active,
+    openBalance: 0,
+    createdAt: data.created_at
+  };
 }
 
 export async function fetchSupabaseCustomerDetail(customerId: string): Promise<CustomerDetail> {
@@ -163,6 +198,14 @@ function mapCustomerDetailRow(customer: CustomerDetailRow): CustomerDetail {
 
 function toMoney(value: number | null) {
   return value === null ? null : value / 100;
+}
+
+function toPhoneE164(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+
+  if (!digits) return null;
+  if (digits.startsWith("55")) return `+${digits}`;
+  return `+55${digits}`;
 }
 
 function ensureSupabase() {
