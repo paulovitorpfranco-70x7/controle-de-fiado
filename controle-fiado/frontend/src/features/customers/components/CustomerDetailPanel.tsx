@@ -93,18 +93,36 @@ export function CustomerDetailPanel({
         <div className="detail-columns">
           <div className="detail-column">
             <div className="eyebrow">Vendas</div>
-            {customer.sales.map((sale) => (
-              <article key={sale.id} className="statement-item">
-                <div className="statement-main">
-                  <strong>{sale.description}</strong>
-                  <span>{formatMoney(sale.remainingAmount)}</span>
-                </div>
-                <div className="customer-meta">
-                  {formatDate(sale.saleDate)} | vence {formatDate(sale.dueDate)} | {sale.status}
-                </div>
-                <div className={`sale-status-pill ${sale.status.toLowerCase()}`}>{sale.status}</div>
-              </article>
-            ))}
+            {customer.sales.map((sale) => {
+              const paidAmount = Math.max(sale.finalAmount - sale.remainingAmount, 0);
+
+              return (
+                <article key={sale.id} className="statement-item">
+                  <div className="statement-main">
+                    <strong>{sale.description}</strong>
+                    <span>{formatMoney(sale.finalAmount)}</span>
+                  </div>
+                  <div className="customer-meta">
+                    {formatDate(sale.saleDate)} | vence {formatDate(sale.dueDate)} | {sale.status}
+                  </div>
+                  <div className="statement-breakdown">
+                    <div>
+                      <span className="label">Valor total</span>
+                      <strong>{formatMoney(sale.finalAmount)}</strong>
+                    </div>
+                    <div>
+                      <span className="label">Pago</span>
+                      <strong>{formatMoney(paidAmount)}</strong>
+                    </div>
+                    <div>
+                      <span className="label">Em aberto</span>
+                      <strong>{formatMoney(sale.remainingAmount)}</strong>
+                    </div>
+                  </div>
+                  <div className={`sale-status-pill ${sale.status.toLowerCase()}`}>{sale.status}</div>
+                </article>
+              );
+            })}
           </div>
 
           <div className="detail-column">
@@ -118,6 +136,16 @@ export function CustomerDetailPanel({
                 <div className="customer-meta">
                   {formatDate(payment.paymentDate)} | {payment.allocations.length} alocacoes
                 </div>
+                {payment.allocations.length ? (
+                  <div className="allocation-list">
+                    {payment.allocations.map((allocation) => (
+                      <div key={`${payment.id}-${allocation.saleId}`} className="allocation-item">
+                        <span className="label">Venda {allocation.saleId.slice(0, 8)}</span>
+                        <strong>{formatMoney(allocation.amount)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </article>
             ))}
           </div>

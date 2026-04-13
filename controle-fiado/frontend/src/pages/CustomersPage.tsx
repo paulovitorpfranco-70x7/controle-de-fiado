@@ -295,6 +295,7 @@ export function CustomersPage() {
                 <CreatePaymentForm
                   customerId={selectedCustomerId}
                   createdById={authUser.id}
+                  openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
                   onSuccess={(message) => setNotice({ tone: "success", message })}
                   onCreated={async () => {
                     await refreshOperationalData(selectedCustomerId);

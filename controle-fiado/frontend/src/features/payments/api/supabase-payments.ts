@@ -28,6 +28,7 @@ export type CreateSupabasePaymentPayload = {
   method: "CASH" | "PIX" | "CARD";
   notes?: string;
   createdById: string;
+  targetSaleId?: string | null;
 };
 
 export async function fetchSupabasePayments() {
@@ -54,7 +55,8 @@ export async function createSupabasePayment(payload: CreateSupabasePaymentPayloa
     p_amount_cents: toCents(payload.amount),
     p_payment_date: parseLocalDateInput(payload.paymentDate).toISOString(),
     p_method: payload.method,
-    p_notes: payload.notes ?? null
+    p_notes: payload.notes ?? null,
+    p_target_sale_id: payload.targetSaleId ?? null
   });
 
   if (error) {

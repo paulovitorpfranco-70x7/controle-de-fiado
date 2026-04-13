@@ -115,12 +115,57 @@ body {
   margin-bottom: 8px;
 }
 
+.statement-breakdown {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.statement-breakdown strong,
+.allocation-item strong {
+  display: block;
+  margin-top: 6px;
+}
+
+.allocation-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.allocation-item {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .customer-selector {
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: #f5f5f5;
   padding: 10px 14px;
+}
+
+select.customer-selector {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #f5f5f5;
+}
+
+select.customer-selector option {
+  background: #151515;
+  color: #f5f5f5;
+}
+
+select.customer-selector:focus,
+.customer-selector:focus {
+  outline: 1px solid rgba(249, 115, 22, 0.45);
+  border-color: rgba(249, 115, 22, 0.45);
 }
 
 .message-copy {
@@ -432,6 +477,7 @@ body {
   .customer-main,
   .customer-grid,
   .queue-summary-grid,
+  .statement-breakdown,
   .detail-columns,
   .operation-grid,
   .form-grid {

@@ -39,7 +39,8 @@ Assim:
 
 A RPC segue a mesma logica da base atual:
 
-- debitos mais antigos primeiro
+- se o operador escolher um titulo, ele e abatido primeiro
+- sem escolha manual, debitos mais antigos primeiro
 - alocacao ate acabar o valor pago
 - venda quitada vira `PAID`
 - venda parcialmente abatida vira `PARTIAL`
@@ -55,15 +56,29 @@ Entradas:
 - `p_payment_date`
 - `p_method`
 - `p_notes`
+- `p_target_sale_id` opcional
 
 Saida:
 
 - `payment_id`
 - `customer_id`
 - `amount_cents`
+- `target_sale_id`
 - `allocated_amount_cents`
 - `unallocated_amount_cents`
 - `allocations`
+
+## Regra de direcionamento manual
+
+Quando `p_target_sale_id` for informado:
+
+- a RPC valida se o titulo pertence ao cliente e esta em aberto
+- o pagamento abate esse titulo primeiro
+- se sobrar valor, o restante segue no rateio automatico das outras vendas
+
+Quando `p_target_sale_id` nao for informado:
+
+- tudo continua no modelo automatico por ordem de antiguidade
 
 ## Regra de permissao
 
@@ -92,9 +107,10 @@ Opcoes futuras:
 ## Fluxo esperado no frontend
 
 1. `OWNER` preenche pagamento
-2. frontend chama `rpc('register_payment', ...)`
-3. Supabase executa a transacao
-4. frontend atualiza ficha, pagamentos e saldo
+2. opcionalmente escolhe qual venda quer quitar primeiro
+3. frontend chama `rpc('register_payment', ...)`
+4. Supabase executa a transacao
+5. frontend atualiza ficha, pagamentos e saldo
 
 ## O que a RPC nao faz
 

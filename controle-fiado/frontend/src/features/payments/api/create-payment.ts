@@ -10,6 +10,7 @@ export type CreatePaymentPayload = {
   method: "CASH" | "PIX" | "CARD";
   notes?: string;
   createdById: string;
+  targetSaleId?: string | null;
 };
 
 export function createPayment(payload: CreatePaymentPayload) {
