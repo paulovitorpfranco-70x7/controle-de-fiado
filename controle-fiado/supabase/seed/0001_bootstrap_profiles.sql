@@ -8,6 +8,6 @@ insert into public.profiles (
   is_active
 )
 values
-  ('00000000-0000-0000-0000-000000000001', 'Dono', 'OWNER', true),
-  ('00000000-0000-0000-0000-000000000002', 'Operadora', 'STAFF', true)
+  ('1f4ef29d-dffa-4ed8-b089-36d837b7c9f4', 'Dono', 'OWNER', true),
+  ('fde6f5f6-08e6-4ce2-8c79-c74e74afc352', 'Operadora', 'STAFF', true)
 on conflict (auth_user_id) do nothing;
