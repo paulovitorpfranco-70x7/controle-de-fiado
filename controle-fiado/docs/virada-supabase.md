@@ -113,9 +113,13 @@ Depois da validacao local:
 - cadastrar variaveis:
   - `VITE_AUTH_MODE=supabase`
   - `VITE_DATA_MODE=supabase`
-  - `VITE_SUPABASE_URL`
-  - `VITE_SUPABASE_ANON_KEY`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 - publicar preview
+
+Guia detalhado:
+
+- `docs/setup-vercel-preview.md`
 
 ## Passo 9: Teste remoto real
 

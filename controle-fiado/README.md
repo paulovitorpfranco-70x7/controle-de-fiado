@@ -41,6 +41,23 @@ Nova base do sistema para transformar o prototipo atual em uma aplicacao real co
 
 - backend: `npm run test:backend`
 
+## Frontend web
+
+Para a fase web com Supabase + Vercel:
+
+- usar `frontend/.env` ou `frontend/.env.example`
+- manter:
+  - `VITE_AUTH_MODE=supabase`
+  - `VITE_DATA_MODE=supabase`
+
+O deploy de preview na Vercel deve apontar para:
+
+- `frontend/`
+
+Guia:
+
+- `docs/setup-vercel-preview.md`
+
 ## Operacao local
 
 - backup do SQLite: `npm run db:backup`
