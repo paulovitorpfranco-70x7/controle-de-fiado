@@ -6,13 +6,24 @@ import type { Sale } from "../../sales/types/sale";
 type CreatePaymentFormProps = {
   customerId: string;
   customerName?: string;
+  customerOptions?: Array<{ id: string; name: string }>;
+  onCustomerChange?: (customerId: string) => void;
   createdById: string;
   openSales?: Sale[];
   onCreated: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
 };
 
-export function CreatePaymentForm({ customerId, customerName, createdById, openSales = [], onCreated, onSuccess }: CreatePaymentFormProps) {
+export function CreatePaymentForm({
+  customerId,
+  customerName,
+  customerOptions = [],
+  onCustomerChange,
+  createdById,
+  openSales = [],
+  onCreated,
+  onSuccess
+}: CreatePaymentFormProps) {
   const [amount, setAmount] = useState("0");
   const [paymentDate, setPaymentDate] = useState(todayInputDateValue());
   const [method, setMethod] = useState<"CASH" | "PIX" | "CARD">("PIX");
@@ -53,7 +64,25 @@ export function CreatePaymentForm({ customerId, customerName, createdById, openS
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
       <div className="eyebrow">Novo pagamento</div>
-      <div className="customer-meta">Cliente selecionado: {customerName ?? customerId}</div>
+      <label className="field-block">
+        <span className="label">Cliente que esta pagando</span>
+        <select
+          className="customer-selector"
+          value={customerId}
+          onChange={(event) => onCustomerChange?.(event.target.value)}
+          disabled={!onCustomerChange || customerOptions.length === 0}
+        >
+          {customerOptions.length ? (
+            customerOptions.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.name}
+              </option>
+            ))
+          ) : (
+            <option value={customerId}>{customerName ?? customerId}</option>
+          )}
+        </select>
+      </label>
       <div className="form-grid">
         <label className="field-block">
           <span className="label">Valor pago</span>

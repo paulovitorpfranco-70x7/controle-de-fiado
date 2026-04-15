@@ -322,6 +322,11 @@ export function CustomersPage() {
                   <CreatePaymentForm
                     customerId={selectedCustomerId}
                     customerName={customerDetail?.name}
+                    customerOptions={customers.map((customer) => ({
+                      id: customer.id,
+                      name: customer.name
+                    }))}
+                    onCustomerChange={setSelectedCustomerId}
                     createdById={authUser.id}
                     openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
                     onSuccess={(message) => setNotice({ tone: "success", message })}
