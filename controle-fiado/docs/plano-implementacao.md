@@ -177,7 +177,8 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Validar `OWNER` e `STAFF` no preview
 - [x] Atualizar roteiro de piloto para Supabase + Vercel
 - [ ] Definir se havera backend hospedado separado no futuro
-- [ ] Executar piloto com uso real controlado
+- [x] Executar piloto tecnico controlado no preview
+- [ ] Executar piloto com dados reais do cliente
 - [ ] Ajustar com base no piloto
 - [ ] Publicar producao
 
@@ -199,4 +200,5 @@ Referencia operacional:
 - [ ] Logs e monitoramento funcionando
 - [ ] Backup validado
 - [x] Staging/preview aprovado
-- [ ] Piloto executado com sucesso
+- [x] Piloto tecnico executado com sucesso
+- [ ] Piloto com dados reais executado com sucesso

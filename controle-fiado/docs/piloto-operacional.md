@@ -1,5 +1,30 @@
 # Piloto Operacional
 
+## Status
+
+Piloto tecnico aprovado no preview da Vercel.
+
+Fluxos validados:
+
+- acesso remoto no preview
+- login `OWNER`
+- login `STAFF`
+- cadastro de clientes
+- registro de vendas com escolha de cliente
+- registro de pagamentos com escolha de cliente
+- pagamento direcionado para um titulo especifico
+- cobranca manual com WhatsApp
+- fila de cobranca
+- marcacao de mensagem como enviada
+- verificacao de nao duplicidade ao rodar novamente
+- teste no celular do dono
+
+Pendente para producao:
+
+- executar piloto com dados reais do cliente
+- coletar feedback operacional do dono e da operadora
+- decidir se o preview atual vira ambiente definitivo
+
 ## Objetivo
 
 Validar o sistema em uso real controlado antes da liberacao definitiva para o
@@ -159,6 +184,8 @@ O piloto pode ser considerado estavel quando:
 - permissoes impedem a `STAFF` de acessar areas sensiveis
 - o dono entende o fluxo manual de envio
 - nao houve duplicidade indevida de cobranca
+
+Status atual: criterios atendidos no piloto tecnico.
 
 ## Sinais de bloqueio
 

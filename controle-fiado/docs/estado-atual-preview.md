@@ -23,17 +23,21 @@ Stack ativa no preview:
 - ocultacao de financeiro/cobranca para `STAFF`
 - preparo de mensagem de cobranca
 - botao explicito `Abrir no WhatsApp`
+- fila de cobranca
+- marcacao de mensagem como enviada
+- nao duplicidade ao rodar o job novamente
+- teste no celular do dono
 
-## Pendencias antes do piloto
+## Pendencias antes da producao
 
-- testar job diario de cobranca no preview
 - revisar dados reais iniciais do cliente
 - confirmar telefones em formato valido
-- testar no celular do dono
-- testar no dispositivo da operadora
+- testar no dispositivo da operadora com dados reais
+- coletar feedback operacional
+- decidir se o preview atual vira ambiente definitivo
 
 ## Proximo passo
 
-Executar o piloto controlado com o cliente real usando o roteiro em:
+Executar o piloto com dados reais do cliente usando o roteiro em:
 
 - `docs/piloto-operacional.md`
