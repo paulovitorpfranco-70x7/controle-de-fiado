@@ -26,3 +26,27 @@
 {"level":30,"time":1775469449004,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-b","req":{"method":"GET","url":"/api/customers","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":54278},"msg":"incoming request"}
 {"level":30,"time":1775469449007,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-a","res":{"statusCode":200},"responseTime":4.813899993896484,"msg":"request completed"}
 {"level":30,"time":1775469449009,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-b","res":{"statusCode":200},"responseTime":4.208699941635132,"msg":"request completed"}
+{"level":30,"time":1776054715521,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-c","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054715560,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-c","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054715594,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-c","res":{"statusCode":404},"responseTime":42.07039976119995,"msg":"request completed"}
+{"level":30,"time":1776054715599,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-d","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054715599,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-d","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054715601,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-d","res":{"statusCode":404},"responseTime":1.5451998710632324,"msg":"request completed"}
+{"level":30,"time":1776054715602,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-e","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054715602,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-e","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054715604,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-e","res":{"statusCode":404},"responseTime":1.9706997871398926,"msg":"request completed"}
+{"level":30,"time":1776054767209,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-f","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054767210,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-f","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054767211,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-f","res":{"statusCode":404},"responseTime":1.8502998352050781,"msg":"request completed"}
+{"level":30,"time":1776054777205,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-g","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054777205,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-g","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054777207,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-g","res":{"statusCode":404},"responseTime":1.4839997291564941,"msg":"request completed"}
+{"level":30,"time":1776054789654,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-h","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054789655,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-h","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054789658,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-h","res":{"statusCode":404},"responseTime":4.239500045776367,"msg":"request completed"}
+{"level":30,"time":1776054789691,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-i","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054789691,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-i","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054789692,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-i","res":{"statusCode":404},"responseTime":1.1864004135131836,"msg":"request completed"}
+{"level":30,"time":1776054852270,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-j","req":{"method":"GET","url":"/api/system/status","host":"127.0.0.1:3333","remoteAddress":"127.0.0.1","remotePort":61963},"msg":"incoming request"}
+{"level":30,"time":1776054852271,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-j","msg":"Route GET:/api/system/status not found"}
+{"level":30,"time":1776054852273,"pid":21512,"hostname":"DESKTOP-NTD1N2U","reqId":"req-j","res":{"statusCode":404},"responseTime":2.25130033493042,"msg":"request completed"}

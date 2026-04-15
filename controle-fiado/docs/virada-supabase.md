@@ -135,14 +135,14 @@ Validar no celular:
 
 ## Checklist de aceite da virada
 
-- migrations aplicadas sem erro
-- perfis corretos criados
-- frontend autenticando via Supabase
-- frontend operando com `VITE_DATA_MODE=supabase`
-- `OWNER` acessa tudo
-- `STAFF` respeita restricoes
-- cobranca manual abre WhatsApp corretamente
-- job diario cria mensagens `PENDING`
+- [x] migrations aplicadas sem erro
+- [x] perfis corretos criados
+- [x] frontend autenticando via Supabase
+- [x] frontend operando com `VITE_DATA_MODE=supabase`
+- [x] `OWNER` acessa tudo
+- [x] `STAFF` respeita restricoes
+- [x] cobranca manual abre WhatsApp corretamente
+- [ ] job diario cria mensagens `PENDING` no preview
 
 ## Se algo falhar
 
@@ -162,5 +162,6 @@ Fazer assim:
 
 1. validar local com Supabase
 2. validar preview na Vercel
-3. validar com dono e operadora
-4. so depois considerar a virada oficial
+3. executar piloto com dono e operadora
+4. ajustar fluxo com base no piloto
+5. so depois considerar a virada oficial

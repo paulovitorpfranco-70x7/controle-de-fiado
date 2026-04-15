@@ -2,181 +2,206 @@
 
 ## Objetivo
 
-Validar o sistema em uso real controlado antes de qualquer liberacao mais ampla.
+Validar o sistema em uso real controlado antes da liberacao definitiva para o
+cliente.
 
-Este piloto considera o contexto atual do projeto:
+Este piloto considera o estado atual do projeto:
 
-- unico usuario
-- execucao local
-- banco `SQLite`
-- cobranca por WhatsApp no modo manual via `wa.me`
+- app web hospedado na Vercel
+- Supabase Auth
+- Supabase Postgres
+- perfis `OWNER` e `STAFF`
+- cobranca manual por botao `Abrir no WhatsApp`
+- baixo volume operacional
 
-## Quando iniciar o piloto
+## Escopo do piloto
 
-Inicie o piloto somente quando estes itens estiverem verdadeiros:
+O piloto deve ser pequeno e controlado.
 
-- backend sobe sem erro
-- frontend sobe sem erro
-- login funciona
-- backup do banco foi executado com sucesso
-- seed local nao sera mais usado como fonte de dados reais
-- usuario do piloto ja recebeu credencial propria
+Recomendacao inicial:
 
-## Preparacao do ambiente
+- 1 dono usando o perfil `OWNER`
+- 1 operadora usando o perfil `STAFF`
+- 5 a 15 clientes reais
+- poucos dias de operacao acompanhada
+- sem migracao em massa de dados antigos nesta primeira etapa
 
-### Maquina do piloto
+## Antes de iniciar
 
-- definir a maquina principal onde o sistema vai rodar
-- garantir que essa maquina tenha backup dos arquivos do projeto
-- garantir que o WhatsApp Web ou WhatsApp Business esteja acessivel nela
-- garantir horario e timezone corretos do Windows
+Confirmar:
 
-### Banco
+- preview da Vercel acessivel no celular e no computador
+- `OWNER` consegue fazer login
+- `STAFF` consegue fazer login
+- migrations `0001`, `0002`, `0003`, `0004` aplicadas no Supabase
+- perfis corretos em `profiles`
+- o dono sabe que o WhatsApp e manual
+- os telefones dos clientes estao em formato valido
 
-- criar backup antes do primeiro uso real
-- registrar onde os backups serao guardados
-- definir frequencia minima de backup:
-  - antes de qualquer mudanca estrutural
-  - ao final de cada dia de uso na primeira semana
+## Preparacao de usuarios
 
-### Configuracao
+### OWNER
 
-- revisar `backend/.env`
-- conferir `AUTH_SECRET`
-- conferir `AUTH_TTL_SECONDS`
-- conferir `ENABLE_DAILY_CHARGE_SCHEDULER`
-- conferir `DAILY_CHARGE_SCHEDULE_TIME`
-- confirmar `WHATSAPP_PROVIDER="wa_link"`
+Responsavel por:
+
+- consultar visao geral
+- registrar pagamentos
+- preparar cobrancas
+- abrir WhatsApp
+- marcar mensagens como enviadas
+- acompanhar pendencias
+
+### STAFF
+
+Responsavel por:
+
+- cadastrar clientes
+- registrar vendas
+- consultar ficha basica de clientes
+
+Restricoes esperadas:
+
+- nao registra pagamentos
+- nao acessa cobrancas
+- nao visualiza historico financeiro sensivel
 
 ## Cadastro inicial
 
 Antes do primeiro dia real:
 
-- criar usuario definitivo do dono
-- remover dependencia do usuario de seed
-- cadastrar 3 a 10 clientes reais
-- cadastrar pelo menos 2 clientes com telefone valido para WhatsApp
-- registrar pelo menos 3 vendas reais de teste
-- registrar pelo menos 1 pagamento parcial
+- cadastrar o dono como `OWNER`
+- cadastrar a operadora como `STAFF`
+- cadastrar 5 a 15 clientes reais
+- conferir telefone de cada cliente
+- criar pelo menos uma venda de teste com vencimento futuro
+- criar pelo menos uma venda de teste vencendo hoje ou em 3 dias
 
 ## Roteiro de validacao
 
-### Fluxo 1: autenticacao
+### Fluxo 1: acesso remoto
 
-- fazer login
-- recarregar a pagina
-- confirmar que a sessao continua valida
-- fazer logout
-- confirmar que rotas protegidas nao respondem sem login
+- abrir o preview da Vercel no computador
+- abrir o preview da Vercel no celular
+- fazer login com `OWNER`
+- fazer login com `STAFF`
+- confirmar que a sessao funciona nos dois dispositivos
 
-### Fluxo 2: cliente
+### Fluxo 2: permissao da STAFF
 
-- criar cliente
-- editar telefone
-- editar observacao
-- confirmar que a ficha detalhada abre sem erro
+- entrar como `STAFF`
+- cadastrar cliente
+- registrar venda
+- confirmar que pagamentos nao aparecem como acao operacional
+- confirmar que cobrancas nao aparecem
 
-### Fluxo 3: venda
+### Fluxo 3: operacao do OWNER
+
+- entrar como `OWNER`
+- consultar cliente criado pela `STAFF`
+- registrar pagamento parcial
+- escolher manualmente qual titulo quitar primeiro
+- confirmar saldo atualizado
+- confirmar alocacao na ficha do cliente
+
+### Fluxo 4: venda
 
 - registrar venda com vencimento futuro
-- confirmar valor final e saldo
-- confirmar que a venda aparece no extrato
-- confirmar que vencimento nao caiu no dia errado
+- confirmar valor final
+- confirmar acrescimo, se houver
+- confirmar que o vencimento aparece no dia correto
+- confirmar que a venda aparece na ficha do cliente
 
-### Fluxo 4: pagamento
+### Fluxo 5: pagamento
 
 - registrar pagamento parcial
 - confirmar reducao do saldo
-- confirmar rateio no debito mais antigo
-- registrar pagamento total
-- confirmar mudanca de status da venda
+- testar pagamento direcionado para um titulo especifico
+- confirmar venda `PARTIAL` ou `PAID`
+- confirmar dashboard do `OWNER`
 
-### Fluxo 5: cobranca manual
+### Fluxo 6: cobranca manual
 
-- abrir cliente com saldo aberto
-- gerar mensagem de cobranca
-- editar a mensagem
-- clicar em abrir no WhatsApp
-- confirmar que o texto abriu corretamente
-- marcar envio como concluido
-- confirmar historico da mensagem
+- selecionar cliente com saldo aberto
+- revisar preview da mensagem
+- editar mensagem, se necessario
+- clicar em `Preparar cobranca`
+- clicar em `Abrir no WhatsApp`
+- confirmar que o texto abre corretamente
+- enviar manualmente pelo WhatsApp
 
-### Fluxo 6: fila de cobranca
+### Fluxo 7: fila de cobranca
 
-- validar lista vencendo em 3 dias
-- validar lista vencendo hoje
-- validar lista em atraso
-- abrir cliente a partir da fila
-- confirmar coerencia entre fila e ficha do cliente
+- criar venda vencendo em 3 dias
+- criar venda vencendo hoje
+- executar o job manual pelo `OWNER`
+- confirmar mensagens `PENDING`
+- abrir mensagem pelo historico
+- marcar como enviada
+- confirmar que nao cria duplicidade ao rodar novamente
 
-### Fluxo 7: scheduler diario
+### Fluxo 8: celular do dono
 
-- deixar `ENABLE_DAILY_CHARGE_SCHEDULER=true`
-- validar proxima execucao no painel do sistema
-- rodar o endpoint manual do job pelo frontend
-- confirmar que nao houve duplicidade
-- confirmar criacao de lembretes `PENDING` quando aplicavel
-
-### Fluxo 8: backup e restore
-
-- rodar `npm run db:backup`
-- conferir arquivo gerado em `backups/sqlite/`
-- executar restore para arquivo temporario
-- confirmar que o restore termina sem erro
+- abrir o preview no celular do dono
+- fazer login
+- consultar clientes
+- abrir cobranca no WhatsApp
+- confirmar que o WhatsApp abre no app ou navegador
 
 ## Indicadores minimos de aceite
 
-O piloto pode ser considerado estavel quando, por pelo menos 5 dias de uso:
+O piloto pode ser considerado estavel quando:
 
-- nenhum dado financeiro foi perdido
-- nenhum vencimento apareceu em data errada
-- nenhuma cobranca duplicada foi criada pelo job
-- o fluxo manual de WhatsApp foi usado sem erro operacional grave
-- backup foi executado e conferido
-- usuario conseguiu operar sem depender de ajuste tecnico diario
+- `OWNER` e `STAFF` conseguem operar sem erro critico
+- vendas e pagamentos alteram saldo corretamente
+- vencimentos aparecem no dia correto
+- cobranca manual abre WhatsApp corretamente
+- permissoes impedem a `STAFF` de acessar areas sensiveis
+- o dono entende o fluxo manual de envio
+- nao houve duplicidade indevida de cobranca
 
 ## Sinais de bloqueio
 
-Nao avance para liberacao mais ampla se ocorrer qualquer um destes:
+Nao avance para producao se ocorrer:
 
-- venda ou pagamento altera saldo de forma errada
-- vencimento aparece no dia anterior ou posterior ao esperado
-- historico de mensagens fica inconsistente
-- job diario cria duplicidade
-- o usuario nao consegue operar sem suporte tecnico constante
-- backup falha ou restore falha
+- saldo errado
+- pagamento abatendo titulo errado sem o usuario entender
+- `STAFF` acessando pagamento ou cobranca
+- vencimento aparecendo em dia errado
+- WhatsApp nao abrindo no celular do dono
+- erro recorrente de login
+- perda ou duplicidade de dados
 
 ## Go/No-Go
 
 ### Go
 
-Liberar continuidade de uso quando:
+Seguir para uso real quando:
 
-- checklist funcional foi concluido
-- aceite minimo foi atingido
-- dono confirma confianca operacional
+- checklist principal for validado
+- dono aprovar o fluxo
+- operadora conseguir registrar clientes e vendas sem suporte constante
 
 ### No-Go
 
-Segurar expansao e corrigir antes se:
+Segurar a liberacao se:
 
 - houver erro financeiro
-- houver erro de data
-- houver perda de historico
-- houver falha recorrente no fluxo de cobranca
+- houver erro de permissao
+- houver falha recorrente na cobranca
+- o dono nao confiar no fluxo operacional
 
 ## Proximos passos depois do piloto
 
 Se o piloto passar:
 
-- revisar ajustes finos de UX
-- definir rotina fixa de backup
-- preparar empacotamento/deploy leve
-- decidir se o app continua local ou vai para hospedagem
+- refinar UI final usando o prototipo original como referencia visual
+- ajustar textos e labels conforme feedback real
+- definir rotina de manutencao do Supabase/Vercel
+- decidir se o preview vira ambiente de producao
 
 Se o piloto falhar:
 
 - registrar o problema
-- reproduzir com dados de teste
+- reproduzir em dados de teste
 - corrigir
-- repetir piloto curto antes de retomar uso real
+- repetir piloto curto antes de liberar

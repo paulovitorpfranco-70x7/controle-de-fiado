@@ -7,12 +7,11 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 
 ## Premissa atual
 
-- este sistema esta sendo construido para um unico usuario
-- nao ha necessidade de escala neste momento
-- para evitar custo agora, o banco padrao da fase atual sera `SQLite`
-- o modo padrao de cobranca por WhatsApp sera manual via link `wa.me`
-- a migracao para `PostgreSQL` fica adiada para quando houver necessidade real
-  de hospedagem online, multiusuario ou maior robustez operacional
+- o sistema passou a operar em modo web com Supabase + Vercel
+- existem dois perfis operacionais: `OWNER` e `STAFF`
+- para evitar custo agora, a base web usa o plano gratuito do Supabase e da Vercel
+- o backend Fastify/SQLite permanece como base legado/local e referencia de regras
+- o modo padrao de cobranca por WhatsApp e manual via link do WhatsApp
 
 ## Como usar este plano
 
@@ -170,12 +169,14 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 
 ## Fase 9: Deploy e producao
 
-- [ ] Criar ambiente de staging
-- [ ] Configurar deploy do backend
-- [ ] Configurar deploy do frontend
-- [ ] Configurar variaveis de ambiente de producao
-- [ ] Validar execucao de migracoes em staging
-- [ ] Validar integracao WhatsApp em staging
+- [x] Criar ambiente de staging/preview na Vercel
+- [x] Configurar deploy do frontend
+- [x] Configurar variaveis de ambiente do preview
+- [x] Validar migrations no Supabase
+- [x] Validar integracao WhatsApp manual no preview
+- [x] Validar `OWNER` e `STAFF` no preview
+- [x] Atualizar roteiro de piloto para Supabase + Vercel
+- [ ] Definir se havera backend hospedado separado no futuro
 - [ ] Executar piloto com uso real controlado
 - [ ] Ajustar com base no piloto
 - [ ] Publicar producao
@@ -184,17 +185,18 @@ Referencia operacional:
 
 - roteiro do piloto em `docs/piloto-operacional.md`
 - estrategia de migracao web em `docs/migracao-supabase-vercel.md`
+- setup do preview em `docs/setup-vercel-preview.md`
 
 ## Checklist de liberacao para producao
 
 - [ ] Testes criticos passando
-- [ ] Banco validado para o contexto real de uso
-- [ ] Migracoes revisadas
-- [ ] Rotas protegidas por autenticacao
+- [x] Banco validado para o contexto real de uso no preview
+- [x] Migracoes revisadas e aplicadas no Supabase
+- [x] Acesso web protegido por Supabase Auth e RLS
 - [ ] Auditoria persistida ativa
-- [ ] Fluxo de cobranca via WhatsApp validado no modo escolhido
+- [x] Fluxo de cobranca via WhatsApp validado no modo escolhido
 - [x] Scheduler real ativo
 - [ ] Logs e monitoramento funcionando
 - [ ] Backup validado
-- [ ] Staging aprovado
+- [x] Staging/preview aprovado
 - [ ] Piloto executado com sucesso

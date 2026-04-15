@@ -5,6 +5,20 @@
 Publicar o frontend web em preview na Vercel usando o Supabase que ja foi
 configurado e validado localmente.
 
+## Estado atual
+
+Preview criado e validado.
+
+Fluxos confirmados:
+
+- login `OWNER`
+- login `STAFF`
+- leitura de clientes
+- registro de vendas
+- registro de pagamentos pelo `OWNER`
+- restricoes de perfil
+- cobranca manual com botao `Abrir no WhatsApp`
+
 ## Pasta do deploy
 
 O deploy deve apontar para:
@@ -58,11 +72,12 @@ Depois do primeiro deploy, validar:
 
 ## Checklist minimo antes de compartilhar
 
-- `0001`, `0002`, `0003`, `0004` aplicadas no Supabase
-- `OWNER` e `STAFF` criados
-- frontend local validado em modo Supabase
-- variaveis da Vercel preenchidas
-- preview remoto testado com os dois perfis
+- [x] `0001`, `0002`, `0003`, `0004` aplicadas no Supabase
+- [x] `OWNER` e `STAFF` criados
+- [x] frontend local validado em modo Supabase
+- [x] variaveis da Vercel preenchidas
+- [x] preview remoto testado com os dois perfis
+- [ ] piloto com cliente real executado
 
 ## Observacao importante
 
