@@ -80,9 +80,13 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
               {message.providerResponse ? <div className="customer-meta">{message.providerResponse}</div> : null}
               {message.sendStatus === "PENDING" ? (
                 <div className="queue-actions">
-                  <a className="auth-button inline-link-button" href={buildWhatsAppUrl(message.phoneE164!, message.messageBody)} target="_blank" rel="noreferrer">
-                    Abrir no WhatsApp
-                  </a>
+                  {message.phoneE164 ? (
+                    <a className="auth-button inline-link-button" href={buildWhatsAppUrl(message.phoneE164, message.messageBody)} target="_blank" rel="noreferrer">
+                      Abrir no WhatsApp
+                    </a>
+                  ) : (
+                    <span className="error-copy">Cliente sem telefone valido.</span>
+                  )}
                   <button
                     className="ghost-button"
                     type="button"
