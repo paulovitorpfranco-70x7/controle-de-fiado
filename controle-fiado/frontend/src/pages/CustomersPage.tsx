@@ -312,6 +312,12 @@ export function CustomersPage() {
               <section className="section-block operation-grid">
                 <CreateSaleForm
                   customerId={selectedCustomerId}
+                  customerName={customerDetail?.name}
+                  customerOptions={customers.map((customer) => ({
+                    id: customer.id,
+                    name: customer.name
+                  }))}
+                  onCustomerChange={setSelectedCustomerId}
                   createdById={authUser.id}
                   onSuccess={(message) => setNotice({ tone: "success", message })}
                   onCreated={async () => {

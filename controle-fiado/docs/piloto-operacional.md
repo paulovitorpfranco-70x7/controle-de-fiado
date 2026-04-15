@@ -34,6 +34,7 @@ Confirmar:
 - `OWNER` consegue fazer login
 - `STAFF` consegue fazer login
 - migrations `0001`, `0002`, `0003`, `0004` aplicadas no Supabase
+- migration `0005` aplicada se o pagamento direcionado estiver ativo
 - perfis corretos em `profiles`
 - o dono sabe que o WhatsApp e manual
 - os telefones dos clientes estao em formato valido

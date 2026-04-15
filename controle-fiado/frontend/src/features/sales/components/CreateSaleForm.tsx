@@ -4,12 +4,23 @@ import { addDaysInputDateValue, todayInputDateValue } from "../../../shared/util
 
 type CreateSaleFormProps = {
   customerId: string;
+  customerName?: string;
+  customerOptions?: Array<{ id: string; name: string }>;
+  onCustomerChange?: (customerId: string) => void;
   createdById: string;
   onCreated: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
 };
 
-export function CreateSaleForm({ customerId, createdById, onCreated, onSuccess }: CreateSaleFormProps) {
+export function CreateSaleForm({
+  customerId,
+  customerName,
+  customerOptions = [],
+  onCustomerChange,
+  createdById,
+  onCreated,
+  onSuccess
+}: CreateSaleFormProps) {
   const [description, setDescription] = useState("Compra de balcão");
   const [originalAmount, setOriginalAmount] = useState("0");
   const [feePercent, setFeePercent] = useState("0");
@@ -50,6 +61,25 @@ export function CreateSaleForm({ customerId, createdById, onCreated, onSuccess }
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
       <div className="eyebrow">Nova venda</div>
+      <label className="field-block">
+        <span className="label">Cliente da venda</span>
+        <select
+          className="customer-selector"
+          value={customerId}
+          onChange={(event) => onCustomerChange?.(event.target.value)}
+          disabled={!onCustomerChange || customerOptions.length === 0}
+        >
+          {customerOptions.length ? (
+            customerOptions.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.name}
+              </option>
+            ))
+          ) : (
+            <option value={customerId}>{customerName ?? customerId}</option>
+          )}
+        </select>
+      </label>
       <label className="field-block">
         <span className="label">Descricao</span>
         <input
