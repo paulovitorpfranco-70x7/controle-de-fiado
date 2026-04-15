@@ -180,6 +180,7 @@ reduzindo risco de erro operacional, financeiro e de integracao.
 - [x] Executar piloto tecnico controlado no preview
 - [x] Executar piloto com dados reais do cliente
 - [x] Preparar roteiro de feedback do cliente
+- [x] Registrar design system oficial de referencia
 - [ ] Ajustar UI/visual final com base no piloto
 - [ ] Publicar producao
 
@@ -188,6 +189,7 @@ Referencia operacional:
 - roteiro do piloto em `docs/piloto-operacional.md`
 - estrategia de migracao web em `docs/migracao-supabase-vercel.md`
 - setup do preview em `docs/setup-vercel-preview.md`
+- design system em `docs/design-system-referencia.md`
 
 ## Checklist de liberacao para producao
 
