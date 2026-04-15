@@ -3,6 +3,7 @@
 ## Status
 
 Piloto tecnico aprovado no preview da Vercel.
+Piloto com cliente validado.
 
 Fluxos validados:
 
@@ -21,9 +22,8 @@ Fluxos validados:
 
 Pendente para producao:
 
-- executar piloto com dados reais do cliente
-- coletar feedback operacional do dono e da operadora
 - decidir se o preview atual vira ambiente definitivo
+- aplicar ajustes finos de UI/visual final
 
 ## Objetivo
 
@@ -186,6 +186,7 @@ O piloto pode ser considerado estavel quando:
 - nao houve duplicidade indevida de cobranca
 
 Status atual: criterios atendidos no piloto tecnico.
+Status atual do piloto real: aprovado pelo cliente.
 
 ## Sinais de bloqueio
 
@@ -226,6 +227,10 @@ Se o piloto passar:
 - ajustar textos e labels conforme feedback real
 - definir rotina de manutencao do Supabase/Vercel
 - decidir se o preview vira ambiente de producao
+
+Roteiro de feedback:
+
+- `docs/roteiro-feedback-cliente.md`
 
 Se o piloto falhar:
 

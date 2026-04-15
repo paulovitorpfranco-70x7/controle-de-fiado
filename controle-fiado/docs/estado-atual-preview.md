@@ -30,14 +30,16 @@ Stack ativa no preview:
 
 ## Pendencias antes da producao
 
-- revisar dados reais iniciais do cliente
-- confirmar telefones em formato valido
-- testar no dispositivo da operadora com dados reais
-- coletar feedback operacional
 - decidir se o preview atual vira ambiente definitivo
+- aplicar ajustes finos de UI/visual final
+- definir rotina minima de manutencao do Supabase/Vercel
 
 ## Proximo passo
 
-Executar o piloto com dados reais do cliente usando o roteiro em:
+Refinar a UI final usando o prototipo original como referencia visual e o
+feedback do piloto real.
+
+Referencia:
 
 - `docs/piloto-operacional.md`
+- `docs/roteiro-feedback-cliente.md`
