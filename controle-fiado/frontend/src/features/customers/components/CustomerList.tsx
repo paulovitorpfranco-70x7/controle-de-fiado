@@ -14,10 +14,26 @@ type CustomerListProps = {
 };
 
 export function CustomerList({ customers, selectedCustomerId, onSelectCustomer }: CustomerListProps) {
+  if (!customers.length) {
+    return <div className="empty-card">Nenhum cliente encontrado para os filtros atuais.</div>;
+  }
+
   return (
     <section className="card-list">
       {customers.map((customer) => (
-        <article key={customer.id} className={`customer-card selectable-card ${selectedCustomerId === customer.id ? "selected" : ""}`}>
+        <article
+          key={customer.id}
+          className={`customer-card selectable-card ${selectedCustomerId === customer.id ? "selected" : ""}`}
+          role={onSelectCustomer ? "button" : undefined}
+          tabIndex={onSelectCustomer ? 0 : undefined}
+          onClick={() => onSelectCustomer?.(customer.id)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onSelectCustomer?.(customer.id);
+            }
+          }}
+        >
           <div className="customer-main">
             <div>
               <div className="customer-name">{customer.name}</div>
@@ -42,9 +58,7 @@ export function CustomerList({ customers, selectedCustomerId, onSelectCustomer }
             </div>
           </div>
           {onSelectCustomer ? (
-            <button className="ghost-button" type="button" onClick={() => onSelectCustomer(customer.id)}>
-              {selectedCustomerId === customer.id ? "Cliente selecionado" : "Selecionar cliente"}
-            </button>
+            <div className="selection-hint">{selectedCustomerId === customer.id ? "Cliente selecionado" : "Clique para abrir a ficha"}</div>
           ) : null}
         </article>
       ))}

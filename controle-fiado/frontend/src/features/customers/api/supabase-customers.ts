@@ -99,6 +99,7 @@ export async function createSupabaseCustomer(payload: CreateCustomerPayload): Pr
     notes: data.notes,
     isActive: data.is_active,
     openBalance: 0,
+    overdueSalesCount: 0,
     createdAt: data.created_at
   };
 }
@@ -138,6 +139,7 @@ function mapCustomerRow(customer: CustomerRow): Customer {
     openBalance: (customer.sales ?? [])
       .filter((sale) => ["OPEN", "PARTIAL", "OVERDUE"].includes(sale.status))
       .reduce((total, sale) => total + sale.remaining_amount_cents, 0) / 100,
+    overdueSalesCount: (customer.sales ?? []).filter((sale) => sale.status === "OVERDUE" && sale.remaining_amount_cents > 0).length,
     createdAt: customer.created_at
   };
 }

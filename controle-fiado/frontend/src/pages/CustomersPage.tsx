@@ -40,6 +40,7 @@ import { getDataMode } from "../shared/config/data";
 import { OperationNotice } from "../shared/components/OperationNotice";
 
 type AppView = "dashboard" | "customers" | "operations" | "charges" | "status";
+type CustomerFilter = "all" | "open" | "overdue" | "clear";
 
 export function CustomersPage() {
   const authMode = getAuthMode();
@@ -328,6 +329,8 @@ export function CustomersPage() {
                 selectedCustomerId={selectedCustomerId}
                 isOwner={isOwner}
                 onSelectCustomer={setSelectedCustomerId}
+                onGoToOperations={() => setActiveView("operations")}
+                onGoToCharges={() => setActiveView("charges")}
                 onCustomerCreated={async (customer) => {
                   await refreshOperationalData(customer.id);
                   setSelectedCustomerId(customer.id);
@@ -483,6 +486,8 @@ type CustomersViewProps = {
   selectedCustomerId: string;
   isOwner: boolean;
   onSelectCustomer: (customerId: string) => void;
+  onGoToOperations: () => void;
+  onGoToCharges: () => void;
   onCustomerCreated: (customer: Customer) => Promise<void>;
   onSuccess: (message: string) => void;
 };
@@ -493,9 +498,40 @@ function CustomersView({
   selectedCustomerId,
   isOwner,
   onSelectCustomer,
+  onGoToOperations,
+  onGoToCharges,
   onCustomerCreated,
   onSuccess
 }: CustomersViewProps) {
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<CustomerFilter>("all");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const filteredCustomers = customers.filter((customer) => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const matchesSearch =
+      !normalizedSearch ||
+      customer.name.toLowerCase().includes(normalizedSearch) ||
+      customer.phone.toLowerCase().includes(normalizedSearch);
+
+    if (!matchesSearch) {
+      return false;
+    }
+
+    if (filter === "open") {
+      return customer.openBalance > 0;
+    }
+
+    if (filter === "clear") {
+      return customer.openBalance <= 0;
+    }
+
+    if (filter === "overdue") {
+      return (customer.overdueSalesCount ?? 0) > 0;
+    }
+
+    return true;
+  });
+
   return (
     <>
       <section className="section-block">
@@ -504,24 +540,67 @@ function CustomersView({
             <div className="eyebrow">Clientes</div>
             <h2>Base operacional inicial</h2>
           </div>
+          <button className="auth-button" type="button" onClick={() => setShowCreateForm((current) => !current)}>
+            {showCreateForm ? "Fechar cadastro" : "Novo cliente"}
+          </button>
         </div>
-        <CreateCustomerForm onSuccess={onSuccess} onCreated={onCustomerCreated} />
-        <div style={{ height: 16 }} />
-        <CustomerList customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer} />
+
+        <div className="customer-toolbar">
+          <label className="field-block customer-search">
+            <span className="label">Buscar cliente</span>
+            <input
+              className="customer-selector"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Nome ou telefone"
+            />
+          </label>
+          <div className="customer-filter-row" aria-label="Filtros de clientes">
+            <button className={filter === "all" ? "active" : ""} type="button" onClick={() => setFilter("all")}>
+              Todos
+            </button>
+            <button className={filter === "open" ? "active" : ""} type="button" onClick={() => setFilter("open")}>
+              Com saldo
+            </button>
+            <button className={filter === "overdue" ? "active" : ""} type="button" onClick={() => setFilter("overdue")}>
+              Em atraso
+            </button>
+            <button className={filter === "clear" ? "active" : ""} type="button" onClick={() => setFilter("clear")}>
+              Sem saldo
+            </button>
+          </div>
+        </div>
+
+        {showCreateForm ? (
+          <div className="collapsible-form">
+            <CreateCustomerForm
+              onSuccess={onSuccess}
+              onCreated={async (customer) => {
+                await onCustomerCreated(customer);
+                setShowCreateForm(false);
+              }}
+            />
+          </div>
+        ) : null}
       </section>
 
-      {customerDetail ? (
-        <CustomerDetailPanel
-          customer={customerDetail}
-          selectedCustomerId={selectedCustomerId}
-          onCustomerChange={onSelectCustomer}
-          canViewPayments={isOwner}
-          options={customers.map((customer) => ({
-            id: customer.id,
-            name: customer.name
-          }))}
-        />
-      ) : null}
+      <section className="customers-workspace">
+        <CustomerList customers={filteredCustomers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer} />
+
+        <div className="customer-detail-slot">
+          {customerDetail ? (
+            <CustomerDetailPanel
+              customer={customerDetail}
+              canViewPayments={isOwner}
+              onCreateSale={onGoToOperations}
+              onRegisterPayment={isOwner ? onGoToOperations : undefined}
+              onChargeCustomer={isOwner ? onGoToCharges : undefined}
+            />
+          ) : (
+            <div className="empty-card">Selecione um cliente para abrir a ficha.</div>
+          )}
+        </div>
+      </section>
     </>
   );
 }

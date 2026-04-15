@@ -232,6 +232,68 @@ body {
   gap: 10px;
 }
 
+.customer-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.customer-search {
+  margin: 0;
+}
+
+.customer-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-filter-row button {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+.customer-filter-row button:hover,
+.customer-filter-row button.active {
+  border-color: rgba(249, 115, 22, 0.28);
+  background: rgba(249, 115, 22, 0.12);
+  color: #fff;
+}
+
+.collapsible-form {
+  margin-top: 16px;
+}
+
+.customers-workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.25fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.customer-detail-slot .section-block {
+  margin-top: 0;
+}
+
+.selection-hint {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.customer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .content-panel {
   padding: 32px;
 }
@@ -549,6 +611,13 @@ select.customer-selector:focus,
 .selectable-card {
   display: grid;
   gap: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.selectable-card:hover {
+  border-color: rgba(249, 115, 22, 0.24);
+  background: rgba(255, 255, 255, 0.045);
 }
 
 .selectable-card.selected {
@@ -693,5 +762,14 @@ select.customer-selector:focus,
   .current-customer-bar {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .customer-toolbar,
+  .customers-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-actions {
+    justify-content: flex-start;
   }
 }

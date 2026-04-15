@@ -8,5 +8,6 @@ export type Customer = {
   notes: string | null;
   isActive: boolean;
   openBalance: number;
+  overdueSalesCount?: number;
   createdAt: string;
 };

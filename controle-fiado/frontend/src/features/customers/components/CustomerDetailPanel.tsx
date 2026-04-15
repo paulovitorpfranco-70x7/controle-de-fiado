@@ -27,18 +27,18 @@ function getNextDueDate(customer: CustomerDetail) {
 
 type CustomerDetailPanelProps = {
   customer: CustomerDetail;
-  selectedCustomerId: string;
-  onCustomerChange: (customerId: string) => void;
-  options: Array<{ id: string; name: string }>;
   canViewPayments?: boolean;
+  onCreateSale?: () => void;
+  onRegisterPayment?: () => void;
+  onChargeCustomer?: () => void;
 };
 
 export function CustomerDetailPanel({
   customer,
-  selectedCustomerId,
-  onCustomerChange,
-  options,
-  canViewPayments = true
+  canViewPayments = true,
+  onCreateSale,
+  onRegisterPayment,
+  onChargeCustomer
 }: CustomerDetailPanelProps) {
   const openSalesCount = customer.sales.filter((sale) => sale.remainingAmount > 0).length;
   const overdueSalesCount = customer.sales.filter((sale) => sale.status === "OVERDUE" && sale.remainingAmount > 0).length;
@@ -52,17 +52,23 @@ export function CustomerDetailPanel({
             <div className="eyebrow">Ficha do cliente</div>
             <h2>{customer.name}</h2>
           </div>
-          <select
-            className="customer-selector"
-            value={selectedCustomerId}
-            onChange={(event) => onCustomerChange(event.target.value)}
-          >
-            {options.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </select>
+          <div className="customer-actions">
+            {onCreateSale ? (
+              <button className="ghost-button" type="button" onClick={onCreateSale}>
+                Nova venda
+              </button>
+            ) : null}
+            {canViewPayments && onRegisterPayment ? (
+              <button className="ghost-button" type="button" onClick={onRegisterPayment}>
+                Registrar pagamento
+              </button>
+            ) : null}
+            {canViewPayments && onChargeCustomer ? (
+              <button className="ghost-button" type="button" onClick={onChargeCustomer}>
+                Cobrar no WhatsApp
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="customer-grid">
@@ -95,7 +101,7 @@ export function CustomerDetailPanel({
         <div className="detail-columns">
           <div className="detail-column">
             <div className="eyebrow">Vendas</div>
-            {customer.sales.map((sale) => {
+            {customer.sales.length ? customer.sales.map((sale) => {
               const paidAmount = Math.max(sale.finalAmount - sale.remainingAmount, 0);
 
               return (
@@ -124,13 +130,13 @@ export function CustomerDetailPanel({
                   <div className={`sale-status-pill ${sale.status.toLowerCase()}`}>{sale.status}</div>
                 </article>
               );
-            })}
+            }) : <article className="statement-item"><div className="customer-meta">Nenhuma venda registrada para este cliente.</div></article>}
           </div>
 
           {canViewPayments ? (
             <div className="detail-column">
               <div className="eyebrow">Pagamentos</div>
-              {customer.payments.map((payment) => (
+              {customer.payments.length ? customer.payments.map((payment) => (
                 <article key={payment.id} className="statement-item">
                   <div className="statement-main">
                     <strong>{formatMoney(payment.amount)}</strong>
@@ -150,7 +156,7 @@ export function CustomerDetailPanel({
                     </div>
                   ) : null}
                 </article>
-              ))}
+              )) : <article className="statement-item"><div className="customer-meta">Nenhum pagamento registrado para este cliente.</div></article>}
             </div>
           ) : (
             <div className="detail-column">
