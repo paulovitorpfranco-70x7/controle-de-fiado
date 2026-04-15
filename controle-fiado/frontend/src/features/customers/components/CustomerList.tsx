@@ -9,13 +9,15 @@ function formatMoney(value: number) {
 
 type CustomerListProps = {
   customers: Customer[];
+  selectedCustomerId?: string;
+  onSelectCustomer?: (customerId: string) => void;
 };
 
-export function CustomerList({ customers }: CustomerListProps) {
+export function CustomerList({ customers, selectedCustomerId, onSelectCustomer }: CustomerListProps) {
   return (
     <section className="card-list">
       {customers.map((customer) => (
-        <article key={customer.id} className="customer-card">
+        <article key={customer.id} className={`customer-card selectable-card ${selectedCustomerId === customer.id ? "selected" : ""}`}>
           <div className="customer-main">
             <div>
               <div className="customer-name">{customer.name}</div>
@@ -39,6 +41,11 @@ export function CustomerList({ customers }: CustomerListProps) {
               <strong>{customer.address ?? "Nao informado"}</strong>
             </div>
           </div>
+          {onSelectCustomer ? (
+            <button className="ghost-button" type="button" onClick={() => onSelectCustomer(customer.id)}>
+              {selectedCustomerId === customer.id ? "Cliente selecionado" : "Selecionar cliente"}
+            </button>
+          ) : null}
         </article>
       ))}
     </section>

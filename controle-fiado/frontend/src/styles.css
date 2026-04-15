@@ -357,6 +357,16 @@ select.customer-selector:focus,
   padding: 22px;
 }
 
+.selectable-card {
+  display: grid;
+  gap: 16px;
+}
+
+.selectable-card.selected {
+  border-color: rgba(249, 115, 22, 0.42);
+  box-shadow: 0 20px 60px rgba(249, 115, 22, 0.12);
+}
+
 .customer-main {
   display: flex;
   justify-content: space-between;

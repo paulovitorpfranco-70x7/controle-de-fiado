@@ -5,13 +5,14 @@ import type { Sale } from "../../sales/types/sale";
 
 type CreatePaymentFormProps = {
   customerId: string;
+  customerName?: string;
   createdById: string;
   openSales?: Sale[];
   onCreated: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
 };
 
-export function CreatePaymentForm({ customerId, createdById, openSales = [], onCreated, onSuccess }: CreatePaymentFormProps) {
+export function CreatePaymentForm({ customerId, customerName, createdById, openSales = [], onCreated, onSuccess }: CreatePaymentFormProps) {
   const [amount, setAmount] = useState("0");
   const [paymentDate, setPaymentDate] = useState(todayInputDateValue());
   const [method, setMethod] = useState<"CASH" | "PIX" | "CARD">("PIX");
@@ -52,6 +53,7 @@ export function CreatePaymentForm({ customerId, createdById, openSales = [], onC
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
       <div className="eyebrow">Novo pagamento</div>
+      <div className="customer-meta">Cliente selecionado: {customerName ?? customerId}</div>
       <div className="form-grid">
         <label className="field-block">
           <span className="label">Valor pago</span>

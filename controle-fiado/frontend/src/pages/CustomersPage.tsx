@@ -292,7 +292,7 @@ export function CustomersPage() {
                 }}
               />
               <div style={{ height: 16 }} />
-              <CustomerList customers={customers} />
+              <CustomerList customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={setSelectedCustomerId} />
             </section>
 
             {customerDetail ? (
@@ -321,6 +321,7 @@ export function CustomersPage() {
                 {isOwner ? (
                   <CreatePaymentForm
                     customerId={selectedCustomerId}
+                    customerName={customerDetail?.name}
                     createdById={authUser.id}
                     openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
                     onSuccess={(message) => setNotice({ tone: "success", message })}
