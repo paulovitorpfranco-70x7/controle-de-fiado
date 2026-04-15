@@ -39,6 +39,13 @@ import { getAuthMode } from "../shared/config/auth";
 import { getDataMode } from "../shared/config/data";
 import { OperationNotice } from "../shared/components/OperationNotice";
 
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value);
+}
+
 export function CustomersPage() {
   const authMode = getAuthMode();
   const dataMode = getDataMode();
@@ -57,6 +64,7 @@ export function CustomersPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
   const isOwner = authUser?.role === "OWNER";
+  const selectedCustomerName = customers.find((customer) => customer.id === selectedCustomerId)?.name ?? customerDetail?.name;
 
   async function refreshOperationalData(customerId: string) {
     const customerDataPromise = fetchCustomers();
@@ -228,9 +236,30 @@ export function CustomersPage() {
   return (
     <div className="page-shell">
       <aside className="side-panel">
-        <div className="eyebrow">Controle de Fiado</div>
-        <h1>Mercadinho do Tonhao</h1>
-        <p>Base real do sistema com API, banco e integracao futura com WhatsApp.</p>
+        <div className="brand-card">
+          <div className="brand-symbol">MT</div>
+          <div>
+            <div className="eyebrow">Controle de Fiado</div>
+            <h1>Mercadinho do Tonhao</h1>
+            <p>Operacao web validada com Supabase, Vercel e cobranca manual pelo WhatsApp.</p>
+          </div>
+        </div>
+
+        <div className="side-quick-card">
+          <div className="label">Saldo em aberto</div>
+          <strong>{formatMoney(dashboardSummary?.totalOpenBalance ?? customerDetail?.openBalance ?? 0)}</strong>
+          <span>{selectedCustomerName ? `Cliente atual: ${selectedCustomerName}` : "Aguardando selecao de cliente"}</span>
+        </div>
+
+        {authUser ? (
+          <nav className="side-nav" aria-label="Atalhos do sistema">
+            <a href="#dashboard">Dashboard</a>
+            <a href="#clientes">Clientes</a>
+            <a href="#operacao">Venda/Pagamento</a>
+            {isOwner ? <a href="#cobrancas">Cobrancas</a> : null}
+          </nav>
+        ) : null}
+
         <AuthPanel
           user={authUser}
           onLogout={async () => {
@@ -250,7 +279,10 @@ export function CustomersPage() {
         <header className="page-header">
           <div>
             <div className="eyebrow">Clientes</div>
-            <h2>{dataMode === "supabase" ? "Base web conectada ao Supabase" : "Base inicial conectada com API"}</h2>
+            <h2>{dataMode === "supabase" ? "Base web em operacao" : "Base inicial conectada com API"}</h2>
+            <p className="page-subtitle">
+              Fluxos de cliente, venda, pagamento e cobranca validados para uso real.
+            </p>
           </div>
           <div className="status-card">
             <span className="status-dot" />
@@ -267,9 +299,12 @@ export function CustomersPage() {
         {!loading && !error && authUser ? (
           <>
             {notice ? <OperationNotice tone={notice.tone} message={notice.message} /> : null}
+            <div id="dashboard" className="anchor-target" />
             {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
-            {systemStatus ? <SystemStatusPanel status={systemStatus} /> : null}
-            {chargeOverview ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
+            <div className="admin-grid">
+              {systemStatus ? <SystemStatusPanel status={systemStatus} /> : null}
+              {chargeOverview ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
+            </div>
             {!isOwner ? (
               <div className="empty-card">
                 Voce esta no perfil STAFF. Clientes e vendas estao liberados; pagamentos, cobrancas e controles administrativos ficam com o OWNER.
@@ -277,7 +312,7 @@ export function CustomersPage() {
             ) : null}
             {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
 
-            <section className="section-block">
+            <section id="clientes" className="section-block anchor-target">
               <div className="page-header page-header-section">
                 <div>
                   <div className="eyebrow">Clientes</div>
@@ -309,7 +344,7 @@ export function CustomersPage() {
             ) : null}
 
             {authUser && selectedCustomerId ? (
-              <section className="section-block operation-grid">
+              <section id="operacao" className="section-block operation-grid anchor-target">
                 <CreateSaleForm
                   customerId={selectedCustomerId}
                   customerName={customerDetail?.name}
@@ -350,14 +385,16 @@ export function CustomersPage() {
             ) : null}
 
             {selectedCustomerId && isOwner ? (
-              <ChargeAutomationPanel
-                canRun={authUser.role === "OWNER"}
-                monitor={dailyChargeJobMonitor}
-                onSuccess={(message) => setNotice({ tone: "success", message })}
-                onCompleted={async () => {
-                  await refreshChargeData(selectedCustomerId);
-                }}
-              />
+              <div id="cobrancas" className="anchor-target">
+                <ChargeAutomationPanel
+                  canRun={authUser.role === "OWNER"}
+                  monitor={dailyChargeJobMonitor}
+                  onSuccess={(message) => setNotice({ tone: "success", message })}
+                  onCompleted={async () => {
+                    await refreshChargeData(selectedCustomerId);
+                  }}
+                />
+              </div>
             ) : null}
 
             {authUser && customerDetail && isOwner ? (
