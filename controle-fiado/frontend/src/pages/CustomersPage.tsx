@@ -39,6 +39,8 @@ import { getAuthMode } from "../shared/config/auth";
 import { getDataMode } from "../shared/config/data";
 import { OperationNotice } from "../shared/components/OperationNotice";
 
+type AppView = "dashboard" | "customers" | "operations" | "charges" | "status";
+
 export function CustomersPage() {
   const authMode = getAuthMode();
   const dataMode = getDataMode();
@@ -56,7 +58,9 @@ export function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
+  const [activeView, setActiveView] = useState<AppView>("dashboard");
   const isOwner = authUser?.role === "OWNER";
+  const pageTitle = getPageTitle(activeView, dataMode);
 
   async function refreshOperationalData(customerId: string) {
     const customerDataPromise = fetchCustomers();
@@ -225,12 +229,41 @@ export function CustomersPage() {
       });
   }, [selectedCustomerId, isOwner]);
 
+  useEffect(() => {
+    if (!isOwner && (activeView === "charges" || activeView === "status")) {
+      setActiveView("dashboard");
+    }
+  }, [activeView, isOwner]);
+
   return (
     <div className="page-shell">
       <aside className="side-panel">
         <div className="eyebrow">Controle de Fiado</div>
         <h1>Mercadinho do Tonhao</h1>
         <p>Base real do sistema com API, banco e integracao futura com WhatsApp.</p>
+        {authUser ? (
+          <nav className="app-nav" aria-label="Navegacao principal">
+            <button className={activeView === "dashboard" ? "active" : ""} type="button" onClick={() => setActiveView("dashboard")}>
+              Dashboard
+            </button>
+            <button className={activeView === "customers" ? "active" : ""} type="button" onClick={() => setActiveView("customers")}>
+              Clientes
+            </button>
+            <button className={activeView === "operations" ? "active" : ""} type="button" onClick={() => setActiveView("operations")}>
+              Venda e pagamento
+            </button>
+            {isOwner ? (
+              <>
+                <button className={activeView === "charges" ? "active" : ""} type="button" onClick={() => setActiveView("charges")}>
+                  Cobrancas
+                </button>
+                <button className={activeView === "status" ? "active" : ""} type="button" onClick={() => setActiveView("status")}>
+                  Status
+                </button>
+              </>
+            ) : null}
+          </nav>
+        ) : null}
         <AuthPanel
           user={authUser}
           onLogout={async () => {
@@ -249,8 +282,9 @@ export function CustomersPage() {
       <main className="content-panel">
         <header className="page-header">
           <div>
-            <div className="eyebrow">Clientes</div>
-            <h2>{dataMode === "supabase" ? "Base web conectada ao Supabase" : "Base inicial conectada com API"}</h2>
+            <div className="eyebrow">{pageTitle.kicker}</div>
+            <h2>{pageTitle.title}</h2>
+            <p className="page-description">{pageTitle.description}</p>
           </div>
           <div className="status-card">
             <span className="status-dot" />
@@ -267,157 +301,361 @@ export function CustomersPage() {
         {!loading && !error && authUser ? (
           <>
             {notice ? <OperationNotice tone={notice.tone} message={notice.message} /> : null}
-            {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
-            {systemStatus ? <SystemStatusPanel status={systemStatus} /> : null}
-            {chargeOverview ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
             {!isOwner ? (
               <div className="empty-card">
                 Voce esta no perfil STAFF. Clientes e vendas estao liberados; pagamentos, cobrancas e controles administrativos ficam com o OWNER.
               </div>
             ) : null}
-            {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
 
-            <section className="section-block">
-              <div className="page-header page-header-section">
-                <div>
-                  <div className="eyebrow">Clientes</div>
-                  <h2>Base operacional inicial</h2>
-                </div>
-              </div>
-              <CreateCustomerForm
-                onSuccess={(message) => setNotice({ tone: "success", message })}
-                onCreated={async (customer) => {
+            {activeView === "dashboard" ? (
+              <DashboardView
+                isOwner={isOwner}
+                dashboardSummary={dashboardSummary}
+                chargeOverview={chargeOverview}
+                dailyChargeJobMonitor={dailyChargeJobMonitor}
+                sales={sales}
+                payments={payments}
+                onGoToOperations={() => setActiveView("operations")}
+                onGoToCustomers={() => setActiveView("customers")}
+                onGoToCharges={() => setActiveView("charges")}
+              />
+            ) : null}
+
+            {activeView === "customers" ? (
+              <CustomersView
+                customers={customers}
+                customerDetail={customerDetail}
+                selectedCustomerId={selectedCustomerId}
+                isOwner={isOwner}
+                onSelectCustomer={setSelectedCustomerId}
+                onCustomerCreated={async (customer) => {
                   await refreshOperationalData(customer.id);
                   setSelectedCustomerId(customer.id);
                 }}
-              />
-              <div style={{ height: 16 }} />
-              <CustomerList customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={setSelectedCustomerId} />
-            </section>
-
-            {customerDetail ? (
-              <CustomerDetailPanel
-                customer={customerDetail}
-                selectedCustomerId={selectedCustomerId}
-                onCustomerChange={setSelectedCustomerId}
-                canViewPayments={isOwner}
-                options={customers.map((customer) => ({
-                  id: customer.id,
-                  name: customer.name
-                }))}
-              />
-            ) : null}
-
-            {authUser && selectedCustomerId ? (
-              <section className="section-block operation-grid">
-                <CreateSaleForm
-                  customerId={selectedCustomerId}
-                  customerName={customerDetail?.name}
-                  customerOptions={customers.map((customer) => ({
-                    id: customer.id,
-                    name: customer.name
-                  }))}
-                  onCustomerChange={setSelectedCustomerId}
-                  createdById={authUser.id}
-                  onSuccess={(message) => setNotice({ tone: "success", message })}
-                  onCreated={async () => {
-                    await refreshOperationalData(selectedCustomerId);
-                  }}
-                />
-                {isOwner ? (
-                  <CreatePaymentForm
-                    customerId={selectedCustomerId}
-                    customerName={customerDetail?.name}
-                    customerOptions={customers.map((customer) => ({
-                      id: customer.id,
-                      name: customer.name
-                    }))}
-                    onCustomerChange={setSelectedCustomerId}
-                    createdById={authUser.id}
-                    openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
-                    onSuccess={(message) => setNotice({ tone: "success", message })}
-                    onCreated={async () => {
-                      await refreshOperationalData(selectedCustomerId);
-                    }}
-                  />
-                ) : (
-                  <div className="operation-form">
-                    <div className="eyebrow">Pagamentos</div>
-                    <div className="customer-meta">Somente o perfil OWNER pode registrar pagamentos.</div>
-                  </div>
-                )}
-              </section>
-            ) : null}
-
-            {selectedCustomerId && isOwner ? (
-              <ChargeAutomationPanel
-                canRun={authUser.role === "OWNER"}
-                monitor={dailyChargeJobMonitor}
                 onSuccess={(message) => setNotice({ tone: "success", message })}
-                onCompleted={async () => {
-                  await refreshChargeData(selectedCustomerId);
-                }}
               />
             ) : null}
 
-            {authUser && customerDetail && isOwner ? (
-              <ManualChargeForm
-                customerId={customerDetail.id}
-                customerName={customerDetail.name}
-                customerPhone={customerDetail.phone}
-                customerPhoneE164={customerDetail.phoneE164}
-                saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
-                openBalance={customerDetail.openBalance}
-                createdById={authUser.id}
-                onSuccess={(message) => setNotice({ tone: "success", message })}
-                onSent={async () => {
-                  await refreshOperationalData(customerDetail.id);
-                }}
-              />
-            ) : null}
-
-            {chargeOverview && isOwner ? (
-              <ChargeOverviewPanel
-                overview={chargeOverview}
+            {activeView === "operations" && selectedCustomerId ? (
+              <OperationsView
+                authUser={authUser}
+                isOwner={isOwner}
+                customers={customers}
+                customerDetail={customerDetail}
                 selectedCustomerId={selectedCustomerId}
                 onSelectCustomer={setSelectedCustomerId}
-              />
-            ) : null}
-            {chargeMessages.length && isOwner ? (
-              <ChargeMessageList
-                messages={chargeMessages}
-                canRetry={authUser.role === "OWNER"}
-                onRetried={(message) => setNotice({ tone: "success", message })}
-                onCompleted={async () => {
+                onSuccess={(message) => setNotice({ tone: "success", message })}
+                onCreated={async () => {
                   await refreshOperationalData(selectedCustomerId);
                 }}
               />
             ) : null}
 
-            <section className="section-block">
-              <div className="page-header page-header-section">
-                <div>
-                  <div className="eyebrow">Vendas</div>
-                  <h2>Ultimas vendas fiado</h2>
-                </div>
-              </div>
-              <RecentSalesList sales={sales} />
-            </section>
-
-            {isOwner ? (
-              <section className="section-block">
-                <div className="page-header page-header-section">
-                  <div>
-                    <div className="eyebrow">Pagamentos</div>
-                    <h2>Ultimos pagamentos</h2>
-                  </div>
-                </div>
-                <RecentPaymentsList payments={payments} />
-              </section>
+            {activeView === "charges" && isOwner ? (
+              <ChargesView
+                authUser={authUser}
+                customerDetail={customerDetail}
+                selectedCustomerId={selectedCustomerId}
+                chargeOverview={chargeOverview}
+                chargeMessages={chargeMessages}
+                dailyChargeJobMonitor={dailyChargeJobMonitor}
+                onSelectCustomer={setSelectedCustomerId}
+                onSuccess={(message) => setNotice({ tone: "success", message })}
+                onChargeDataRefresh={async () => {
+                  await refreshChargeData(selectedCustomerId);
+                }}
+                onOperationalRefresh={async (customerId) => {
+                  await refreshOperationalData(customerId);
+                }}
+              />
             ) : null}
+
+            {activeView === "status" && isOwner ? <StatusView status={systemStatus} /> : null}
           </>
         ) : null}
       </main>
     </div>
   );
+}
+
+function getPageTitle(activeView: AppView, dataMode: string) {
+  const titles: Record<AppView, { kicker: string; title: string; description: string }> = {
+    dashboard: {
+      kicker: "Inicio",
+      title: dataMode === "supabase" ? "Base web conectada ao Supabase" : "Base inicial conectada com API",
+      description: "Resumo da operacao e atalhos principais para o dia a dia."
+    },
+    customers: {
+      kicker: "Clientes",
+      title: "Cadastro e ficha do cliente",
+      description: "Consulte, selecione e cadastre clientes sem misturar com pagamentos ou cobrancas."
+    },
+    operations: {
+      kicker: "Operacao",
+      title: "Venda e pagamento",
+      description: "Registre vendas fiado e pagamentos no cliente selecionado."
+    },
+    charges: {
+      kicker: "Cobrancas",
+      title: "Lembretes por WhatsApp",
+      description: "Prepare mensagens manuais e acompanhe vencimentos."
+    },
+    status: {
+      kicker: "Sistema",
+      title: "Status do ambiente",
+      description: "Informacoes tecnicas do ambiente web."
+    }
+  };
+
+  return titles[activeView];
+}
+
+type DashboardViewProps = {
+  isOwner: boolean;
+  dashboardSummary: DashboardSummary | null;
+  chargeOverview: ChargeOverview | null;
+  dailyChargeJobMonitor: DailyChargeJobMonitor | null;
+  sales: Sale[];
+  payments: Payment[];
+  onGoToOperations: () => void;
+  onGoToCustomers: () => void;
+  onGoToCharges: () => void;
+};
+
+function DashboardView({
+  isOwner,
+  dashboardSummary,
+  chargeOverview,
+  dailyChargeJobMonitor,
+  sales,
+  payments,
+  onGoToOperations,
+  onGoToCustomers,
+  onGoToCharges
+}: DashboardViewProps) {
+  return (
+    <>
+      <section className="quick-actions section-block">
+        <button className="ghost-button" type="button" onClick={onGoToOperations}>
+          Nova venda / pagamento
+        </button>
+        <button className="ghost-button" type="button" onClick={onGoToCustomers}>
+          Abrir clientes
+        </button>
+        {isOwner ? (
+          <button className="ghost-button" type="button" onClick={onGoToCharges}>
+            Ver cobrancas
+          </button>
+        ) : null}
+      </section>
+
+      {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} /> : null}
+      {chargeOverview && isOwner ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
+
+      <section className="section-block">
+        <div className="page-header page-header-section">
+          <div>
+            <div className="eyebrow">Vendas</div>
+            <h2>Ultimas vendas fiado</h2>
+          </div>
+        </div>
+        <RecentSalesList sales={sales} />
+      </section>
+
+      {isOwner ? (
+        <section className="section-block">
+          <div className="page-header page-header-section">
+            <div>
+              <div className="eyebrow">Pagamentos</div>
+              <h2>Ultimos pagamentos</h2>
+            </div>
+          </div>
+          <RecentPaymentsList payments={payments} />
+        </section>
+      ) : null}
+    </>
+  );
+}
+
+type CustomersViewProps = {
+  customers: Customer[];
+  customerDetail: CustomerDetail | null;
+  selectedCustomerId: string;
+  isOwner: boolean;
+  onSelectCustomer: (customerId: string) => void;
+  onCustomerCreated: (customer: Customer) => Promise<void>;
+  onSuccess: (message: string) => void;
+};
+
+function CustomersView({
+  customers,
+  customerDetail,
+  selectedCustomerId,
+  isOwner,
+  onSelectCustomer,
+  onCustomerCreated,
+  onSuccess
+}: CustomersViewProps) {
+  return (
+    <>
+      <section className="section-block">
+        <div className="page-header page-header-section">
+          <div>
+            <div className="eyebrow">Clientes</div>
+            <h2>Base operacional inicial</h2>
+          </div>
+        </div>
+        <CreateCustomerForm onSuccess={onSuccess} onCreated={onCustomerCreated} />
+        <div style={{ height: 16 }} />
+        <CustomerList customers={customers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer} />
+      </section>
+
+      {customerDetail ? (
+        <CustomerDetailPanel
+          customer={customerDetail}
+          selectedCustomerId={selectedCustomerId}
+          onCustomerChange={onSelectCustomer}
+          canViewPayments={isOwner}
+          options={customers.map((customer) => ({
+            id: customer.id,
+            name: customer.name
+          }))}
+        />
+      ) : null}
+    </>
+  );
+}
+
+type OperationsViewProps = {
+  authUser: AuthUser;
+  isOwner: boolean;
+  customers: Customer[];
+  customerDetail: CustomerDetail | null;
+  selectedCustomerId: string;
+  onSelectCustomer: (customerId: string) => void;
+  onSuccess: (message: string) => void;
+  onCreated: () => Promise<void>;
+};
+
+function OperationsView({
+  authUser,
+  isOwner,
+  customers,
+  customerDetail,
+  selectedCustomerId,
+  onSelectCustomer,
+  onSuccess,
+  onCreated
+}: OperationsViewProps) {
+  return (
+    <>
+      {customerDetail ? <CurrentCustomerBar customerName={customerDetail.name} openBalance={customerDetail.openBalance} /> : null}
+      <section className="section-block operation-grid">
+        <CreateSaleForm
+          customerId={selectedCustomerId}
+          customerName={customerDetail?.name}
+          customerOptions={customers.map((customer) => ({
+            id: customer.id,
+            name: customer.name
+          }))}
+          onCustomerChange={onSelectCustomer}
+          createdById={authUser.id}
+          onSuccess={onSuccess}
+          onCreated={onCreated}
+        />
+        {isOwner ? (
+          <CreatePaymentForm
+            customerId={selectedCustomerId}
+            customerName={customerDetail?.name}
+            customerOptions={customers.map((customer) => ({
+              id: customer.id,
+              name: customer.name
+            }))}
+            onCustomerChange={onSelectCustomer}
+            createdById={authUser.id}
+            openSales={customerDetail?.sales.filter((sale) => sale.remainingAmount > 0) ?? []}
+            onSuccess={onSuccess}
+            onCreated={onCreated}
+          />
+        ) : (
+          <div className="operation-form">
+            <div className="eyebrow">Pagamentos</div>
+            <div className="customer-meta">Somente o perfil OWNER pode registrar pagamentos.</div>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+type ChargesViewProps = {
+  authUser: AuthUser;
+  customerDetail: CustomerDetail | null;
+  selectedCustomerId: string;
+  chargeOverview: ChargeOverview | null;
+  chargeMessages: ChargeMessage[];
+  dailyChargeJobMonitor: DailyChargeJobMonitor | null;
+  onSelectCustomer: (customerId: string) => void;
+  onSuccess: (message: string) => void;
+  onChargeDataRefresh: () => Promise<void>;
+  onOperationalRefresh: (customerId: string) => Promise<void>;
+};
+
+function ChargesView({
+  authUser,
+  customerDetail,
+  selectedCustomerId,
+  chargeOverview,
+  chargeMessages,
+  dailyChargeJobMonitor,
+  onSelectCustomer,
+  onSuccess,
+  onChargeDataRefresh,
+  onOperationalRefresh
+}: ChargesViewProps) {
+  return (
+    <>
+      <ChargeAutomationPanel
+        canRun={authUser.role === "OWNER"}
+        monitor={dailyChargeJobMonitor}
+        onSuccess={onSuccess}
+        onCompleted={onChargeDataRefresh}
+      />
+
+      {customerDetail ? (
+        <ManualChargeForm
+          customerId={customerDetail.id}
+          customerName={customerDetail.name}
+          customerPhone={customerDetail.phone}
+          customerPhoneE164={customerDetail.phoneE164}
+          saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
+          openBalance={customerDetail.openBalance}
+          createdById={authUser.id}
+          onSuccess={onSuccess}
+          onSent={async () => {
+            await onOperationalRefresh(customerDetail.id);
+          }}
+        />
+      ) : null}
+
+      {chargeOverview ? (
+        <ChargeOverviewPanel overview={chargeOverview} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer} />
+      ) : null}
+
+      {chargeMessages.length ? (
+        <ChargeMessageList
+          messages={chargeMessages}
+          canRetry={authUser.role === "OWNER"}
+          onRetried={onSuccess}
+          onCompleted={async () => {
+            await onOperationalRefresh(selectedCustomerId);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function StatusView({ status }: { status: SystemStatus | null }) {
+  return status ? <SystemStatusPanel status={status} /> : <div className="empty-card">Status do ambiente indisponivel.</div>;
 }

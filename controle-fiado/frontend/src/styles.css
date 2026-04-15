@@ -190,6 +190,48 @@ body {
   line-height: 1.6;
 }
 
+.app-nav {
+  margin-top: 24px;
+  display: grid;
+  gap: 8px;
+}
+
+.app-nav button {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.66);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.app-nav button:hover,
+.app-nav button.active {
+  border-color: rgba(249, 115, 22, 0.22);
+  background: rgba(249, 115, 22, 0.1);
+  color: #fff;
+}
+
+.page-description {
+  margin: 12px 0 0;
+  max-width: 680px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.55;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .content-panel {
   padding: 32px;
 }
