@@ -7,6 +7,8 @@ dist
 coverage
 frontend/dist
 frontend/tsconfig.tsbuildinfo
+frontend/frontend-start.log
+frontend/frontend-start.err.log
 frontend-dev.log
 frontend-dev.out.log
 backend/dist
