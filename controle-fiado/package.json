@@ -16,6 +16,6 @@
     "db:migrate:safe": "powershell -ExecutionPolicy Bypass -File scripts/migrate-sqlite-safe.ps1",
     "db:generate": "npm --workspace backend run prisma:generate",
     "db:migrate": "npm --workspace backend run prisma:migrate",
-    "db:seed": "npm --workspace backend run prisma:seed"
+    "db:seed": "npm --workspace backend exec -- prisma db seed"
   }
 }

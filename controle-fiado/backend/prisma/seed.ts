@@ -100,8 +100,11 @@ async function main() {
     }
   });
 
-  await prisma.auditLog.create({
-    data: {
+  await prisma.auditLog.upsert({
+    where: { id: "audit-seed-initial" },
+    update: {},
+    create: {
+      id: "audit-seed-initial",
       actorUserId: owner.id,
       action: "seed_database",
       entityType: "system",
