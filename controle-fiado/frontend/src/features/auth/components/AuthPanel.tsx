@@ -49,26 +49,36 @@ export function AuthPanel({ user, onLogin, onLogout }: AuthPanelProps) {
 
   return (
     <form className="auth-panel auth-form" onSubmit={handleSubmit}>
-      <div className="eyebrow">Entrar</div>
-      <input
-        className="customer-selector"
-        type={authMode === "supabase" ? "email" : "text"}
-        placeholder={authMode === "supabase" ? "email" : "login"}
-        value={loginValue}
-        onChange={(event) => setLoginValue(event.target.value)}
-      />
-      <input
-        className="customer-selector"
-        type="password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-      />
+      <label className="field-block">
+        <span className="label">{authMode === "supabase" ? "Email" : "Login"}</span>
+        <input
+          className="customer-selector"
+          type={authMode === "supabase" ? "email" : "text"}
+          placeholder={authMode === "supabase" ? "seu@email.com" : "Seu login"}
+          value={loginValue}
+          onChange={(event) => setLoginValue(event.target.value)}
+        />
+      </label>
+
+      <label className="field-block">
+        <span className="label">Senha</span>
+        <input
+          className="customer-selector"
+          type="password"
+          placeholder="Sua senha"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </label>
+
       <button className="auth-button" type="submit" disabled={submitting}>
         {submitting ? "Entrando..." : "Entrar"}
       </button>
-      <div className="customer-meta">
-        Modo de autenticacao: <strong>{authMode}</strong>
+
+      <div className="auth-meta-row">
+        <div className="customer-meta">Modo de autenticacao: <strong>{authMode}</strong></div>
       </div>
+
       {error ? <div className="error-copy">{error}</div> : null}
     </form>
   );

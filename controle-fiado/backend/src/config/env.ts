@@ -11,7 +11,10 @@ function getEnv(name: string, fallback?: string) {
 export const env = {
   appEnv: getEnv("APP_ENV", process.env.NODE_ENV ?? "development"),
   port: Number(getEnv("PORT", "3333")),
-  corsOrigin: getEnv("CORS_ORIGIN", "http://127.0.0.1:5173"),
+  corsOrigins: getEnv("CORS_ORIGIN", "http://127.0.0.1:5173,http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   whatsappProvider: getEnv("WHATSAPP_PROVIDER", "wa_link"),
   metaWhatsAppApiVersion: getEnv("META_WHATSAPP_API_VERSION", "v23.0"),
   metaWhatsAppAccessToken: getEnv("META_WHATSAPP_ACCESS_TOKEN", ""),

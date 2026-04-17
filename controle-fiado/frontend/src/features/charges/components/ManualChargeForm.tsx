@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { sendManualCharge } from "../api/send-manual-charge";
 import { markChargeMessageSent } from "../api/mark-charge-message-sent";
+import { sendManualCharge } from "../api/send-manual-charge";
 import { buildWhatsAppUrl } from "../utils/build-whatsapp-url";
 
 type ManualChargeFormProps = {
@@ -72,11 +72,11 @@ export function ManualChargeForm({
         await markChargeMessageSent(message.id);
       }
 
-      setSuccess("Mensagem preparada com sucesso. Use o botao abaixo para abrir no WhatsApp.");
+      setSuccess("Mensagem preparada com sucesso. Abra no WhatsApp para concluir o contato.");
       onSuccess?.("Mensagem preparada com sucesso.");
       await onSent();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao enviar cobranca.");
+      setError(err instanceof Error ? err.message : "Falha ao preparar cobranca.");
     } finally {
       setLoading(false);
     }
@@ -84,42 +84,59 @@ export function ManualChargeForm({
 
   return (
     <section className="section-block">
-      <form className="customer-card manual-charge-form" onSubmit={handleSubmit}>
-        <div className="page-header page-header-section">
+      <form className="dashboard-chart-card manual-charge-card" onSubmit={handleSubmit}>
+        <div className="dashboard-card-head">
           <div>
             <div className="eyebrow">Cobranca manual</div>
-            <h2>Enviar mensagem agora</h2>
+            <h3>Preparar mensagem</h3>
+            <p className="page-description">Monte o texto final, confira o contato e abra a conversa com um clique.</p>
           </div>
         </div>
 
-        <div className="customer-meta">Cliente selecionado: {customerName}</div>
-        <div className="customer-meta">Saldo atual: {formatMoney(openBalance)}</div>
-        <div className="customer-meta">WhatsApp: {customerPhoneE164 ?? customerPhone ?? "Nao informado"}</div>
-        {!hasWhatsAppTarget ? (
-          <div className="error-copy">Cliente sem telefone valido para abrir o WhatsApp. Ajuste o telefone antes de cobrar.</div>
-        ) : null}
+        <div className="operation-support-grid">
+          <div className="support-card">
+            <span className="label">Cliente</span>
+            <strong>{customerName}</strong>
+          </div>
+          <div className="support-card">
+            <span className="label">Saldo atual</span>
+            <strong>{formatMoney(openBalance)}</strong>
+          </div>
+          <div className="support-card">
+            <span className="label">WhatsApp</span>
+            <strong>{customerPhoneE164 ?? customerPhone ?? "Nao informado"}</strong>
+          </div>
+          <div className="support-card">
+            <span className="label">Venda alvo</span>
+            <strong>{saleId ? saleId.slice(0, 8) : "Sem venda especifica"}</strong>
+          </div>
+        </div>
 
-        <label className="eyebrow" htmlFor="manual-charge-message">
-          Preview da mensagem
+        {!hasWhatsAppTarget ? <div className="operation-notice error">Cliente sem telefone valido para abrir o WhatsApp.</div> : null}
+
+        <label className="field-block" htmlFor="manual-charge-message">
+          <span className="label">Mensagem</span>
+          <textarea
+            id="manual-charge-message"
+            className="message-textarea"
+            value={messageBody}
+            onChange={(event) => setMessageBody(event.target.value)}
+          />
         </label>
-        <textarea
-          id="manual-charge-message"
-          className="message-textarea"
-          value={messageBody}
-          onChange={(event) => setMessageBody(event.target.value)}
-        />
 
-        <button className="auth-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
-          {loading ? "Preparando..." : "Preparar cobranca"}
-        </button>
-        {whatsappUrl ? (
-          <a className="auth-button inline-link-button" href={whatsappUrl} target="_blank" rel="noreferrer">
-            Abrir no WhatsApp
-          </a>
-        ) : null}
+        <div className="form-actions-row">
+          <button className="auth-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
+            {loading ? "Preparando..." : "Preparar cobranca"}
+          </button>
+          {whatsappUrl ? (
+            <a className="ghost-button inline-link-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+              Abrir no WhatsApp
+            </a>
+          ) : null}
+        </div>
 
-        {success ? <div className="success-copy">{success}</div> : null}
-        {error ? <div className="error-copy">{error}</div> : null}
+        {success ? <div className="operation-notice success">{success}</div> : null}
+        {error ? <div className="operation-notice error">{error}</div> : null}
       </form>
     </section>
   );

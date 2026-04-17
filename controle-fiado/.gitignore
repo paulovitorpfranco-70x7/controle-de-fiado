@@ -6,8 +6,12 @@ dist
 .env.local
 coverage
 frontend/dist
+frontend/tsconfig.tsbuildinfo
+frontend-dev.log
+frontend-dev.out.log
 backend/dist
+backend/backend-start.log
 backend/generated
 prisma/dev.db
 prisma/dev.db-journal
-
+scratch_db.js

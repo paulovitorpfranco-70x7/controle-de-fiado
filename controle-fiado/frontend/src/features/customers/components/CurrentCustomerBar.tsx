@@ -19,7 +19,7 @@ export function CurrentCustomerBar({ customerName, openBalance }: CurrentCustome
           <strong>{customerName}</strong>
         </div>
         <div>
-          <div className="eyebrow">Saldo em aberto</div>
+          <div className="eyebrow">Saldo pendente</div>
           <strong>{formatMoney(openBalance)}</strong>
         </div>
       </div>

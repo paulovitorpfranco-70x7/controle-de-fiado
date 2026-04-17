@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { createSale } from "../api/create-sale";
+import { useMemo, useState } from "react";
 import { addDaysInputDateValue, todayInputDateValue } from "../../../shared/utils/date-input";
+import { createSale } from "../api/create-sale";
 
 type CreateSaleFormProps = {
   customerId: string;
@@ -21,7 +21,7 @@ export function CreateSaleForm({
   onCreated,
   onSuccess
 }: CreateSaleFormProps) {
-  const [description, setDescription] = useState("Compra de balcão");
+  const [description, setDescription] = useState("Compra de balcao");
   const [originalAmount, setOriginalAmount] = useState("0");
   const [feePercent, setFeePercent] = useState("0");
   const [saleDate, setSaleDate] = useState(todayInputDateValue());
@@ -29,6 +29,17 @@ export function CreateSaleForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const projectedAmount = useMemo(() => {
+    const baseAmount = Number(originalAmount) || 0;
+    const fee = Number(feePercent) || 0;
+
+    if (baseAmount <= 0) {
+      return 0;
+    }
+
+    return baseAmount + (baseAmount * fee) / 100;
+  }, [feePercent, originalAmount]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,6 +57,7 @@ export function CreateSaleForm({
         dueDate,
         createdById
       });
+
       setOriginalAmount("0");
       setFeePercent("0");
       setSuccess("Venda registrada com sucesso.");
@@ -60,9 +72,16 @@ export function CreateSaleForm({
 
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
-      <div className="eyebrow">Nova venda</div>
+      <div className="operation-header">
+        <div>
+          <div className="eyebrow">Nova venda</div>
+          <h3>Lancar fiado</h3>
+        </div>
+        <div className="operation-chip">{formatCurrency(projectedAmount)}</div>
+      </div>
+
       <label className="field-block">
-        <span className="label">Cliente da venda</span>
+        <span className="label">Cliente</span>
         <select
           className="customer-selector"
           value={customerId}
@@ -80,18 +99,20 @@ export function CreateSaleForm({
           )}
         </select>
       </label>
+
       <label className="field-block">
         <span className="label">Descricao</span>
         <input
           className="customer-selector"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Descricao da venda"
+          placeholder="Ex.: compra do mes"
         />
       </label>
+
       <div className="form-grid">
         <label className="field-block">
-          <span className="label">Valor da venda</span>
+          <span className="label">Valor</span>
           <input
             className="customer-selector"
             type="number"
@@ -99,11 +120,12 @@ export function CreateSaleForm({
             step="0.01"
             value={originalAmount}
             onChange={(event) => setOriginalAmount(event.target.value)}
-            placeholder="Ex: 50,00"
+            placeholder="0,00"
           />
         </label>
+
         <label className="field-block">
-          <span className="label">% de acrescimo</span>
+          <span className="label">Acrescimo %</span>
           <input
             className="customer-selector"
             type="number"
@@ -112,25 +134,47 @@ export function CreateSaleForm({
             step="0.01"
             value={feePercent}
             onChange={(event) => setFeePercent(event.target.value)}
-            placeholder="Ex: 10"
+            placeholder="0"
           />
         </label>
       </div>
+
       <div className="form-grid">
         <label className="field-block">
           <span className="label">Data da venda</span>
           <input className="customer-selector" type="date" value={saleDate} onChange={(event) => setSaleDate(event.target.value)} />
         </label>
+
         <label className="field-block">
-          <span className="label">Data de vencimento</span>
+          <span className="label">Vencimento</span>
           <input className="customer-selector" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
         </label>
       </div>
+
+      <div className="operation-support-grid">
+        <div className="support-card">
+          <span className="label">Cliente atual</span>
+          <strong>{customerName ?? "Sem cliente selecionado"}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">Total previsto</span>
+          <strong>{formatCurrency(projectedAmount)}</strong>
+        </div>
+      </div>
+
       <button className="auth-button" type="submit" disabled={loading}>
         {loading ? "Salvando..." : "Registrar venda"}
       </button>
+
       {success ? <div className="success-copy">{success}</div> : null}
       {error ? <div className="error-copy">{error}</div> : null}
     </form>
   );
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value);
 }

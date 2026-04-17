@@ -5,11 +5,11 @@ const prisma = new PrismaClient();
 async function main() {
   const owner = await prisma.user.upsert({
     where: { login: "tonhao" },
-    update: {},
+    update: { passwordHash: "plain:tonhao123" },
     create: {
       name: "Tonhao",
       login: "tonhao",
-      passwordHash: "definir-hash-real",
+      passwordHash: "plain:tonhao123",
       role: UserRole.OWNER
     }
   });

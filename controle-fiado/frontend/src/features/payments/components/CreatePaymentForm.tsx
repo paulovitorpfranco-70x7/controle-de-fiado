@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { createPayment } from "../api/create-payment";
+import { useMemo, useState } from "react";
 import { todayInputDateValue } from "../../../shared/utils/date-input";
 import type { Sale } from "../../sales/types/sale";
+import { createPayment } from "../api/create-payment";
 
 type CreatePaymentFormProps = {
   customerId: string;
@@ -33,6 +33,8 @@ export function CreatePaymentForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const selectedSale = useMemo(() => openSales.find((sale) => sale.id === targetSaleId) ?? null, [openSales, targetSaleId]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
@@ -49,6 +51,7 @@ export function CreatePaymentForm({
         createdById,
         targetSaleId: targetSaleId || null
       });
+
       setAmount("0");
       setTargetSaleId("");
       setSuccess("Pagamento registrado com sucesso.");
@@ -63,9 +66,16 @@ export function CreatePaymentForm({
 
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
-      <div className="eyebrow">Novo pagamento</div>
+      <div className="operation-header">
+        <div>
+          <div className="eyebrow">Novo pagamento</div>
+          <h3>Receber valor</h3>
+        </div>
+        <div className="operation-chip">{formatCurrency(Number(amount) || 0)}</div>
+      </div>
+
       <label className="field-block">
-        <span className="label">Cliente que esta pagando</span>
+        <span className="label">Cliente</span>
         <select
           className="customer-selector"
           value={customerId}
@@ -83,6 +93,7 @@ export function CreatePaymentForm({
           )}
         </select>
       </label>
+
       <div className="form-grid">
         <label className="field-block">
           <span className="label">Valor pago</span>
@@ -93,32 +104,30 @@ export function CreatePaymentForm({
             step="0.01"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
-            placeholder="Valor pago"
+            placeholder="0,00"
           />
         </label>
+
         <label className="field-block">
-          <span className="label">Data do pagamento</span>
-          <input
-            className="customer-selector"
-            type="date"
-            value={paymentDate}
-            onChange={(event) => setPaymentDate(event.target.value)}
-          />
+          <span className="label">Data</span>
+          <input className="customer-selector" type="date" value={paymentDate} onChange={(event) => setPaymentDate(event.target.value)} />
         </label>
       </div>
+
       <div className="form-grid">
         <label className="field-block">
-          <span className="label">Forma de pagamento</span>
+          <span className="label">Forma</span>
           <select className="customer-selector" value={method} onChange={(event) => setMethod(event.target.value as "CASH" | "PIX" | "CARD")}>
             <option value="PIX">PIX</option>
             <option value="CASH">Dinheiro</option>
             <option value="CARD">Cartao</option>
           </select>
         </label>
+
         <label className="field-block">
-          <span className="label">Aplicar em</span>
+          <span className="label">Aplicacao</span>
           <select className="customer-selector" value={targetSaleId} onChange={(event) => setTargetSaleId(event.target.value)}>
-            <option value="">Rateio automatico nas mais antigas</option>
+            <option value="">Rateio automatico</option>
             {openSales.map((sale) => (
               <option key={sale.id} value={sale.id}>
                 {`${sale.description} | vence ${formatDate(sale.dueDate)} | aberto ${formatCurrency(sale.remainingAmount)}`}
@@ -127,16 +136,33 @@ export function CreatePaymentForm({
           </select>
         </label>
       </div>
+
       <label className="field-block">
-        <span className="label">Observacoes</span>
+        <span className="label">Observacao</span>
         <input className="customer-selector" value={notes} onChange={(event) => setNotes(event.target.value)} />
       </label>
-      {targetSaleId ? <div className="message-copy">O sistema vai quitar primeiro o titulo escolhido. Se sobrar valor, o restante sera rateado nas outras vendas em aberto.</div> : null}
-      {!targetSaleId ? <div className="message-copy">Sem escolha manual, o pagamento continua sendo rateado automaticamente nas vendas mais antigas.</div> : null}
-      {openSales.length === 0 ? <div className="message-copy">Este cliente nao possui titulos em aberto para direcionar manualmente.</div> : null}
+
+      <div className="operation-support-grid">
+        <div className="support-card">
+          <span className="label">Cliente atual</span>
+          <strong>{customerName ?? "Sem cliente selecionado"}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">Destino</span>
+          <strong>{selectedSale ? selectedSale.description : "Rateio automatico nas vendas em aberto"}</strong>
+        </div>
+      </div>
+
+      {targetSaleId ? (
+        <div className="message-copy">O sistema quita primeiro a venda escolhida e distribui o restante, se houver.</div>
+      ) : null}
+      {!targetSaleId ? <div className="message-copy">Sem escolha manual, o valor sera aplicado nas vendas mais antigas.</div> : null}
+      {openSales.length === 0 ? <div className="message-copy">Este cliente nao possui vendas em aberto para direcionamento manual.</div> : null}
+
       <button className="auth-button" type="submit" disabled={loading}>
         {loading ? "Salvando..." : "Registrar pagamento"}
       </button>
+
       {success ? <div className="success-copy">{success}</div> : null}
       {error ? <div className="error-copy">{error}</div> : null}
     </form>

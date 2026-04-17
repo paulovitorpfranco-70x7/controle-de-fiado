@@ -20,7 +20,23 @@ export function buildApp() {
   registerObservability(app);
 
   app.register(cors, {
-    origin: env.corsOrigin
+    origin: (origin, callback) => {
+      if (!origin || env.corsOrigins.includes("*") || env.corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      try {
+        const requestOrigin = new URL(origin);
+        const isLocalDevOrigin =
+          requestOrigin.protocol === "http:" &&
+          (requestOrigin.hostname === "localhost" || requestOrigin.hostname === "127.0.0.1");
+
+        callback(null, isLocalDevOrigin);
+      } catch {
+        callback(null, false);
+      }
+    }
   });
 
   app.get("/health", async () => ({

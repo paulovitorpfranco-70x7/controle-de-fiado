@@ -26,7 +26,7 @@ async function main() {
 
   const owner = await prisma.user.upsert({
     where: { login: ownerSeed.login },
-    update: {},
+    update: { passwordHash: ownerSeed.passwordHash },
     create: {
       name: ownerSeed.name,
       login: ownerSeed.login,

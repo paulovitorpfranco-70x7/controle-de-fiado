@@ -49,47 +49,53 @@ export function CreateCustomerForm({ onCreated, onSuccess }: CreateCustomerFormP
 
   return (
     <form className="operation-form" onSubmit={handleSubmit}>
-      <div className="eyebrow">Novo cliente</div>
-      <input
-        className="customer-selector"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        placeholder="Nome do cliente"
-      />
-      <div className="form-grid">
-        <input
-          className="customer-selector"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          placeholder="Telefone"
-        />
-        <input
-          className="customer-selector"
-          type="number"
-          min="0"
-          step="0.01"
-          value={creditLimit}
-          onChange={(event) => setCreditLimit(event.target.value)}
-          placeholder="Limite de credito"
-        />
+      <div className="operation-header">
+        <div>
+          <div className="eyebrow">Novo cliente</div>
+          <h3>Cadastrar cliente</h3>
+        </div>
       </div>
-      <input
-        className="customer-selector"
-        value={address}
-        onChange={(event) => setAddress(event.target.value)}
-        placeholder="Endereco"
-      />
-      <input
-        className="customer-selector"
-        value={notes}
-        onChange={(event) => setNotes(event.target.value)}
-        placeholder="Observacoes"
-      />
+
+      <label className="field-block">
+        <span className="label">Nome</span>
+        <input className="customer-selector" value={name} onChange={(event) => setName(event.target.value)} placeholder="Nome do cliente" />
+      </label>
+
+      <div className="form-grid">
+        <label className="field-block">
+          <span className="label">Telefone</span>
+          <input className="customer-selector" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Telefone" />
+        </label>
+        <label className="field-block">
+          <span className="label">Limite de credito</span>
+          <input
+            className="customer-selector"
+            type="number"
+            min="0"
+            step="0.01"
+            value={creditLimit}
+            onChange={(event) => setCreditLimit(event.target.value)}
+            placeholder="0,00"
+          />
+        </label>
+      </div>
+
+      <label className="field-block">
+        <span className="label">Endereco</span>
+        <input className="customer-selector" value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Endereco" />
+      </label>
+
+      <label className="field-block">
+        <span className="label">Observacoes</span>
+        <input className="customer-selector" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Observacoes" />
+      </label>
+
       <button className="auth-button" type="submit" disabled={loading}>
         {loading ? "Salvando..." : "Cadastrar cliente"}
       </button>
-      {success ? <div className="success-copy">{success}</div> : null}
-      {error ? <div className="error-copy">{error}</div> : null}
+
+      {success ? <div className="operation-notice success">{success}</div> : null}
+      {error ? <div className="operation-notice error">{error}</div> : null}
     </form>
   );
 }

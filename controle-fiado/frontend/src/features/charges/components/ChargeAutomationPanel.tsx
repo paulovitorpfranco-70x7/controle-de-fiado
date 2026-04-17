@@ -21,10 +21,10 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
     try {
       const data = await runDailyChargeJob();
       setResult(data);
-      onSuccess?.("Job diario executado com sucesso.");
+      onSuccess?.("Rotina diaria executada com sucesso.");
       await onCompleted();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao rodar job.");
+      setError(err instanceof Error ? err.message : "Falha ao executar a rotina.");
     } finally {
       setLoading(false);
     }
@@ -32,66 +32,78 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
 
   return (
     <section className="section-block">
-      <div className="customer-card">
-        <div className="page-header page-header-section">
-          <div>
-            <div className="eyebrow">Automacao</div>
-            <h2>Job diario de cobranca</h2>
-          </div>
-          <button className="auth-button" type="button" onClick={handleRun} disabled={loading || !canRun}>
-            {loading ? "Rodando..." : "Executar agora"}
-          </button>
+      <div className="dashboard-panel">
+        <div className="dashboard-hero charges-hero">
+          <article className="dashboard-chart-card">
+            <div className="dashboard-card-head">
+              <div>
+                <div className="eyebrow">Automacao</div>
+                <h3>Rotina diaria de cobranca</h3>
+                <p className="page-description">Dispara avisos de vencimento e atualiza o monitor operacional.</p>
+              </div>
+              <button className="auth-button" type="button" onClick={handleRun} disabled={loading || !canRun}>
+                {loading ? "Executando..." : "Executar agora"}
+              </button>
+            </div>
+
+            {!canRun ? <div className="empty-card">Somente o perfil OWNER pode executar a rotina manualmente.</div> : null}
+
+            {result ? (
+              <div className="dashboard-kpi-grid">
+                <article className="dashboard-kpi-card">
+                  <span className="label">3 dias</span>
+                  <strong>{result.auto3DaysSent}</strong>
+                </article>
+                <article className="dashboard-kpi-card">
+                  <span className="label">No vencimento</span>
+                  <strong>{result.autoDueDateSent}</strong>
+                </article>
+                <article className="dashboard-kpi-card">
+                  <span className="label">Duplicadas</span>
+                  <strong>{result.skippedDuplicates}</strong>
+                </article>
+                <article className="dashboard-kpi-card">
+                  <span className="label">Falhas</span>
+                  <strong>{result.failedMessages}</strong>
+                </article>
+              </div>
+            ) : null}
+          </article>
+
+          <article className="dashboard-chart-card">
+            <div className="dashboard-card-head">
+              <div>
+                <div className="eyebrow">Monitor</div>
+                <h3>Saude da automacao</h3>
+              </div>
+            </div>
+
+            {monitor ? (
+              <div className="dashboard-kpi-grid">
+                <article className="dashboard-kpi-card">
+                  <span className="label">Ultima execucao</span>
+                  <strong>{monitor.lastRunAt ? new Date(monitor.lastRunAt).toLocaleString("pt-BR") : "Nunca"}</strong>
+                </article>
+                <article className="dashboard-kpi-card">
+                  <span className="label">Status</span>
+                  <strong>{renderStatus(monitor.lastRunStatus)}</strong>
+                </article>
+                <article className="dashboard-kpi-card">
+                  <span className="label">Falhas totais</span>
+                  <strong>{monitor.failedMessagesTotal}</strong>
+                </article>
+                <article className="dashboard-kpi-card">
+                  <span className="label">Falhas em 7 dias</span>
+                  <strong>{monitor.failedMessagesLast7Days}</strong>
+                </article>
+              </div>
+            ) : (
+              <div className="empty-card">Monitor ainda sem registros de execucao.</div>
+            )}
+
+            {monitor?.lastFailureMessage ? <div className="error-copy">Ultima falha: {monitor.lastFailureMessage}</div> : null}
+          </article>
         </div>
-
-        {!canRun ? <p className="muted-copy">Somente perfil OWNER pode executar o job manualmente.</p> : null}
-
-        {result ? (
-          <div className="customer-grid">
-            <div>
-              <span className="label">3 dias</span>
-              <strong>{result.auto3DaysSent}</strong>
-            </div>
-            <div>
-              <span className="label">No vencimento</span>
-              <strong>{result.autoDueDateSent}</strong>
-            </div>
-            <div>
-              <span className="label">Duplicadas</span>
-              <strong>{result.skippedDuplicates}</strong>
-            </div>
-            <div>
-              <span className="label">Falhas</span>
-              <strong>{result.failedMessages}</strong>
-            </div>
-          </div>
-        ) : null}
-
-        {monitor ? (
-          <div className="customer-grid">
-            <div>
-              <span className="label">Ultima execucao</span>
-              <strong>{monitor.lastRunAt ? new Date(monitor.lastRunAt).toLocaleString("pt-BR") : "Nunca"}</strong>
-            </div>
-            <div>
-              <span className="label">Status</span>
-              <strong>{renderStatus(monitor.lastRunStatus)}</strong>
-            </div>
-            <div>
-              <span className="label">Falhas total</span>
-              <strong>{monitor.failedMessagesTotal}</strong>
-            </div>
-            <div>
-              <span className="label">Falhas 7 dias</span>
-              <strong>{monitor.failedMessagesLast7Days}</strong>
-            </div>
-          </div>
-        ) : null}
-
-        {monitor?.lastFailureMessage ? (
-          <p className="muted-copy">
-            Ultima falha: {monitor.lastFailureMessage}
-          </p>
-        ) : null}
 
         {error ? <div className="error-copy">{error}</div> : null}
       </div>
