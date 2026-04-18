@@ -1,4 +1,3 @@
-import { ChargeAlertsPanel } from "../../features/charges/components/ChargeAlertsPanel";
 import type { ChargeOverview } from "../../features/charges/types/charge-overview";
 import type { DailyChargeJobMonitor } from "../../features/charges/types/daily-charge-job-monitor";
 import { DashboardSummaryPanel } from "../../features/dashboard/components/DashboardSummaryPanel";
@@ -43,8 +42,15 @@ export function DashboardSection({
         ) : null}
       </section>
 
-      {dashboardSummary ? <DashboardSummaryPanel summary={dashboardSummary} chargeOverview={chargeOverview} sales={sales} payments={payments} /> : null}
-      {isOwner && chargeOverview ? <ChargeAlertsPanel overview={chargeOverview} monitor={dailyChargeJobMonitor} /> : null}
+      {dashboardSummary ? (
+        <DashboardSummaryPanel
+          summary={dashboardSummary}
+          chargeOverview={chargeOverview}
+          monitor={isOwner ? dailyChargeJobMonitor : null}
+          sales={sales}
+          payments={payments}
+        />
+      ) : null}
 
       <section className="section-block dashboard-stream-grid">
         <article className="dashboard-chart-card">

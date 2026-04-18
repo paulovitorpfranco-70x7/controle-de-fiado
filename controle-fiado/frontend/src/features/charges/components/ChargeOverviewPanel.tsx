@@ -43,7 +43,11 @@ export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCust
             </div>
           </div>
 
-          {urgentCount > 0 ? <div className="queue-alert">{urgentCount} cobranca{urgentCount > 1 ? "s" : ""} exigem atencao imediata hoje.</div> : null}
+          {urgentCount > 0 ? (
+            <div className="queue-alert">
+              {urgentCount} cobranca{urgentCount > 1 ? "s" : ""} exig{urgentCount > 1 ? "em" : "e"} atencao imediata hoje.
+            </div>
+          ) : null}
 
           <div className="queue-summary-grid queue-summary-grid-expanded">
             {summaryCards.map((card) => (

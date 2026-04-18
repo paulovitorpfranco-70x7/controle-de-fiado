@@ -1,4 +1,4 @@
-import { useState, type PropsWithChildren, type ReactNode } from "react";
+import { useEffect, useState, type PropsWithChildren, type ReactNode } from "react";
 import type { AuthUser } from "../features/auth/types/auth";
 import type { AppSection } from "./types";
 
@@ -10,17 +10,40 @@ type AppShellProps = PropsWithChildren<{
   pageKey?: string;
 }>;
 
-const SECTION_LABELS: Array<{ id: AppSection; label: string; ownerOnly?: boolean }> = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "customers", label: "Clientes" },
-  { id: "operations", label: "Operacoes" },
-  { id: "charges", label: "Cobrancas", ownerOnly: true },
-  { id: "status", label: "Sistema", ownerOnly: true }
+const SIDEBAR_STORAGE_KEY = "controle-fiado-sidebar-collapsed";
+
+const SECTION_LABELS: Array<{ id: AppSection; label: string; shortLabel: string; ownerOnly?: boolean }> = [
+  { id: "dashboard", label: "Dashboard", shortLabel: "Ds" },
+  { id: "customers", label: "Clientes", shortLabel: "Cl" },
+  { id: "operations", label: "Operacoes", shortLabel: "Op" },
+  { id: "charges", label: "Cobrancas", shortLabel: "Cb", ownerOnly: true },
+  { id: "status", label: "Sistema", shortLabel: "St", ownerOnly: true }
 ];
 
 export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, pageKey, children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    const stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+
+    if (stored !== null) {
+      return stored === "1";
+    }
+
+    return window.innerWidth >= 1180;
+  });
   const isOwner = authUser.role === "OWNER";
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, desktopCollapsed ? "1" : "0");
+  }, [desktopCollapsed]);
 
   function handleNavigate(section: AppSection) {
     onNavigate(section);
@@ -28,7 +51,7 @@ export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, p
   }
 
   return (
-    <div className="page-shell">
+    <div className={`page-shell ${desktopCollapsed ? "desktop-nav-collapsed" : ""}`}>
       <button
         className="mobile-menu-button"
         type="button"
@@ -43,10 +66,23 @@ export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, p
 
       <button className={`app-overlay ${menuOpen ? "visible" : ""}`} type="button" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} />
 
-      <aside className={`side-panel ${menuOpen ? "menu-open" : ""}`}>
+      <aside className={`side-panel ${menuOpen ? "menu-open" : ""} ${desktopCollapsed ? "is-collapsed" : ""}`}>
+        <div className="side-panel-topbar">
+          <button
+            className="desktop-shell-toggle"
+            type="button"
+            aria-label={desktopCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+            aria-pressed={desktopCollapsed}
+            onClick={() => setDesktopCollapsed((current) => !current)}
+          >
+            <span aria-hidden="true">{desktopCollapsed ? ">" : "<"}</span>
+          </button>
+        </div>
+
         <div className="brand-block">
           <div className="brand-media">
-            <img src="/assets/logo-mercadinho-tonhao-full.png" alt="Mercadinho do Tonhao" className="brand-image brand-image-full" />
+            <img src="/assets/logo-mercadinho-tonhao-full-cropped.png" alt="Mercadinho do Tonhao" className="brand-image brand-image-full" />
+            <img src="/assets/logo-mercadinho-tonhao-icon-transparent.png" alt="" className="brand-image brand-image-compact" />
           </div>
           <div className="eyebrow">Controle de Fiado</div>
           <h1>Mercadinho do Tonhao</h1>
@@ -67,9 +103,12 @@ export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, p
               key={section.id}
               className={activeSection === section.id ? "active" : ""}
               type="button"
+              aria-label={section.label}
+              title={desktopCollapsed ? section.label : undefined}
               onClick={() => handleNavigate(section.id)}
             >
-              {section.label}
+              <span className="app-nav-icon" aria-hidden="true">{section.shortLabel}</span>
+              <span className="app-nav-label">{section.label}</span>
             </button>
           ))}
         </nav>

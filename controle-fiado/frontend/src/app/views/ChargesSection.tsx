@@ -33,6 +33,8 @@ export function ChargesSection({
   onChargeDataRefresh,
   onOperationalRefresh
 }: ChargesSectionProps) {
+  const hasChargeableCustomer = Boolean(customerDetail && customerDetail.openBalance > 0);
+
   function jumpToSection(sectionId: string) {
     const element = document.getElementById(sectionId);
     element?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -76,7 +78,7 @@ export function ChargesSection({
         />
       </div>
 
-      {customerDetail ? (
+      {hasChargeableCustomer && customerDetail ? (
         <div id="charges-manual-panel">
           <ManualChargeForm
             customerId={customerDetail.id}
@@ -94,7 +96,7 @@ export function ChargesSection({
         </div>
       ) : (
         <section className="section-block" id="charges-manual-panel">
-          <div className="empty-card">Selecione um cliente com saldo aberto para preparar uma cobranca manual e abrir o WhatsApp.</div>
+          <div className="empty-card">Selecione na fila um cliente com saldo aberto para preparar a cobranca manual e abrir o WhatsApp.</div>
         </section>
       )}
 

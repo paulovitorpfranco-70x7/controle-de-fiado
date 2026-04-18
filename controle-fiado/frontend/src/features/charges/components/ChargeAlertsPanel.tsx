@@ -11,7 +11,7 @@ export function ChargeAlertsPanel({ overview, monitor }: ChargeAlertsPanelProps)
     overview.overdue.length > 0
       ? {
           title: "Atrasos ativos",
-          body: `${overview.overdue.length} cobranca${overview.overdue.length > 1 ? "s" : ""} em atraso exigem contato hoje.`,
+          body: `${overview.overdue.length} cobranca${overview.overdue.length > 1 ? "s" : ""} em atraso exig${overview.overdue.length > 1 ? "em" : "e"} contato hoje.`,
           tone: "danger"
         }
       : null,

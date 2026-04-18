@@ -12,7 +12,7 @@ export function LoginView({ environmentLabel, notice, onLogin }: LoginViewProps)
   return (
     <main className="login-page login-page-clean">
       <section className="login-card login-card-centered">
-        <img src="/assets/logo-mercadinho-tonhao-icon.png" alt="Mercadinho do Tonhao" className="login-logo" />
+        <img src="/assets/logo-mercadinho-tonhao-icon-transparent.png" alt="Mercadinho do Tonhao" className="login-logo" />
 
         <div className="login-brand-block">
           <h1>Mercadinho do Tonhao</h1>
