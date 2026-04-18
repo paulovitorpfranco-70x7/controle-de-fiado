@@ -124,6 +124,12 @@ export function ManualChargeForm({
           />
         </label>
 
+        <div className="charge-preview-card">
+          <span className="label">Preview rapido</span>
+          <strong>{customerName}</strong>
+          <p className="message-copy">{messageBody}</p>
+        </div>
+
         <div className="form-actions-row">
           <button className="auth-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
             {loading ? "Preparando..." : "Preparar cobranca"}

@@ -40,6 +40,8 @@ export function CreateSaleForm({
 
     return baseAmount + (baseAmount * fee) / 100;
   }, [feePercent, originalAmount]);
+  const projectedFeeAmount = Math.max(projectedAmount - (Number(originalAmount) || 0), 0);
+  const daysUntilDue = getDateDiffInDays(saleDate, dueDate);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -157,9 +159,30 @@ export function CreateSaleForm({
           <strong>{customerName ?? "Sem cliente selecionado"}</strong>
         </div>
         <div className="support-card">
+          <span className="label">Acrescimo previsto</span>
+          <strong>{formatCurrency(projectedFeeAmount)}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">Prazo</span>
+          <strong>{daysUntilDue > 0 ? `${daysUntilDue} dia(s)` : "Vence hoje"}</strong>
+        </div>
+        <div className="support-card support-card-emphasis">
           <span className="label">Total previsto</span>
           <strong>{formatCurrency(projectedAmount)}</strong>
         </div>
+      </div>
+
+      <div className="inline-action-row">
+        {[7, 15, 30].map((days) => (
+          <button
+            key={days}
+            className={`mini-chip-button ${daysUntilDue === days ? "active" : ""}`}
+            type="button"
+            onClick={() => setDueDate(addDaysInputDateValue(days))}
+          >
+            {`${days} dias`}
+          </button>
+        ))}
       </div>
 
       <button className="auth-button" type="submit" disabled={loading}>
@@ -177,4 +200,12 @@ function formatCurrency(value: number) {
     style: "currency",
     currency: "BRL"
   }).format(value);
+}
+
+function getDateDiffInDays(startValue: string, endValue: string) {
+  const start = new Date(`${startValue}T00:00:00`);
+  const end = new Date(`${endValue}T00:00:00`);
+  const diff = end.getTime() - start.getTime();
+
+  return Number.isNaN(diff) ? 0 : Math.max(Math.round(diff / 86400000), 0);
 }

@@ -13,6 +13,12 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatLongDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "medium"
+  }).format(new Date(value));
+}
+
 function getNextDueDate(customer: CustomerDetail) {
   const activeSales = customer.sales.filter((sale) => sale.remainingAmount > 0);
 
@@ -76,7 +82,7 @@ export function CustomerDetailPanel({
 
         <div className="customer-actions">
           {onCreateSale ? (
-            <button className="ghost-button" type="button" onClick={onCreateSale}>
+            <button className="auth-button compact-action-button" type="button" onClick={onCreateSale}>
               Nova venda
             </button>
           ) : null}
@@ -116,6 +122,10 @@ export function CustomerDetailPanel({
         <div className="support-card">
           <span className="label">Proximo vencimento</span>
           <strong>{nextDueDate ? formatDate(nextDueDate.toISOString()) : "Sem pendencia"}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">Cliente desde</span>
+          <strong>{formatLongDate(customer.createdAt)}</strong>
         </div>
         <div className="support-card">
           <span className="label">Observacao</span>

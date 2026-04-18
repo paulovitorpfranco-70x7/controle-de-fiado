@@ -34,6 +34,7 @@ export function CreatePaymentForm({
   const [success, setSuccess] = useState<string | null>(null);
 
   const selectedSale = useMemo(() => openSales.find((sale) => sale.id === targetSaleId) ?? null, [openSales, targetSaleId]);
+  const openSalesBalance = useMemo(() => openSales.reduce((total, sale) => total + sale.remainingAmount, 0), [openSales]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -139,7 +140,7 @@ export function CreatePaymentForm({
 
       <label className="field-block">
         <span className="label">Observacao</span>
-        <input className="customer-selector" value={notes} onChange={(event) => setNotes(event.target.value)} />
+        <textarea className="message-textarea compact-textarea" value={notes} onChange={(event) => setNotes(event.target.value)} />
       </label>
 
       <div className="operation-support-grid">
@@ -148,6 +149,14 @@ export function CreatePaymentForm({
           <strong>{customerName ?? "Sem cliente selecionado"}</strong>
         </div>
         <div className="support-card">
+          <span className="label">Saldo em aberto</span>
+          <strong>{formatCurrency(openSalesBalance)}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">Vendas abertas</span>
+          <strong>{openSales.length}</strong>
+        </div>
+        <div className="support-card support-card-emphasis">
           <span className="label">Destino</span>
           <strong>{selectedSale ? selectedSale.description : "Rateio automatico nas vendas em aberto"}</strong>
         </div>

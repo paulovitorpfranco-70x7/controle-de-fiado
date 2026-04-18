@@ -56,6 +56,17 @@ export function CreateCustomerForm({ onCreated, onSuccess }: CreateCustomerFormP
         </div>
       </div>
 
+      <div className="operation-support-grid">
+        <div className="support-card">
+          <span className="label">Obrigatorio</span>
+          <strong>Nome e telefone para localizar e cobrar.</strong>
+        </div>
+        <div className="support-card support-card-emphasis">
+          <span className="label">Opcional</span>
+          <strong>Limite, endereco e observacao para agilizar o caixa.</strong>
+        </div>
+      </div>
+
       <label className="field-block">
         <span className="label">Nome</span>
         <input className="customer-selector" value={name} onChange={(event) => setName(event.target.value)} placeholder="Nome do cliente" />
@@ -87,7 +98,12 @@ export function CreateCustomerForm({ onCreated, onSuccess }: CreateCustomerFormP
 
       <label className="field-block">
         <span className="label">Observacoes</span>
-        <input className="customer-selector" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Observacoes" />
+        <textarea
+          className="message-textarea compact-textarea"
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          placeholder="Preferencias, apelido, melhor horario ou instrucoes uteis"
+        />
       </label>
 
       <button className="auth-button" type="submit" disabled={loading}>
