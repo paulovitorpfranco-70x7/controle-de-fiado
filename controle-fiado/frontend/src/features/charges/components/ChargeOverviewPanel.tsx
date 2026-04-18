@@ -13,6 +13,10 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function getGroupAmount(items: ChargeOverview["dueSoon"]) {
+  return items.reduce((total, item) => total + item.remainingAmount, 0);
+}
+
 type ChargeOverviewPanelProps = {
   overview: ChargeOverview;
   selectedCustomerId?: string;
@@ -21,6 +25,11 @@ type ChargeOverviewPanelProps = {
 
 export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCustomer }: ChargeOverviewPanelProps) {
   const urgentCount = overview.dueToday.length + overview.overdue.length;
+  const summaryCards = [
+    { label: "Em 3 dias", count: overview.dueSoon.length, amount: getGroupAmount(overview.dueSoon), tone: "neutral" },
+    { label: "Hoje", count: overview.dueToday.length, amount: getGroupAmount(overview.dueToday), tone: "warning" },
+    { label: "Em atraso", count: overview.overdue.length, amount: getGroupAmount(overview.overdue), tone: "danger" }
+  ] as const;
 
   return (
     <section className="section-block">
@@ -32,23 +41,19 @@ export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCust
               <h3>Fila de acompanhamento</h3>
               <p className="page-description">Priorize o que vence hoje, o que ja atrasou e o que precisa entrar na proxima rodada.</p>
             </div>
-            <div className="queue-summary-grid">
-              <div>
-                <span className="label">Em 3 dias</span>
-                <strong>{overview.dueSoon.length}</strong>
-              </div>
-              <div>
-                <span className="label">Hoje</span>
-                <strong>{overview.dueToday.length}</strong>
-              </div>
-              <div>
-                <span className="label">Em atraso</span>
-                <strong>{overview.overdue.length}</strong>
-              </div>
-            </div>
           </div>
 
           {urgentCount > 0 ? <div className="queue-alert">{urgentCount} cobranca{urgentCount > 1 ? "s" : ""} exigem atencao imediata hoje.</div> : null}
+
+          <div className="queue-summary-grid queue-summary-grid-expanded">
+            {summaryCards.map((card) => (
+              <div key={card.label} className={`queue-summary-card ${card.tone}`}>
+                <span className="label">{card.label}</span>
+                <strong>{card.count}</strong>
+                <span className="customer-meta">{formatMoney(card.amount)}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="dashboard-stream-grid charges-column-grid">
@@ -74,6 +79,10 @@ export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCust
             <div className="eyebrow">{title}</div>
             <h3>{items.length} item{items.length === 1 ? "" : "s"}</h3>
           </div>
+          <div className="queue-lane-total">
+            <span className="label">Valor</span>
+            <strong>{formatMoney(getGroupAmount(items))}</strong>
+          </div>
         </div>
 
         <div className="customer-stream-list">
@@ -86,6 +95,10 @@ export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCust
                     <div className="stream-title">{item.customerName}</div>
                     <div className="customer-meta">
                       {item.phone} | vence {formatDate(item.dueDate)}
+                    </div>
+                    <div className="customer-card-tags">
+                      <span className={`customer-tag ${item.phoneE164 ? "" : "warning"}`}>{item.phoneE164 ? "WhatsApp pronto" : "Sem WhatsApp"}</span>
+                      <span className="customer-tag">Venda {item.saleId.slice(0, 8)}</span>
                     </div>
                   </div>
                   <div className={currentSelectedCustomerId === item.customerId ? "badge success" : "badge warning"}>

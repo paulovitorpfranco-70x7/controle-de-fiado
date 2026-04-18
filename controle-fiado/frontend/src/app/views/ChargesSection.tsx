@@ -92,7 +92,11 @@ export function ChargesSection({
             }}
           />
         </div>
-      ) : null}
+      ) : (
+        <section className="section-block" id="charges-manual-panel">
+          <div className="empty-card">Selecione um cliente com saldo aberto para preparar uma cobranca manual e abrir o WhatsApp.</div>
+        </section>
+      )}
 
       {chargeOverview ? (
         <div id="charges-overview-panel">
@@ -111,7 +115,11 @@ export function ChargesSection({
             }}
           />
         </div>
-      ) : null}
+      ) : (
+        <section className="section-block" id="charges-history-panel">
+          <div className="empty-card">Nenhuma mensagem recente ainda. Quando a fila rodar ou uma cobranca manual for preparada, o historico aparece aqui.</div>
+        </section>
+      )}
     </>
   );
 }

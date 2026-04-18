@@ -95,13 +95,42 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
               <div className="stream-card-head">
                 <div className="stream-card-copy">
                   <div className="stream-kicker">Mensagem</div>
-                  <div className="stream-title">{getTriggerLabel(message.triggerType)}</div>
+                  <div className="stream-title">{message.customerName ?? getTriggerLabel(message.triggerType)}</div>
                   <div className="customer-meta">{formatDate(message.createdAt)}</div>
+                  <div className="customer-card-tags">
+                    <span className="customer-tag">{getTriggerLabel(message.triggerType)}</span>
+                    {message.saleId ? <span className="customer-tag">Venda {message.saleId.slice(0, 8)}</span> : null}
+                    {message.providerName ? <span className="customer-tag">{message.providerName}</span> : null}
+                  </div>
                 </div>
-                <div className={message.sendStatus === "FAILED" ? "badge warning" : "badge success"}>{getSendStatusLabel(message.sendStatus)}</div>
+                <div
+                  className={
+                    message.sendStatus === "FAILED"
+                      ? "badge warning"
+                      : message.sendStatus === "PENDING"
+                        ? "badge warning"
+                        : "badge success"
+                  }
+                >
+                  {getSendStatusLabel(message.sendStatus)}
+                </div>
               </div>
 
               <div className="message-copy charge-message-copy">{message.messageBody}</div>
+              <div className="stream-metrics-grid">
+                <div>
+                  <span className="label">Cliente</span>
+                  <strong>{message.customerName ?? "Nao vinculado"}</strong>
+                </div>
+                <div>
+                  <span className="label">Telefone</span>
+                  <strong>{message.phone ?? "Nao informado"}</strong>
+                </div>
+                <div>
+                  <span className="label">Envio</span>
+                  <strong>{message.sentAt ? formatDate(message.sentAt) : "Aguardando"}</strong>
+                </div>
+              </div>
               {message.providerResponse ? <div className="customer-meta">{message.providerResponse}</div> : null}
 
               <div className="form-actions-row">

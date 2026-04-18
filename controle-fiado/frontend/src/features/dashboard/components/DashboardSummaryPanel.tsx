@@ -48,6 +48,36 @@ function getChargeSegments(overview: ChargeOverview | null) {
   ];
 }
 
+function getChargeAmount(items: ChargeOverview["dueSoon"] = []) {
+  return items.reduce((total, item) => total + item.remainingAmount, 0);
+}
+
+function getPrioritySummary(summary: DashboardSummary, overview: ChargeOverview | null) {
+  const urgentCount = (overview?.overdue.length ?? 0) + (overview?.dueToday.length ?? 0);
+
+  if (urgentCount > 0) {
+    return {
+      label: "Prioridade agora",
+      title: `${urgentCount} contato${urgentCount > 1 ? "s" : ""} precisa${urgentCount > 1 ? "m" : ""} sair hoje`,
+      description: "Comece pelos atrasados e pelos vencimentos do dia antes de abrir a proxima rodada."
+    };
+  }
+
+  if (summary.dueSoonCount > 0) {
+    return {
+      label: "Proxima rodada",
+      title: `${summary.dueSoonCount} aviso${summary.dueSoonCount > 1 ? "s" : ""} entra${summary.dueSoonCount > 1 ? "m" : ""} nos proximos dias`,
+      description: "A carteira esta controlada. Vale preparar a fila antes do vencimento apertar."
+    };
+  }
+
+  return {
+    label: "Carteira sob controle",
+    title: "Sem pressao imediata de cobranca",
+    description: "Use o painel para acompanhar saldo aberto e ritmo de recebimento, sem urgencias ativas agora."
+  };
+}
+
 type DashboardSummaryPanelProps = {
   summary: DashboardSummary;
   chargeOverview: ChargeOverview | null;
@@ -61,16 +91,35 @@ export function DashboardSummaryPanel({ summary, chargeOverview, sales, payments
   const chargeSegments = getChargeSegments(chargeOverview);
   const totalChargeItems = chargeSegments.reduce((total, item) => total + item.value, 0);
   const maxDebtorValue = Math.max(...summary.topDebtors.map((item) => item.openBalance), 1);
+  const priority = getPrioritySummary(summary, chargeOverview);
+  const overdueAmount = getChargeAmount(chargeOverview?.overdue);
+  const dueTodayAmount = getChargeAmount(chargeOverview?.dueToday);
+  const dueSoonAmount = getChargeAmount(chargeOverview?.dueSoon);
   let accumulatedOffset = 0;
 
   return (
     <section className="section-block">
       <div className="dashboard-panel">
         <div className="dashboard-hero">
-          <div>
-            <div className="eyebrow">Dashboard</div>
-            <h2>Leitura do dia</h2>
-            <p className="page-description">Resumo visual do caixa, do fiado e da cobranca para decidir rapido o que fazer agora.</p>
+          <div className="dashboard-priority-card">
+            <div className="eyebrow">{priority.label}</div>
+            <h2>{priority.title}</h2>
+            <p className="page-description">{priority.description}</p>
+
+            <div className="dashboard-priority-strip">
+              <div className="priority-pill">
+                <span className="label">Saldo em aberto</span>
+                <strong>{formatMoney(summary.totalOpenBalance)}</strong>
+              </div>
+              <div className="priority-pill">
+                <span className="label">Recebido no periodo</span>
+                <strong>{formatMoney(summary.recentPaymentsTotal)}</strong>
+              </div>
+              <div className="priority-pill">
+                <span className="label">Clientes em atraso</span>
+                <strong>{summary.overdueCustomers}</strong>
+              </div>
+            </div>
           </div>
 
           <div className="dashboard-kpi-grid">
@@ -185,6 +234,21 @@ export function DashboardSummaryPanel({ summary, chargeOverview, sales, payments
                 </div>
               ))}
             </div>
+
+            <div className="dashboard-metric-row">
+              <div>
+                <span className="label">Valor em atraso</span>
+                <strong>{formatMoney(overdueAmount)}</strong>
+              </div>
+              <div>
+                <span className="label">Vence hoje</span>
+                <strong>{formatMoney(dueTodayAmount)}</strong>
+              </div>
+              <div>
+                <span className="label">Proximas</span>
+                <strong>{formatMoney(dueSoonAmount)}</strong>
+              </div>
+            </div>
           </article>
         </div>
 
@@ -207,7 +271,10 @@ export function DashboardSummaryPanel({ summary, chargeOverview, sales, payments
                   <div className="debtor-bar-track">
                     <span className="debtor-bar-fill" style={{ width: `${(debtor.openBalance / maxDebtorValue) * 100}%` }} />
                   </div>
-                  <strong className="debtor-value">{formatMoney(debtor.openBalance)}</strong>
+                  <div className="debtor-value-block">
+                    <strong className="debtor-value">{formatMoney(debtor.openBalance)}</strong>
+                    {debtor === summary.topDebtors[0] ? <span className="selection-chip">Maior saldo</span> : null}
+                  </div>
                 </div>
               ))
             ) : (

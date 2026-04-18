@@ -9,14 +9,34 @@ type ChargeAlertsPanelProps = {
 export function ChargeAlertsPanel({ overview, monitor }: ChargeAlertsPanelProps) {
   const alerts = [
     overview.overdue.length > 0
-      ? `${overview.overdue.length} cobranca${overview.overdue.length > 1 ? "s" : ""} em atraso exigem contato hoje.`
+      ? {
+          title: "Atrasos ativos",
+          body: `${overview.overdue.length} cobranca${overview.overdue.length > 1 ? "s" : ""} em atraso exigem contato hoje.`,
+          tone: "danger"
+        }
       : null,
-    overview.dueToday.length > 0 ? `${overview.dueToday.length} cobranca${overview.dueToday.length > 1 ? "s" : ""} vencem hoje.` : null,
+    overview.dueToday.length > 0
+      ? {
+          title: "Vencimento de hoje",
+          body: `${overview.dueToday.length} cobranca${overview.dueToday.length > 1 ? "s" : ""} vencem hoje.`,
+          tone: "warning"
+        }
+      : null,
     monitor && monitor.failedMessagesLast7Days > 0
-      ? `${monitor.failedMessagesLast7Days} tentativa${monitor.failedMessagesLast7Days > 1 ? "s" : ""} falharam nos ultimos 7 dias.`
+      ? {
+          title: "Falhas recentes",
+          body: `${monitor.failedMessagesLast7Days} tentativa${monitor.failedMessagesLast7Days > 1 ? "s" : ""} falharam nos ultimos 7 dias.`,
+          tone: "neutral"
+        }
       : null,
-    monitor?.lastRunStatus === "failed" ? "A rotina diaria falhou na ultima execucao e precisa de revisao." : null
-  ].filter(Boolean) as string[];
+    monitor?.lastRunStatus === "failed"
+      ? {
+          title: "Rotina interrompida",
+          body: "A rotina diaria falhou na ultima execucao e precisa de revisao.",
+          tone: "danger"
+        }
+      : null
+  ].filter(Boolean) as Array<{ title: string; body: string; tone: "danger" | "warning" | "neutral" }>;
 
   if (!alerts.length) {
     return null;
@@ -26,11 +46,12 @@ export function ChargeAlertsPanel({ overview, monitor }: ChargeAlertsPanelProps)
     <section className="section-block">
       <div className="customer-card charge-alerts-card">
         <div className="eyebrow">Alertas</div>
-        <div className="detail-column">
+        <div className="charge-alert-grid">
           {alerts.map((alert) => (
-            <div key={alert} className="queue-alert">
-              {alert}
-            </div>
+            <article key={alert.title} className={`queue-alert charge-alert-card ${alert.tone}`}>
+              <span className="label">{alert.title}</span>
+              <strong>{alert.body}</strong>
+            </article>
           ))}
         </div>
       </div>

@@ -9,6 +9,12 @@ type ChargeAutomationPanelProps = {
   canRun: boolean;
 };
 
+function getStatusTone(status: DailyChargeJobMonitor["lastRunStatus"]) {
+  if (status === "success") return "success";
+  if (status === "failed") return "warning";
+  return "neutral";
+}
+
 export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun }: ChargeAutomationPanelProps) {
   const [result, setResult] = useState<DailyChargeJobResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -87,6 +93,7 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
                 <article className="dashboard-kpi-card">
                   <span className="label">Status</span>
                   <strong>{renderStatus(monitor.lastRunStatus)}</strong>
+                  <span className={`customer-tag ${getStatusTone(monitor.lastRunStatus)}`}>{renderStatus(monitor.lastRunStatus)}</span>
                 </article>
                 <article className="dashboard-kpi-card">
                   <span className="label">Falhas totais</span>
@@ -101,11 +108,26 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
               <div className="empty-card">Monitor ainda sem registros de execucao.</div>
             )}
 
-            {monitor?.lastFailureMessage ? <div className="error-copy">Ultima falha: {monitor.lastFailureMessage}</div> : null}
+            {monitor?.lastFailureMessage ? (
+              <div className="operation-notice error">
+                <span className="operation-notice-label">Ultima falha</span>
+                <strong>{monitor.lastFailureMessage}</strong>
+              </div>
+            ) : null}
           </article>
         </div>
 
-        {error ? <div className="error-copy">{error}</div> : null}
+        {result ? (
+          <div className="operation-notice success">
+            <span className="operation-notice-label">Resumo da execucao</span>
+            <strong>
+              {result.auto3DaysSent + result.autoDueDateSent} mensagem(ns) preparada(s), {result.failedMessages} falha(s), {result.skippedDuplicates} duplicata(s)
+              {" "}ignorada(s).
+            </strong>
+          </div>
+        ) : null}
+
+        {error ? <div className="operation-notice error">{error}</div> : null}
       </div>
     </section>
   );

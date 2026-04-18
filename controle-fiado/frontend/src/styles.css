@@ -357,7 +357,8 @@ img {
 
 .side-panel h1,
 .page-header h2,
-.hero-copy h2 {
+.hero-copy h2,
+.dashboard-priority-card h2 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
@@ -564,6 +565,38 @@ img {
   gap: 16px;
 }
 
+.dashboard-priority-card {
+  display: grid;
+  gap: 16px;
+  align-content: space-between;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 216, 179, 0.12);
+  background:
+    linear-gradient(135deg, rgba(255, 210, 160, 0.14), rgba(249, 115, 22, 0.08) 42%, rgba(255, 255, 255, 0.03)),
+    rgba(14, 14, 22, 0.72);
+  box-shadow: var(--glass-highlight), var(--shadow-md);
+}
+
+.dashboard-priority-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.priority-pill {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.priority-pill strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1rem;
+}
+
 .dashboard-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.95fr);
@@ -714,7 +747,7 @@ img {
 
 .dashboard-metric-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-top: 12px;
 }
@@ -785,6 +818,12 @@ img {
 
 .debtor-copy {
   min-width: 0;
+}
+
+.debtor-value-block {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
 }
 
 .debtor-bar-track {
@@ -925,6 +964,10 @@ img {
   margin-top: 4px;
   font-size: 0.95rem;
   line-height: 1.35;
+}
+
+.queue-lane-total {
+  text-align: right;
 }
 
 .operation-header {
@@ -1124,6 +1167,25 @@ select.customer-selector option {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.queue-summary-grid-expanded {
+  margin-top: 14px;
+}
+
+.queue-summary-card {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  padding: 14px 16px;
+}
+
+.queue-summary-card.warning {
+  border-color: rgba(249, 115, 22, 0.18);
+}
+
+.queue-summary-card.danger {
+  border-color: rgba(251, 113, 133, 0.18);
+}
+
 .statement-breakdown {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 12px;
@@ -1254,6 +1316,18 @@ select.customer-selector option {
   border-color: rgba(249, 115, 22, 0.16);
   background: rgba(249, 115, 22, 0.12);
   color: var(--amber);
+}
+
+.customer-tag.success {
+  border-color: rgba(52, 211, 153, 0.18);
+  background: rgba(52, 211, 153, 0.12);
+  color: #9cf0cc;
+}
+
+.customer-tag.neutral {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-soft);
 }
 
 .selection-chip {
@@ -1654,6 +1728,29 @@ select.customer-selector option {
   font-size: 1rem;
 }
 
+.charge-alert-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.charge-alert-card {
+  display: grid;
+  gap: 8px;
+}
+
+.charge-alert-card strong {
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.charge-alert-card.warning {
+  border-color: rgba(249, 115, 22, 0.18);
+}
+
+.charge-alert-card.danger {
+  border-color: rgba(251, 113, 133, 0.2);
+}
+
 .customer-list-card {
   gap: 12px;
 }
@@ -1820,6 +1917,7 @@ select.customer-selector option {
   .statement-breakdown,
   .queue-summary-grid,
   .hero-metrics,
+  .dashboard-priority-strip,
   .dashboard-kpi-grid,
   .dashboard-metric-row,
   .customer-stat-grid,
@@ -1868,6 +1966,10 @@ select.customer-selector option {
 
   .debtor-row {
     grid-template-columns: 1fr;
+  }
+
+  .debtor-value-block {
+    justify-items: start;
   }
 
   .stream-progress-meta {
