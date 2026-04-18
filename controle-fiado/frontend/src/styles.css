@@ -865,6 +865,19 @@ img {
   min-height: 100%;
 }
 
+.dashboard-flow-card .trend-chart {
+  min-height: 150px;
+  gap: 10px;
+}
+
+.dashboard-flow-card .trend-bars {
+  min-height: 110px;
+}
+
+.dashboard-flow-card .trend-bar {
+  width: min(18px, 100%);
+}
+
 .dashboard-focus-card {
   display: grid;
   align-content: start;
@@ -948,13 +961,34 @@ img {
 
 .dashboard-support-card {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   align-content: start;
+}
+
+.dashboard-flow-inline-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.dashboard-flow-inline-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dashboard-flow-inline-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.12rem;
+  line-height: 1;
 }
 
 .dashboard-support-list {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .dashboard-support-row {
@@ -962,8 +996,8 @@ img {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -2514,6 +2548,7 @@ select.customer-selector option {
   .hero-metrics,
   .dashboard-priority-strip,
   .dashboard-priority-stat-row,
+  .dashboard-flow-inline-metrics,
   .dashboard-kpi-grid,
   .dashboard-metric-row,
   .customer-stat-grid,

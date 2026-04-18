@@ -332,11 +332,26 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
             <div className="dashboard-card-head">
               <div>
                 <div className="eyebrow">Movimento</div>
-                <h3>Fluxo recente de vendas e pagamentos</h3>
+                <h3>Ritmo do periodo</h3>
               </div>
               <div className="dashboard-legend">
                 <span><i className="sales" />Vendas</span>
                 <span><i className="payments" />Pagamentos</span>
+              </div>
+            </div>
+
+            <div className="dashboard-flow-inline-metrics">
+              <div className="dashboard-flow-inline-card">
+                <span className="label">Vendido</span>
+                <strong>{formatMoney(summary.recentSalesTotal)}</strong>
+              </div>
+              <div className="dashboard-flow-inline-card">
+                <span className="label">Recebido</span>
+                <strong>{formatMoney(summary.recentPaymentsTotal)}</strong>
+              </div>
+              <div className="dashboard-flow-inline-card">
+                <span className="label">Recuperacao</span>
+                <strong>{recoveryRate}%</strong>
               </div>
             </div>
 
@@ -355,28 +370,13 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
                 <div className="empty-chart-copy">Sem movimentacao suficiente para montar o grafico.</div>
               )}
             </div>
-
-            <div className="dashboard-metric-row dashboard-metric-row-spacious">
-              <div>
-                <span className="label">Vendido no periodo</span>
-                <strong>{formatMoney(summary.recentSalesTotal)}</strong>
-              </div>
-              <div>
-                <span className="label">Recebido no periodo</span>
-                <strong>{formatMoney(summary.recentPaymentsTotal)}</strong>
-              </div>
-              <div>
-                <span className="label">Giro de recuperacao</span>
-                <strong>{recoveryRate}%</strong>
-              </div>
-            </div>
           </article>
 
           <article className="dashboard-chart-card dashboard-support-card">
             <div className="dashboard-card-head">
               <div>
                 <div className="eyebrow">Cobranca</div>
-                <h3>O que precisa separar agora</h3>
+                <h3>Fila curta</h3>
               </div>
               <strong>{totalChargeItems}</strong>
             </div>
@@ -398,27 +398,14 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
 
             {operationalAlerts.length ? (
               <div className="dashboard-alert-stack">
-                {operationalAlerts.map((alert) => (
-                  <article key={alert.title} className={`dashboard-inline-alert ${alert.tone}`}>
-                    <span className="label">{alert.title}</span>
-                    <strong>{alert.body}</strong>
-                  </article>
-                ))}
+                <article className={`dashboard-inline-alert ${operationalAlerts[0].tone}`}>
+                  <span className="label">{operationalAlerts[0].title}</span>
+                  <strong>{operationalAlerts[0].body}</strong>
+                </article>
               </div>
             ) : (
               <div className="empty-chart-copy">Sem alertas criticos de cobranca agora.</div>
             )}
-
-            {supportingLateCustomers.length ? (
-              <div className="dashboard-mini-stack dashboard-mini-stack-muted">
-                {supportingLateCustomers.map((customer) => (
-                  <div key={customer.customerId} className="dashboard-mini-row">
-                    <span>{customer.customerName}</span>
-                    <strong>{formatMoney(customer.totalAmount)}</strong>
-                  </div>
-                ))}
-              </div>
-            ) : null}
           </article>
         </div>
 
