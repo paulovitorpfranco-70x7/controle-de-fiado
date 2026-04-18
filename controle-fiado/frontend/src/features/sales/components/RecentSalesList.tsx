@@ -34,46 +34,34 @@ export function RecentSalesList({ sales }: RecentSalesListProps) {
   }
 
   return (
-    <section className="dashboard-stream-list">
-      {sales.map((sale) => {
+    <section className="dashboard-stream-list dashboard-stream-list-compact">
+      {sales.slice(0, 3).map((sale) => {
         const paidAmount = Math.max(sale.finalAmount - sale.remainingAmount, 0);
         const progress = sale.finalAmount > 0 ? Math.min((paidAmount / sale.finalAmount) * 100, 100) : 0;
 
         return (
-          <article key={sale.id} className="stream-card sale-stream-card">
-            <div className="stream-card-head">
-              <div className="stream-card-copy">
-                <div className="stream-kicker">Venda</div>
-                <div className="stream-title">{sale.description}</div>
+          <article key={sale.id} className="compact-stream-card sale-stream-card">
+            <div className="compact-stream-head">
+              <div className="compact-stream-copy">
+                <div className="compact-stream-title-row">
+                  <strong className="compact-stream-title">{sale.description}</strong>
+                  <div className={sale.status === "OVERDUE" ? "badge warning" : "badge success"}>{getSaleStatusLabel(sale.status)}</div>
+                </div>
                 <div className="customer-meta">
                   {formatDate(sale.saleDate)} | vence em {formatDate(sale.dueDate)}
                 </div>
               </div>
-              <div className={sale.status === "OVERDUE" ? "badge warning" : "badge success"}>{getSaleStatusLabel(sale.status)}</div>
+              <strong className="compact-stream-amount">{formatMoney(sale.finalAmount)}</strong>
             </div>
 
-            <div className="stream-progress">
-              <div className="stream-progress-bar">
+            <div className="compact-stream-progress">
+              <div className="stream-progress-bar compact-progress-bar">
                 <span className="stream-progress-fill sales" style={{ width: `${Math.max(progress, 6)}%` }} />
               </div>
-              <div className="stream-progress-meta">
+              <div className="compact-stream-meta">
                 <span>{formatMoney(paidAmount)} pago</span>
-                <span>{formatMoney(sale.remainingAmount)} em aberto</span>
-              </div>
-            </div>
-
-            <div className="stream-metrics-grid">
-              <div>
-                <span className="label">Valor final</span>
-                <strong>{formatMoney(sale.finalAmount)}</strong>
-              </div>
-              <div>
-                <span className="label">Acrescimo</span>
-                <strong>{formatMoney(sale.feeAmount)}</strong>
-              </div>
-              <div>
-                <span className="label">Origem</span>
-                <strong>{sale.id.slice(0, 8)}</strong>
+                <span>{formatMoney(sale.remainingAmount)} aberto</span>
+                <span>{sale.id.slice(0, 8)}</span>
               </div>
             </div>
           </article>

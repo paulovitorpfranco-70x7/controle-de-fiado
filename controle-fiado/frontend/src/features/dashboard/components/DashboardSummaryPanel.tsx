@@ -59,23 +59,32 @@ function getPrioritySummary(summary: DashboardSummary, overview: ChargeOverview 
   if (urgentCount > 0) {
     return {
       label: "Prioridade agora",
-      title: `${urgentCount} contato${urgentCount > 1 ? "s" : ""} precisa${urgentCount > 1 ? "m" : ""} sair hoje`,
-      description: "Separe atrasos e vencimentos do dia primeiro. O resto do painel entra como suporte para decidir a ordem."
+      title: `contato${urgentCount > 1 ? "s" : ""} precisa${urgentCount > 1 ? "m" : ""} sair hoje`,
+      description: "Comece por atraso e vencimento do dia. O restante do painel serve para ordenar a fila.",
+      metricValue: urgentCount,
+      metricLabel: urgentCount > 1 ? "contatos" : "contato",
+      tone: "danger" as const
     };
   }
 
   if (summary.dueSoonCount > 0) {
     return {
       label: "Janela seguinte",
-      title: `${summary.dueSoonCount} aviso${summary.dueSoonCount > 1 ? "s" : ""} entra${summary.dueSoonCount > 1 ? "m" : ""} na fila curta`,
-      description: "A carteira nao esta sob pressao imediata. Vale organizar quem vence em seguida antes de virar atraso."
+      title: `aviso${summary.dueSoonCount > 1 ? "s entram" : " entra"} na fila curta`,
+      description: "Nao virou urgencia ainda. Vale preparar a proxima rodada antes de apertar.",
+      metricValue: summary.dueSoonCount,
+      metricLabel: summary.dueSoonCount > 1 ? "avisos" : "aviso",
+      tone: "warning" as const
     };
   }
 
   return {
     label: "Carteira sob controle",
-    title: "Sem urgencia operacional agora",
-    description: "Use o dashboard para acompanhar concentracao de fiado e ritmo de recebimento, sem apagar incendio."
+    title: "urgencia operacional agora",
+    description: "O foco pode ficar em acompanhar concentracao de fiado e ritmo de recebimento.",
+    metricValue: 0,
+    metricLabel: "urgencias",
+    tone: "calm" as const
   };
 }
 
@@ -194,9 +203,14 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
         <div className="dashboard-impact-grid">
           <article className="dashboard-priority-card dashboard-priority-card-clean dashboard-priority-card-hero">
             <div className="dashboard-priority-header">
-              <div>
+              <div className={`dashboard-priority-counter ${priority.tone}`}>
+                <strong>{priority.metricValue}</strong>
+                <span>{priority.metricLabel}</span>
+              </div>
+
+              <div className="dashboard-priority-copy">
                 <div className="eyebrow">{priority.label}</div>
-                <h2>{priority.title}</h2>
+                <h2>{priority.metricValue > 0 ? `${priority.metricValue} ${priority.title}` : `Sem ${priority.title}`}</h2>
                 <p className="page-description">{priority.description}</p>
               </div>
 
@@ -207,14 +221,14 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
             </div>
 
             <div className="dashboard-priority-stat-row">
-              <div className="dashboard-priority-stat">
-                <span className="label">Saldo em aberto</span>
-                <strong>{formatMoney(summary.totalOpenBalance)}</strong>
-              </div>
-              <div className="dashboard-priority-stat">
-                <span className="label">Recebido no periodo</span>
-                <strong>{formatMoney(summary.recentPaymentsTotal)}</strong>
-              </div>
+                <div className="dashboard-priority-stat">
+                  <span className="label">Saldo em aberto</span>
+                  <strong>{formatMoney(summary.totalOpenBalance)}</strong>
+                </div>
+                <div className="dashboard-priority-stat">
+                  <span className="label">Recebido no periodo</span>
+                  <strong>{formatMoney(summary.recentPaymentsTotal)}</strong>
+                </div>
               <div className="dashboard-priority-stat">
                 <span className="label">Clientes em atraso</span>
                 <strong>{overdueCustomerCount}</strong>
@@ -245,7 +259,7 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
                 </div>
 
                 <div className="dashboard-focus-note">
-                  {Math.round((topDebtor.openBalance / concentrationBase) * 100)}% da carteira aberta esta concentrada aqui.
+                  {Math.round((topDebtor.openBalance / concentrationBase) * 100)}% da carteira aberta esta aqui.
                 </div>
 
                 {supportingDebtors.length ? (
@@ -293,7 +307,7 @@ export function DashboardSummaryPanel({ summary, chargeOverview, monitor, sales,
                 <div className="dashboard-focus-note">
                   {topLateCustomer.overdueCount > 0
                     ? `${topLateCustomer.overdueCount} atraso${topLateCustomer.overdueCount > 1 ? "s" : ""} ativo${topLateCustomer.overdueCount > 1 ? "s" : ""}.`
-                    : `${topLateCustomer.dueTodayCount} vencimento${topLateCustomer.dueTodayCount > 1 ? "s" : ""} cai${topLateCustomer.dueTodayCount > 1 ? "em" : ""} hoje.`}
+                    : `${topLateCustomer.dueTodayCount} vencimento${topLateCustomer.dueTodayCount > 1 ? "s" : ""} hoje.`}
                 </div>
 
                 {supportingLateCustomers.length ? (
