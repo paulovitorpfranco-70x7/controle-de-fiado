@@ -173,8 +173,11 @@ img {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   transition: padding 220ms ease, gap 220ms ease;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .side-panel::before {
@@ -2904,6 +2907,7 @@ select.customer-selector option {
     top: 0;
     left: 0;
     width: min(320px, calc(100vw - 36px));
+    max-height: 100dvh;
     min-height: 100vh;
     border-right: 1px solid var(--line);
     border-bottom: 0;
@@ -3082,6 +3086,7 @@ select.customer-selector option {
   .side-panel {
     width: min(300px, calc(100vw - 28px));
     gap: 16px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   }
 
   .page-header,
