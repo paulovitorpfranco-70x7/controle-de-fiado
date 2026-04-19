@@ -2338,6 +2338,10 @@ select.customer-selector option {
   align-items: flex-start;
 }
 
+.customer-detail-close {
+  justify-self: end;
+}
+
 .customer-profile-main {
   display: flex;
   gap: 16px;
@@ -2398,6 +2402,10 @@ select.customer-selector option {
   gap: 12px;
 }
 
+.customer-summary-strip-mobile {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .customer-stat-card {
   position: relative;
   overflow: hidden;
@@ -2441,6 +2449,10 @@ select.customer-selector option {
   gap: 22px;
 }
 
+.customer-activity-panel-mobile {
+  gap: 16px;
+}
+
 .customer-activity-group {
   display: grid;
   gap: 14px;
@@ -2448,6 +2460,20 @@ select.customer-selector option {
 
 .customer-note-card {
   grid-column: span 2;
+}
+
+.floating-form-shell .customer-detail-shell {
+  gap: 16px;
+}
+
+.floating-form-shell .customer-profile-hero {
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.floating-form-shell .customer-activity-panel {
+  padding: 18px;
+  border-radius: 22px;
 }
 
 .floating-form-overlay {
@@ -3253,6 +3279,30 @@ select.customer-selector option {
   .customer-profile-top,
   .customer-profile-main {
     flex-direction: column;
+  }
+
+  .customer-detail-shell-mobile {
+    gap: 16px;
+  }
+
+  .customer-detail-shell-mobile .customer-profile-hero {
+    padding: 16px;
+    border-radius: 18px;
+    gap: 16px;
+  }
+
+  .customer-detail-shell-mobile .customer-actions {
+    gap: 10px;
+  }
+
+  .customer-detail-shell-mobile .customer-actions .floating-form-close {
+    justify-self: end;
+    min-height: 40px;
+  }
+
+  .customer-detail-shell-mobile .customer-activity-panel {
+    padding: 16px;
+    gap: 16px;
   }
 
   .customer-card-side {

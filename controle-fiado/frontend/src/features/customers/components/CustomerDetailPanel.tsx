@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { CustomerDetail } from "../types/customer-detail";
 
 function formatMoney(value: number) {
@@ -42,6 +43,8 @@ type CustomerDetailPanelProps = {
   onCreateSale?: () => void;
   onRegisterPayment?: () => void;
   onChargeCustomer?: () => void;
+  isCompactMobile?: boolean;
+  onClose?: () => void;
 };
 
 export function CustomerDetailPanel({
@@ -49,7 +52,9 @@ export function CustomerDetailPanel({
   canViewPayments = true,
   onCreateSale,
   onRegisterPayment,
-  onChargeCustomer
+  onChargeCustomer,
+  isCompactMobile = false,
+  onClose
 }: CustomerDetailPanelProps) {
   const openSales = customer.sales.filter((sale) => sale.remainingAmount > 0);
   const recentPayments = customer.payments.slice(0, 5);
@@ -58,26 +63,32 @@ export function CustomerDetailPanel({
   const nextDueDate = getNextDueDate(customer);
   const showPaymentAction = canViewPayments && onRegisterPayment && customer.openBalance > 0;
   const showChargeAction = canViewPayments && onChargeCustomer && customer.openBalance > 0;
+  const mobilePayments = recentPayments.slice(0, 3);
 
   return (
-    <section className="section-block customer-detail-shell">
-      <header className="customer-profile-hero">
+    <section className={`section-block customer-detail-shell ${isCompactMobile ? "customer-detail-shell-mobile" : ""}`}>
+      <header className={`customer-profile-hero ${isCompactMobile ? "customer-profile-hero-mobile" : ""}`}>
         <div className="customer-profile-top">
           <div className="customer-profile-main">
             <div className="customer-profile-mark">{customer.name.slice(0, 1).toUpperCase()}</div>
 
             <div className="customer-profile-copy">
               <div className="eyebrow">Ficha do cliente</div>
-              <h2>{customer.name}</h2>
+              <h2 id={isCompactMobile ? "customer-mobile-title" : undefined}>{customer.name}</h2>
               <div className="customer-profile-meta">
                 <span>{customer.phone}</span>
                 <span>{customer.isActive ? "Ativo" : "Inativo"}</span>
-                {customer.address ? <span>{customer.address}</span> : null}
+                {!isCompactMobile && customer.address ? <span>{customer.address}</span> : null}
               </div>
             </div>
           </div>
 
           <div className="customer-actions">
+            {onClose ? (
+              <button className="floating-form-close customer-detail-close" type="button" aria-label="Fechar ficha do cliente" onClick={onClose}>
+                <X size={18} strokeWidth={2.2} />
+              </button>
+            ) : null}
             {onCreateSale ? (
               <button className="auth-button compact-action-button" type="button" onClick={onCreateSale}>
                 Nova venda
@@ -96,7 +107,7 @@ export function CustomerDetailPanel({
           </div>
         </div>
 
-        <section className="customer-summary-strip">
+        <section className={`customer-summary-strip ${isCompactMobile ? "customer-summary-strip-mobile" : ""}`}>
           <article className="customer-stat-card emphasis">
             <span className="label">Saldo atual</span>
             <strong>{formatMoney(customer.openBalance)}</strong>
@@ -113,13 +124,13 @@ export function CustomerDetailPanel({
             <span className="label">Proximo vencimento</span>
             <strong>{nextDueDate ? formatDate(nextDueDate.toISOString()) : "Sem pendencia"}</strong>
           </article>
-          {customer.creditLimit ? (
+          {!isCompactMobile && customer.creditLimit ? (
             <article className="customer-stat-card">
               <span className="label">Limite</span>
               <strong>{formatMoney(customer.creditLimit)}</strong>
             </article>
           ) : null}
-          {customer.notes ? (
+          {!isCompactMobile && customer.notes ? (
             <article className="customer-stat-card customer-note-card">
               <span className="label">Observacao</span>
               <strong>{customer.notes}</strong>
@@ -128,7 +139,7 @@ export function CustomerDetailPanel({
         </section>
       </header>
 
-      <article className="dashboard-chart-card customer-activity-panel">
+      <article className={`dashboard-chart-card customer-activity-panel ${isCompactMobile ? "customer-activity-panel-mobile" : ""}`}>
         <div className="customer-activity-group">
           <div className="dashboard-card-head">
             <div>
@@ -163,42 +174,54 @@ export function CustomerDetailPanel({
           </div>
         </div>
 
-        <div className="customer-activity-group">
-          <div className="dashboard-card-head">
-            <div>
-              <div className="eyebrow">Pagamentos</div>
-              <h3>Ultimos recebimentos</h3>
+        {!isCompactMobile ? (
+          <div className="customer-activity-group">
+            <div className="dashboard-card-head">
+              <div>
+                <div className="eyebrow">Pagamentos</div>
+                <h3>Ultimos recebimentos</h3>
+              </div>
             </div>
-          </div>
 
-          {canViewPayments ? (
-            <div className="customer-stream-list">
-              {recentPayments.length ? (
-                recentPayments.map((payment) => (
-                  <article key={payment.id} className="compact-stream-card">
-                    <div className="compact-stream-head">
-                      <div className="compact-stream-copy">
-                        <div className="stream-kicker">Pagamento</div>
-                        <div className="compact-stream-title-row">
-                          <strong className="compact-stream-title">{formatDate(payment.paymentDate)}</strong>
-                          <strong className="compact-stream-amount">{formatMoney(payment.amount)}</strong>
-                        </div>
-                        <div className="compact-stream-meta">
-                          <span>{payment.method}</span>
-                          <span>{payment.allocations.length} alocacao(oes)</span>
+            {canViewPayments ? (
+              <div className="customer-stream-list">
+                {recentPayments.length ? (
+                  recentPayments.map((payment) => (
+                    <article key={payment.id} className="compact-stream-card">
+                      <div className="compact-stream-head">
+                        <div className="compact-stream-copy">
+                          <div className="stream-kicker">Pagamento</div>
+                          <div className="compact-stream-title-row">
+                            <strong className="compact-stream-title">{formatDate(payment.paymentDate)}</strong>
+                            <strong className="compact-stream-amount">{formatMoney(payment.amount)}</strong>
+                          </div>
+                          <div className="compact-stream-meta">
+                            <span>{payment.method}</span>
+                            <span>{payment.allocations.length} alocacao(oes)</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <div className="empty-card">Nenhum pagamento recente para este cliente.</div>
-              )}
+                    </article>
+                  ))
+                ) : (
+                  <div className="empty-card">Nenhum pagamento recente para este cliente.</div>
+                )}
+              </div>
+            ) : (
+              <div className="empty-card">Visualizacao de pagamentos restrita ao perfil OWNER.</div>
+            )}
+          </div>
+        ) : null}
+
+        {isCompactMobile && canViewPayments && mobilePayments.length ? (
+          <div className="dashboard-card-head">
+            <div>
+              <div className="eyebrow">Ultimo recebimento</div>
+              <h3>{formatDate(mobilePayments[0].paymentDate)}</h3>
             </div>
-          ) : (
-            <div className="empty-card">Visualizacao de pagamentos restrita ao perfil OWNER.</div>
-          )}
-        </div>
+            <strong className="compact-stream-amount">{formatMoney(mobilePayments[0].amount)}</strong>
+          </div>
+        ) : null}
       </article>
     </section>
   );

@@ -31,9 +31,30 @@ export function CustomersSection({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => globalThis.matchMedia?.("(max-width: 860px)").matches ?? false);
 
   useEffect(() => {
-    if (!showCreateForm) {
+    const mediaQuery = globalThis.matchMedia?.("(max-width: 860px)");
+
+    if (!mediaQuery) {
+      return;
+    }
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showCreateForm && !showMobileDetail) {
       return;
     }
 
@@ -43,6 +64,7 @@ export function CustomersSection({
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setShowCreateForm(false);
+        setShowMobileDetail(false);
       }
     }
 
@@ -52,7 +74,13 @@ export function CustomersSection({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showCreateForm]);
+  }, [showCreateForm, showMobileDetail]);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setShowMobileDetail(false);
+    }
+  }, [isMobile]);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -81,6 +109,14 @@ export function CustomersSection({
       return true;
     });
   }, [customers, filter, search]);
+
+  function handleSelectCustomer(customerId: string) {
+    onSelectCustomer(customerId);
+
+    if (isMobile) {
+      setShowMobileDetail(true);
+    }
+  }
 
   return (
     <>
@@ -129,22 +165,24 @@ export function CustomersSection({
               <h3>Clientes encontrados</h3>
             </div>
           </div>
-          <CustomerList customers={filteredCustomers} selectedCustomerId={selectedCustomerId} onSelectCustomer={onSelectCustomer} />
+          <CustomerList customers={filteredCustomers} selectedCustomerId={selectedCustomerId} onSelectCustomer={handleSelectCustomer} />
         </div>
 
-        <div className="customer-detail-slot" id="customer-detail-panel">
-          {customerDetail ? (
-            <CustomerDetailPanel
-              customer={customerDetail}
-              canViewPayments={isOwner}
-              onCreateSale={() => onNavigate("operations")}
-              onRegisterPayment={isOwner ? () => onNavigate("operations") : undefined}
-              onChargeCustomer={isOwner ? () => onNavigate("charges") : undefined}
-            />
-          ) : (
-            <div className="empty-card">Selecione um cliente para abrir a ficha completa.</div>
-          )}
-        </div>
+        {!isMobile ? (
+          <div className="customer-detail-slot" id="customer-detail-panel">
+            {customerDetail ? (
+              <CustomerDetailPanel
+                customer={customerDetail}
+                canViewPayments={isOwner}
+                onCreateSale={() => onNavigate("operations")}
+                onRegisterPayment={isOwner ? () => onNavigate("operations") : undefined}
+                onChargeCustomer={isOwner ? () => onNavigate("charges") : undefined}
+              />
+            ) : (
+              <div className="empty-card">Selecione um cliente para abrir a ficha completa.</div>
+            )}
+          </div>
+        ) : null}
       </section>
 
       {showCreateForm ? (
@@ -157,6 +195,39 @@ export function CustomersSection({
                 await onCustomerCreated(customer);
                 setShowCreateForm(false);
               }}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {isMobile && showMobileDetail && customerDetail ? (
+        <div className="floating-form-overlay" role="presentation" onClick={() => setShowMobileDetail(false)}>
+          <div className="floating-form-shell" role="dialog" aria-modal="true" aria-labelledby="customer-mobile-title" onClick={(event) => event.stopPropagation()}>
+            <CustomerDetailPanel
+              customer={customerDetail}
+              canViewPayments={isOwner}
+              isCompactMobile
+              onClose={() => setShowMobileDetail(false)}
+              onCreateSale={() => {
+                setShowMobileDetail(false);
+                onNavigate("operations");
+              }}
+              onRegisterPayment={
+                isOwner
+                  ? () => {
+                      setShowMobileDetail(false);
+                      onNavigate("operations");
+                    }
+                  : undefined
+              }
+              onChargeCustomer={
+                isOwner
+                  ? () => {
+                      setShowMobileDetail(false);
+                      onNavigate("charges");
+                    }
+                  : undefined
+              }
             />
           </div>
         </div>
