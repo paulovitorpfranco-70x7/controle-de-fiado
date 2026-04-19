@@ -10,20 +10,6 @@ type SaleOverviewRow = {
   due_date: string;
   remaining_amount_cents: number;
   status: "OPEN" | "PARTIAL" | "OVERDUE" | "PAID" | "CANCELED";
-  customer?:
-    | {
-        id: string;
-        name: string;
-        phone: string;
-        phone_e164: string | null;
-      }
-    | {
-        id: string;
-        name: string;
-        phone: string;
-        phone_e164: string | null;
-      }[]
-    | null;
 };
 
 type MessageRow = {
@@ -40,18 +26,13 @@ type MessageRow = {
   sent_at: string | null;
   created_by_profile_id: string | null;
   created_at: string;
-  customer?:
-    | {
-        name: string;
-        phone: string;
-        phone_e164: string | null;
-      }
-    | {
-        name: string;
-        phone: string;
-        phone_e164: string | null;
-      }[]
-    | null;
+};
+
+type CustomerLookupRow = {
+  id: string;
+  name: string;
+  phone: string;
+  phone_e164: string | null;
 };
 
 type AuditRow = {
@@ -80,7 +61,7 @@ export async function fetchSupabaseChargeOverview(): Promise<ChargeOverview> {
     }),
     supabase!
       .from("sales")
-      .select("id, customer_id, due_date, remaining_amount_cents, status, customer:customers(id, name, phone, phone_e164)")
+      .select("id, customer_id, due_date, remaining_amount_cents, status")
       .in("status", ["OPEN", "PARTIAL", "OVERDUE"])
       .gt("remaining_amount_cents", 0)
       .lt("due_date", todayStart)
@@ -91,10 +72,17 @@ export async function fetchSupabaseChargeOverview(): Promise<ChargeOverview> {
   throwIfError(dueTodayResult.error, "Falha ao carregar cobrancas de hoje.");
   throwIfError(overdueResult.error, "Falha ao carregar cobrancas em atraso.");
 
+  const sales = [
+    ...((dueSoonResult.data ?? []) as SaleOverviewRow[]),
+    ...((dueTodayResult.data ?? []) as SaleOverviewRow[]),
+    ...((overdueResult.data ?? []) as SaleOverviewRow[])
+  ];
+  const customerMap = await fetchCustomerMap(sales.map((sale) => sale.customer_id));
+
   return {
-    dueSoon: ((dueSoonResult.data ?? []) as SaleOverviewRow[]).map(mapOverviewRow),
-    dueToday: ((dueTodayResult.data ?? []) as SaleOverviewRow[]).map(mapOverviewRow),
-    overdue: ((overdueResult.data ?? []) as SaleOverviewRow[]).map(mapOverviewRow)
+    dueSoon: ((dueSoonResult.data ?? []) as SaleOverviewRow[]).map((sale) => mapOverviewRow(sale, customerMap)),
+    dueToday: ((dueTodayResult.data ?? []) as SaleOverviewRow[]).map((sale) => mapOverviewRow(sale, customerMap)),
+    overdue: ((overdueResult.data ?? []) as SaleOverviewRow[]).map((sale) => mapOverviewRow(sale, customerMap))
   };
 }
 
@@ -103,14 +91,17 @@ export async function fetchSupabaseChargeMessages(customerId?: string): Promise<
 
   const query = supabase!
     .from("whatsapp_messages")
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at")
     .order("created_at", { ascending: false });
 
   const { data, error } = customerId ? await query.eq("customer_id", customerId) : await query;
 
   throwIfError(error, "Falha ao carregar mensagens de cobranca.");
 
-  return ((data ?? []) as MessageRow[]).map(mapMessageRow);
+  const messages = (data ?? []) as MessageRow[];
+  const customerMap = await fetchCustomerMap(messages.map((message) => message.customer_id));
+
+  return messages.map((message) => mapMessageRow(message, customerMap));
 }
 
 export async function fetchSupabaseDailyChargeJobMonitor(): Promise<DailyChargeJobMonitor> {
@@ -208,11 +199,12 @@ export async function sendSupabaseManualCharge(input: {
       provider_response: "Mensagem preparada para envio manual.",
       created_by_profile_id: input.createdById
     })
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at")
     .single();
 
   throwIfError(error, "Falha ao criar mensagem manual.");
-  return mapMessageRow(data as MessageRow);
+  const customerMap = await fetchCustomerMap([context.customerId]);
+  return mapMessageRow(data as MessageRow, customerMap);
 }
 
 export async function markSupabaseChargeMessageSent(messageId: string) {
@@ -226,11 +218,13 @@ export async function markSupabaseChargeMessageSent(messageId: string) {
       sent_at: new Date().toISOString()
     })
     .eq("id", messageId)
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at")
     .single();
 
   throwIfError(error, "Falha ao marcar mensagem como enviada.");
-  return mapMessageRow(data as MessageRow);
+  const message = data as MessageRow;
+  const customerMap = await fetchCustomerMap([message.customer_id]);
+  return mapMessageRow(message, customerMap);
 }
 
 export async function retrySupabaseFailedCharge(messageId: string) {
@@ -238,7 +232,7 @@ export async function retrySupabaseFailedCharge(messageId: string) {
 
   const { data: existing, error: loadError } = await supabase!
     .from("whatsapp_messages")
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at")
     .eq("id", messageId)
     .single();
 
@@ -262,17 +256,18 @@ export async function retrySupabaseFailedCharge(messageId: string) {
       provider_response: "Mensagem recriada para novo envio manual.",
       created_by_profile_id: source.created_by_profile_id
     })
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at")
     .single();
 
   throwIfError(error, "Falha ao reenviar mensagem.");
-  return mapMessageRow(data as MessageRow);
+  const customerMap = await fetchCustomerMap([source.customer_id]);
+  return mapMessageRow(data as MessageRow, customerMap);
 }
 
 async function querySalesWindow(input: { from: string; to: string }) {
   return supabase!
     .from("sales")
-    .select("id, customer_id, due_date, remaining_amount_cents, status, customer:customers(id, name, phone, phone_e164)")
+    .select("id, customer_id, due_date, remaining_amount_cents, status")
     .in("status", ["OPEN", "PARTIAL", "OVERDUE"])
     .gt("remaining_amount_cents", 0)
     .gte("due_date", input.from)
@@ -285,7 +280,7 @@ async function findChargeContext(customerId: string, saleId?: string) {
 
   let query = supabase!
     .from("sales")
-    .select("id, customer_id, due_date, remaining_amount_cents, status, customer:customers(id, name, phone, phone_e164)")
+    .select("id, customer_id, due_date, remaining_amount_cents, status")
     .eq("customer_id", customerId)
     .in("status", ["OPEN", "PARTIAL", "OVERDUE"])
     .gt("remaining_amount_cents", 0)
@@ -306,7 +301,7 @@ async function findChargeContext(customerId: string, saleId?: string) {
     return null;
   }
 
-  const customer = extractCustomer(row.customer);
+  const customer = await fetchCustomerById(row.customer_id);
 
   return {
     customerId: row.customer_id,
@@ -317,11 +312,11 @@ async function findChargeContext(customerId: string, saleId?: string) {
   };
 }
 
-function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
-  const customer = extractCustomer(sale.customer);
+function mapOverviewRow(sale: SaleOverviewRow, customerMap: Map<string, CustomerLookupRow>): ChargeOverviewItem {
+  const customer = customerMap.get(sale.customer_id) ?? null;
 
   return {
-    customerId: customer?.id ?? sale.customer_id,
+    customerId: sale.customer_id,
     customerName: customer?.name?.trim() || "Cliente",
     phone: customer?.phone ?? "",
     phoneE164: customer?.phone_e164 ?? normalizeBrazilPhoneToE164(customer?.phone),
@@ -332,8 +327,8 @@ function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
   };
 }
 
-function mapMessageRow(message: MessageRow): ChargeMessage {
-  const customer = extractCustomer(message.customer);
+function mapMessageRow(message: MessageRow, customerMap: Map<string, CustomerLookupRow>): ChargeMessage {
+  const customer = customerMap.get(message.customer_id) ?? null;
 
   return {
     id: message.id,
@@ -368,14 +363,26 @@ function buildManualChargeMessage(customerName: string, openBalance: number, due
   return `Ola ${customerName}, seu saldo em aberto no Mercadinho do Tonhao e de ${balance}${dueText}. Responda esta mensagem para combinar o pagamento.`;
 }
 
-function extractCustomer<T extends { name: string; phone: string; phone_e164: string | null }>(
-  value: T | T[] | null | undefined
-) {
-  if (!value) {
-    return null;
+async function fetchCustomerMap(customerIds: string[]) {
+  const uniqueIds = [...new Set(customerIds.filter(Boolean))];
+
+  if (!uniqueIds.length) {
+    return new Map<string, CustomerLookupRow>();
   }
 
-  return Array.isArray(value) ? value[0] ?? null : value;
+  const { data, error } = await supabase!
+    .from("customers")
+    .select("id, name, phone, phone_e164")
+    .in("id", uniqueIds);
+
+  throwIfError(error, "Falha ao carregar clientes da cobranca.");
+
+  return new Map(((data ?? []) as CustomerLookupRow[]).map((customer) => [customer.id, customer]));
+}
+
+async function fetchCustomerById(customerId: string) {
+  const customerMap = await fetchCustomerMap([customerId]);
+  return customerMap.get(customerId) ?? null;
 }
 
 function startOfDay(date: Date) {
