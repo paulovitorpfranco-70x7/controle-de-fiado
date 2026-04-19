@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { markChargeMessageSent } from "../api/mark-charge-message-sent";
 import { sendManualCharge } from "../api/send-manual-charge";
@@ -13,6 +14,7 @@ type ManualChargeFormProps = {
   createdById: string;
   onSent: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
+  onCancel?: () => void;
 };
 
 function formatMoney(value: number) {
@@ -35,7 +37,8 @@ export function ManualChargeForm({
   openBalance,
   createdById,
   onSent,
-  onSuccess
+  onSuccess,
+  onCancel
 }: ManualChargeFormProps) {
   const [messageBody, setMessageBody] = useState(buildDefaultMessage(customerName, openBalance));
   const [loading, setLoading] = useState(false);
@@ -83,64 +86,70 @@ export function ManualChargeForm({
   }
 
   return (
-    <section className="section-block">
-      <form className="dashboard-chart-card manual-charge-card" onSubmit={handleSubmit}>
-        <div className="dashboard-card-head">
-          <div>
-            <div className="eyebrow">Cobranca manual</div>
-            <h3>Preparar mensagem</h3>
-            <p className="page-description">Monte o texto final, confira o contato e abra a conversa com um clique.</p>
-          </div>
-          <span className={`customer-tag ${hasWhatsAppTarget ? "success" : "warning"}`}>{hasWhatsAppTarget ? "WhatsApp pronto" : "Sem WhatsApp"}</span>
+    <form className="dashboard-chart-card manual-charge-card" onSubmit={handleSubmit}>
+      <div className="dashboard-card-head">
+        <div>
+          <div className="eyebrow">Cobranca manual</div>
+          <h3 id="manual-charge-title">Preparar mensagem</h3>
+          <p className="page-description">Monte o texto final, confira o contato e abra a conversa com um clique.</p>
         </div>
-
-        <div className="operation-support-grid">
-          <div className="support-card">
-            <span className="label">Cliente</span>
-            <strong>{customerName}</strong>
-          </div>
-          <div className="support-card">
-            <span className="label">Saldo atual</span>
-            <strong>{formatMoney(openBalance)}</strong>
-          </div>
-          <div className="support-card">
-            <span className="label">WhatsApp</span>
-            <strong>{customerPhoneE164 ?? customerPhone ?? "Nao informado"}</strong>
-          </div>
-        </div>
-
-        {!hasWhatsAppTarget ? <div className="operation-notice error">Cliente sem telefone valido para abrir o WhatsApp.</div> : null}
-
-        <label className="field-block" htmlFor="manual-charge-message">
-          <span className="label">Mensagem</span>
-          <textarea
-            id="manual-charge-message"
-            className="message-textarea"
-            value={messageBody}
-            onChange={(event) => setMessageBody(event.target.value)}
-          />
-        </label>
-
-        <div className="charge-preview-card">
-          <span className="label">Mensagem final</span>
-          <strong>{customerName}</strong>
-          <p className="message-copy">{messageBody}</p>
-        </div>
-
-        <div className="form-actions-row">
-          <button className="auth-button compact-action-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
-            {loading ? "Preparando..." : "Preparar cobranca"}
+        {onCancel ? (
+          <button className="floating-form-close" type="button" aria-label="Fechar cobranca manual" onClick={onCancel}>
+            <X size={18} strokeWidth={2.2} />
           </button>
-          {whatsappUrl ? (
-            <a className="ghost-button inline-link-button compact-action-button" href={whatsappUrl} target="_blank" rel="noreferrer">
-              Abrir no WhatsApp
-            </a>
-          ) : null}
-        </div>
+        ) : (
+          <span className={`customer-tag ${hasWhatsAppTarget ? "success" : "warning"}`}>{hasWhatsAppTarget ? "WhatsApp pronto" : "Sem WhatsApp"}</span>
+        )}
+      </div>
 
-        {success ? <div className="operation-notice success">{success}</div> : null}
-        {error ? <div className="operation-notice error">{error}</div> : null}
-      </form>
-    </section>
+      {onCancel ? <span className={`customer-tag ${hasWhatsAppTarget ? "success" : "warning"}`}>{hasWhatsAppTarget ? "WhatsApp pronto" : "Sem WhatsApp"}</span> : null}
+
+      <div className="operation-support-grid">
+        <div className="support-card">
+          <span className="label">Cliente</span>
+          <strong>{customerName}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">Saldo atual</span>
+          <strong>{formatMoney(openBalance)}</strong>
+        </div>
+        <div className="support-card">
+          <span className="label">WhatsApp</span>
+          <strong>{customerPhoneE164 ?? customerPhone ?? "Nao informado"}</strong>
+        </div>
+      </div>
+
+      {!hasWhatsAppTarget ? <div className="operation-notice error">Cliente sem telefone valido para abrir o WhatsApp.</div> : null}
+
+      <label className="field-block" htmlFor="manual-charge-message">
+        <span className="label">Mensagem</span>
+        <textarea
+          id="manual-charge-message"
+          className="message-textarea"
+          value={messageBody}
+          onChange={(event) => setMessageBody(event.target.value)}
+        />
+      </label>
+
+      <div className="charge-preview-card">
+        <span className="label">Mensagem final</span>
+        <strong>{customerName}</strong>
+        <p className="message-copy">{messageBody}</p>
+      </div>
+
+      <div className="form-actions-row">
+        <button className="auth-button compact-action-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
+          {loading ? "Preparando..." : "Preparar cobranca"}
+        </button>
+        {whatsappUrl ? (
+          <a className="ghost-button inline-link-button compact-action-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+            Abrir no WhatsApp
+          </a>
+        ) : null}
+      </div>
+
+      {success ? <div className="operation-notice success">{success}</div> : null}
+      {error ? <div className="operation-notice error">{error}</div> : null}
+    </form>
   );
 }
