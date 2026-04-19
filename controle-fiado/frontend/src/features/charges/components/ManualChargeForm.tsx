@@ -42,22 +42,25 @@ export function ManualChargeForm({
 }: ManualChargeFormProps) {
   const [messageBody, setMessageBody] = useState(buildDefaultMessage(customerName, openBalance));
   const [loading, setLoading] = useState(false);
+  const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const hasWhatsAppTarget = Boolean(customerPhoneE164);
-  const whatsappUrl = customerPhoneE164 ? buildWhatsAppUrl(customerPhoneE164, messageBody) : null;
 
   useEffect(() => {
     setMessageBody(buildDefaultMessage(customerName, openBalance));
-    setSuccess(null);
+    setIsEditingMessage(false);
     setError(null);
   }, [customerName, openBalance]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleOpenWhatsApp() {
+    if (!customerPhoneE164) {
+      setError("Cliente sem telefone valido para abrir o WhatsApp.");
+      return;
+    }
+
+    const whatsappWindow = window.open("", "_blank", "noopener,noreferrer");
     setLoading(true);
     setError(null);
-    setSuccess(null);
 
     try {
       const message = await sendManualCharge({
@@ -75,10 +78,20 @@ export function ManualChargeForm({
         await markChargeMessageSent(message.id);
       }
 
-      setSuccess("Mensagem preparada com sucesso. Abra no WhatsApp para concluir o contato.");
-      onSuccess?.("Mensagem preparada com sucesso.");
+      const finalMessage = message.phoneE164 ? message.messageBody : messageBody;
+      const finalPhone = message.phoneE164 ?? customerPhoneE164;
+      const whatsappUrl = buildWhatsAppUrl(finalPhone, finalMessage);
+
+      if (whatsappWindow) {
+        whatsappWindow.location.href = whatsappUrl;
+      } else {
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      }
+
+      onSuccess?.("Mensagem aberta no WhatsApp.");
       await onSent();
     } catch (err) {
+      whatsappWindow?.close();
       setError(err instanceof Error ? err.message : "Falha ao preparar cobranca.");
     } finally {
       setLoading(false);
@@ -86,12 +99,12 @@ export function ManualChargeForm({
   }
 
   return (
-    <form className="dashboard-chart-card manual-charge-card" onSubmit={handleSubmit}>
+    <div className="dashboard-chart-card manual-charge-card">
       <div className="dashboard-card-head">
         <div>
           <div className="eyebrow">Cobranca manual</div>
-          <h3 id="manual-charge-title">Preparar mensagem</h3>
-          <p className="page-description">Monte o texto final, confira o contato e abra a conversa com um clique.</p>
+          <h3 id="manual-charge-title">Enviar mensagem</h3>
+          <p className="page-description">Confira o texto e abra a conversa no WhatsApp. Edite apenas se precisar ajustar.</p>
         </div>
         {onCancel ? (
           <button className="floating-form-close" type="button" aria-label="Fechar cobranca manual" onClick={onCancel}>
@@ -121,35 +134,34 @@ export function ManualChargeForm({
 
       {!hasWhatsAppTarget ? <div className="operation-notice error">Cliente sem telefone valido para abrir o WhatsApp.</div> : null}
 
-      <label className="field-block" htmlFor="manual-charge-message">
-        <span className="label">Mensagem</span>
-        <textarea
-          id="manual-charge-message"
-          className="message-textarea"
-          value={messageBody}
-          onChange={(event) => setMessageBody(event.target.value)}
-        />
-      </label>
-
-      <div className="charge-preview-card">
-        <span className="label">Mensagem final</span>
-        <strong>{customerName}</strong>
-        <p className="message-copy">{messageBody}</p>
-      </div>
+      {isEditingMessage ? (
+        <label className="field-block" htmlFor="manual-charge-message">
+          <span className="label">Mensagem</span>
+          <textarea
+            id="manual-charge-message"
+            className="message-textarea"
+            value={messageBody}
+            onChange={(event) => setMessageBody(event.target.value)}
+          />
+        </label>
+      ) : (
+        <div className="charge-preview-card">
+          <span className="label">Mensagem</span>
+          <strong>{customerName}</strong>
+          <p className="message-copy">{messageBody}</p>
+        </div>
+      )}
 
       <div className="form-actions-row">
-        <button className="auth-button compact-action-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
-          {loading ? "Preparando..." : "Preparar cobranca"}
+        <button className="auth-button compact-action-button" type="button" onClick={handleOpenWhatsApp} disabled={loading || !hasWhatsAppTarget}>
+          {loading ? "Abrindo..." : "Abrir no WhatsApp"}
         </button>
-        {whatsappUrl ? (
-          <a className="ghost-button inline-link-button compact-action-button" href={whatsappUrl} target="_blank" rel="noreferrer">
-            Abrir no WhatsApp
-          </a>
-        ) : null}
+        <button className="ghost-button compact-action-button" type="button" onClick={() => setIsEditingMessage((current) => !current)}>
+          {isEditingMessage ? "Concluir edicao" : "Editar mensagem"}
+        </button>
       </div>
 
-      {success ? <div className="operation-notice success">{success}</div> : null}
       {error ? <div className="operation-notice error">{error}</div> : null}
-    </form>
+    </div>
   );
 }

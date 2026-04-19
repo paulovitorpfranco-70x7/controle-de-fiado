@@ -13,12 +13,6 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function formatLongDate(value: string) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "medium"
-  }).format(new Date(value));
-}
-
 function getNextDueDate(customer: CustomerDetail) {
   const activeSales = customer.sales.filter((sale) => sale.remainingAmount > 0);
 
@@ -62,191 +56,141 @@ export function CustomerDetailPanel({
   const openSalesCount = openSales.length;
   const overdueSalesCount = openSales.filter((sale) => sale.status === "OVERDUE").length;
   const nextDueDate = getNextDueDate(customer);
+  const showPaymentAction = canViewPayments && onRegisterPayment && customer.openBalance > 0;
+  const showChargeAction = canViewPayments && onChargeCustomer && customer.openBalance > 0;
 
   return (
     <section className="section-block customer-detail-shell">
       <header className="customer-profile-hero">
-        <div className="customer-profile-main">
-          <div className="customer-profile-mark">{customer.name.slice(0, 1).toUpperCase()}</div>
+        <div className="customer-profile-top">
+          <div className="customer-profile-main">
+            <div className="customer-profile-mark">{customer.name.slice(0, 1).toUpperCase()}</div>
 
-          <div className="customer-profile-copy">
-            <div className="eyebrow">Ficha do cliente</div>
-            <h2>{customer.name}</h2>
-            <div className="customer-profile-meta">
-              <span>{customer.phone}</span>
-              <span>{customer.isActive ? "Ativo" : "Inativo"}</span>
-              <span>{customer.address ?? "Endereco nao informado"}</span>
+            <div className="customer-profile-copy">
+              <div className="eyebrow">Ficha do cliente</div>
+              <h2>{customer.name}</h2>
+              <div className="customer-profile-meta">
+                <span>{customer.phone}</span>
+                <span>{customer.isActive ? "Ativo" : "Inativo"}</span>
+                {customer.address ? <span>{customer.address}</span> : null}
+              </div>
             </div>
+          </div>
+
+          <div className="customer-actions">
+            {onCreateSale ? (
+              <button className="auth-button compact-action-button" type="button" onClick={onCreateSale}>
+                Nova venda
+              </button>
+            ) : null}
+            {showPaymentAction ? (
+              <button className="ghost-button" type="button" onClick={onRegisterPayment}>
+                Registrar pagamento
+              </button>
+            ) : null}
+            {showChargeAction ? (
+              <button className="ghost-button" type="button" onClick={onChargeCustomer}>
+                Cobrar
+              </button>
+            ) : null}
           </div>
         </div>
 
-        <div className="customer-actions">
-          {onCreateSale ? (
-            <button className="auth-button compact-action-button" type="button" onClick={onCreateSale}>
-              Nova venda
-            </button>
+        <section className="customer-summary-strip">
+          <article className="customer-stat-card emphasis">
+            <span className="label">Saldo atual</span>
+            <strong>{formatMoney(customer.openBalance)}</strong>
+          </article>
+          <article className="customer-stat-card">
+            <span className="label">Vendas em aberto</span>
+            <strong>{openSalesCount}</strong>
+          </article>
+          <article className="customer-stat-card">
+            <span className="label">Em atraso</span>
+            <strong>{overdueSalesCount}</strong>
+          </article>
+          <article className="customer-stat-card">
+            <span className="label">Proximo vencimento</span>
+            <strong>{nextDueDate ? formatDate(nextDueDate.toISOString()) : "Sem pendencia"}</strong>
+          </article>
+          {customer.creditLimit ? (
+            <article className="customer-stat-card">
+              <span className="label">Limite</span>
+              <strong>{formatMoney(customer.creditLimit)}</strong>
+            </article>
           ) : null}
-          {canViewPayments && onRegisterPayment ? (
-            <button className="ghost-button" type="button" onClick={onRegisterPayment}>
-              Novo pagamento
-            </button>
+          {customer.notes ? (
+            <article className="customer-stat-card customer-note-card">
+              <span className="label">Observacao</span>
+              <strong>{customer.notes}</strong>
+            </article>
           ) : null}
-          {canViewPayments && onChargeCustomer ? (
-            <button className="ghost-button" type="button" onClick={onChargeCustomer}>
-              Abrir cobranca
-            </button>
-          ) : null}
-        </div>
+        </section>
       </header>
 
-      <section className="customer-stat-grid">
-        <article className="customer-stat-card emphasis">
-          <span className="label">Saldo atual</span>
-          <strong>{formatMoney(customer.openBalance)}</strong>
-        </article>
-        <article className="customer-stat-card">
-          <span className="label">Limite</span>
-          <strong>{customer.creditLimit ? formatMoney(customer.creditLimit) : "Nao definido"}</strong>
-        </article>
-        <article className="customer-stat-card">
-          <span className="label">Vendas em aberto</span>
-          <strong>{openSalesCount}</strong>
-        </article>
-        <article className="customer-stat-card">
-          <span className="label">Em atraso</span>
-          <strong>{overdueSalesCount}</strong>
-        </article>
-      </section>
-
-      <section className="customer-support-strip">
-        <div className="support-card">
-          <span className="label">Proximo vencimento</span>
-          <strong>{nextDueDate ? formatDate(nextDueDate.toISOString()) : "Sem pendencia"}</strong>
-        </div>
-        <div className="support-card">
-          <span className="label">Cliente desde</span>
-          <strong>{formatLongDate(customer.createdAt)}</strong>
-        </div>
-        <div className="support-card">
-          <span className="label">Observacao</span>
-          <strong>{customer.notes ?? "Sem anotacoes para este cliente"}</strong>
-        </div>
-      </section>
-
-      <section className="customer-detail-columns">
-        <article className="dashboard-chart-card customer-module">
+      <article className="dashboard-chart-card customer-activity-panel">
+        <div className="customer-activity-group">
           <div className="dashboard-card-head">
             <div>
-              <div className="eyebrow">Vendas</div>
-              <h3>Vendas em aberto</h3>
+              <div className="eyebrow">Pendencias</div>
+              <h3>O que este cliente deve</h3>
             </div>
           </div>
 
           <div className="customer-stream-list">
             {openSales.length ? (
-              openSales.map((sale) => {
-                const paidAmount = Math.max(sale.finalAmount - sale.remainingAmount, 0);
-                const progress = sale.finalAmount > 0 ? Math.min((paidAmount / sale.finalAmount) * 100, 100) : 0;
-
-                return (
-                  <article key={sale.id} className="stream-card sale-stream-card">
-                    <div className="stream-card-head">
-                      <div className="stream-card-copy">
-                        <div className="stream-kicker">Venda</div>
-                        <div className="stream-title">{sale.description}</div>
-                        <div className="customer-meta">
-                          {formatDate(sale.saleDate)} | vence {formatDate(sale.dueDate)}
-                        </div>
+              openSales.map((sale) => (
+                <article key={sale.id} className="compact-stream-card">
+                  <div className="compact-stream-head">
+                    <div className="compact-stream-copy">
+                      <div className="stream-kicker">{getSaleStatusLabel(sale.status)}</div>
+                      <div className="compact-stream-title-row">
+                        <strong className="compact-stream-title">{sale.description}</strong>
+                        <strong className="compact-stream-amount">{formatMoney(sale.remainingAmount)}</strong>
                       </div>
-                      <div className={`sale-status-pill ${sale.status.toLowerCase()}`}>{getSaleStatusLabel(sale.status)}</div>
-                    </div>
-
-                    <div className="stream-progress">
-                      <div className="stream-progress-bar">
-                        <span className="stream-progress-fill sales" style={{ width: `${Math.max(progress, 6)}%` }} />
-                      </div>
-                      <div className="stream-progress-meta">
-                        <span>{formatMoney(paidAmount)} pago</span>
-                        <span>{formatMoney(sale.remainingAmount)} em aberto</span>
+                      <div className="compact-stream-meta">
+                        <span>Venda {formatDate(sale.saleDate)}</span>
+                        <span>Vence {formatDate(sale.dueDate)}</span>
+                        <span>Total {formatMoney(sale.finalAmount)}</span>
                       </div>
                     </div>
-
-                    <div className="stream-metrics-grid">
-                      <div>
-                        <span className="label">Total</span>
-                        <strong>{formatMoney(sale.finalAmount)}</strong>
-                      </div>
-                      <div>
-                        <span className="label">Acrescimo</span>
-                        <strong>{formatMoney(sale.feeAmount)}</strong>
-                      </div>
-                      <div>
-                        <span className="label">Codigo</span>
-                        <strong>{sale.id.slice(0, 8)}</strong>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })
+                  </div>
+                </article>
+              ))
             ) : (
               <div className="empty-card">Nenhuma venda em aberto para este cliente.</div>
             )}
           </div>
-        </article>
+        </div>
 
-        <article className="dashboard-chart-card customer-module">
+        <div className="customer-activity-group">
           <div className="dashboard-card-head">
             <div>
               <div className="eyebrow">Pagamentos</div>
-              <h3>Pagamentos recentes</h3>
+              <h3>Ultimos recebimentos</h3>
             </div>
           </div>
 
           {canViewPayments ? (
             <div className="customer-stream-list">
               {recentPayments.length ? (
-                recentPayments.map((payment) => {
-                  const allocatedAmount = payment.allocations.reduce((total, allocation) => total + allocation.amount, 0);
-                  const progress = payment.amount > 0 ? Math.min((allocatedAmount / payment.amount) * 100, 100) : 0;
-
-                  return (
-                    <article key={payment.id} className="stream-card payment-stream-card">
-                      <div className="stream-card-head">
-                        <div className="stream-card-copy">
-                          <div className="stream-kicker">Pagamento</div>
-                          <div className="stream-title">{formatMoney(payment.amount)}</div>
-                          <div className="customer-meta">
-                            {formatDate(payment.paymentDate)} | {payment.method}
-                          </div>
+                recentPayments.map((payment) => (
+                  <article key={payment.id} className="compact-stream-card">
+                    <div className="compact-stream-head">
+                      <div className="compact-stream-copy">
+                        <div className="stream-kicker">Pagamento</div>
+                        <div className="compact-stream-title-row">
+                          <strong className="compact-stream-title">{formatDate(payment.paymentDate)}</strong>
+                          <strong className="compact-stream-amount">{formatMoney(payment.amount)}</strong>
                         </div>
-                        <div className="badge success">{payment.allocations.length} aloc.</div>
-                      </div>
-
-                      <div className="stream-progress">
-                        <div className="stream-progress-bar">
-                          <span className="stream-progress-fill payments" style={{ width: `${Math.max(progress, 6)}%` }} />
-                        </div>
-                        <div className="stream-progress-meta">
-                          <span>{formatMoney(allocatedAmount)} alocado</span>
-                          <span>{formatMoney(Math.max(payment.amount - allocatedAmount, 0))} livre</span>
+                        <div className="compact-stream-meta">
+                          <span>{payment.method}</span>
+                          <span>{payment.allocations.length} alocacao(oes)</span>
                         </div>
                       </div>
-
-                      <div className="payment-allocation-grid">
-                        {payment.allocations.length ? (
-                          payment.allocations.map((allocation) => (
-                            <div key={`${payment.id}-${allocation.saleId}`} className="allocation-item">
-                              <span className="label">Venda {allocation.saleId.slice(0, 8)}</span>
-                              <strong>{formatMoney(allocation.amount)}</strong>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="customer-meta">Pagamento sem alocacoes detalhadas.</div>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })
+                    </div>
+                  </article>
+                ))
               ) : (
                 <div className="empty-card">Nenhum pagamento recente para este cliente.</div>
               )}
@@ -254,8 +198,8 @@ export function CustomerDetailPanel({
           ) : (
             <div className="empty-card">Visualizacao de pagamentos restrita ao perfil OWNER.</div>
           )}
-        </article>
-      </section>
+        </div>
+      </article>
     </section>
   );
 }

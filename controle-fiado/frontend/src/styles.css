@@ -2214,6 +2214,17 @@ select.customer-selector option {
   justify-items: end;
 }
 
+.customer-balance-block {
+  text-align: right;
+}
+
+.customer-balance-block strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
 .customer-card-tags {
   grid-auto-flow: column;
   grid-auto-columns: max-content;
@@ -2309,10 +2320,8 @@ select.customer-selector option {
 .customer-profile-hero {
   position: relative;
   overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
+  display: grid;
+  gap: 20px;
   padding: 20px;
   border-radius: 26px;
   border: 1px solid var(--line);
@@ -2320,6 +2329,13 @@ select.customer-selector option {
     linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(255, 255, 255, 0.03)),
     rgba(14, 14, 22, 0.78);
   box-shadow: var(--glass-highlight), var(--shadow-md);
+}
+
+.customer-profile-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .customer-profile-main {
@@ -2376,6 +2392,12 @@ select.customer-selector option {
   gap: 12px;
 }
 
+.customer-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .customer-stat-card {
   position: relative;
   overflow: hidden;
@@ -2406,12 +2428,26 @@ select.customer-selector option {
 }
 
 .customer-support-strip {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .customer-detail-columns {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
+}
+
+.customer-activity-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.customer-activity-group {
+  display: grid;
+  gap: 14px;
+}
+
+.customer-note-card {
+  grid-column: span 2;
 }
 
 .floating-form-overlay {
@@ -3068,6 +3104,7 @@ select.customer-selector option {
   .dashboard-kpi-grid,
   .dashboard-metric-row,
   .customer-stat-grid,
+  .customer-summary-strip,
   .customer-support-strip,
   .stream-metrics-grid,
   .operation-support-grid,
@@ -3213,6 +3250,7 @@ select.customer-selector option {
   }
 
   .customer-profile-hero,
+  .customer-profile-top,
   .customer-profile-main {
     flex-direction: column;
   }

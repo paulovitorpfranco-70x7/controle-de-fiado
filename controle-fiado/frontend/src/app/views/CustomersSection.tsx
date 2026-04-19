@@ -54,11 +54,6 @@ export function CustomersSection({
     };
   }, [showCreateForm]);
 
-  function jumpToSection(sectionId: string) {
-    const element = document.getElementById(sectionId);
-    element?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
       const normalizedSearch = search.trim().toLowerCase();
@@ -93,11 +88,11 @@ export function CustomersSection({
         <div className="page-header page-header-section">
           <div>
             <div className="eyebrow">Clientes</div>
-            <h2>Consulta e acompanhamento</h2>
-            <p className="page-description">Busque clientes, aplique filtros rapidos e abra a ficha sem trocar de tela.</p>
+            <h2>Encontre o cliente</h2>
+            <p className="page-description">Busque, filtre e abra a ficha para vender, receber ou cobrar.</p>
           </div>
-          <button className="auth-button section-primary-action" type="button" onClick={() => setShowCreateForm((current) => !current)}>
-            {showCreateForm ? "Fechar cadastro" : "Novo cliente"}
+          <button className="auth-button section-primary-action" type="button" onClick={() => setShowCreateForm(true)}>
+            Novo cliente
           </button>
         </div>
 
@@ -122,33 +117,7 @@ export function CustomersSection({
             <button className={filter === "overdue" ? "active" : ""} type="button" onClick={() => setFilter("overdue")}>
               Em atraso
             </button>
-            <button className={filter === "clear" ? "active" : ""} type="button" onClick={() => setFilter("clear")}>
-              Sem saldo
-            </button>
           </div>
-        </div>
-
-        <div className="customers-summary-bar">
-          <div className="summary-pill">
-            <span className="label">Resultado</span>
-            <strong>{filteredCustomers.length}</strong>
-          </div>
-          <div className="summary-pill">
-            <span className="label">Selecionado</span>
-            <strong>{customerDetail?.name ?? "Nenhum cliente"}</strong>
-          </div>
-        </div>
-
-        <div className="section-context-nav" aria-label="Atalhos da area de clientes">
-          <button className="ghost-button" type="button" onClick={() => jumpToSection("customers-list-panel")}>
-            Carteira
-          </button>
-          <button className="ghost-button" type="button" onClick={() => jumpToSection("customer-detail-panel")}>
-            Ficha
-          </button>
-          <button className="ghost-button" type="button" onClick={() => setShowCreateForm(true)}>
-            Cadastro
-          </button>
         </div>
       </section>
 
