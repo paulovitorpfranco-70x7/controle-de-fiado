@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useState } from "react";
 import { createCustomer } from "../api/create-customer";
 import type { Customer } from "../types/customer";
@@ -5,9 +6,10 @@ import type { Customer } from "../types/customer";
 type CreateCustomerFormProps = {
   onCreated: (customer: Customer) => Promise<void> | void;
   onSuccess?: (message: string) => void;
+  onCancel?: () => void;
 };
 
-export function CreateCustomerForm({ onCreated, onSuccess }: CreateCustomerFormProps) {
+export function CreateCustomerForm({ onCreated, onSuccess, onCancel }: CreateCustomerFormProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -52,8 +54,13 @@ export function CreateCustomerForm({ onCreated, onSuccess }: CreateCustomerFormP
       <div className="operation-header">
         <div>
           <div className="eyebrow">Novo cliente</div>
-          <h3>Cadastrar cliente</h3>
+          <h3 id="customer-create-title">Cadastrar cliente</h3>
         </div>
+        {onCancel ? (
+          <button className="floating-form-close" type="button" aria-label="Fechar cadastro" onClick={onCancel}>
+            <X size={18} strokeWidth={2.2} />
+          </button>
+        ) : null}
       </div>
 
       <div className="operation-support-grid">

@@ -1,3 +1,4 @@
+import { Activity, HandCoins, House, MessageCircle, Users, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type PropsWithChildren, type ReactNode } from "react";
 import type { AuthUser } from "../features/auth/types/auth";
 import type { AppSection } from "./types";
@@ -12,12 +13,12 @@ type AppShellProps = PropsWithChildren<{
 
 const SIDEBAR_STORAGE_KEY = "controle-fiado-sidebar-collapsed";
 
-const SECTION_LABELS: Array<{ id: AppSection; label: string; shortLabel: string; ownerOnly?: boolean }> = [
-  { id: "dashboard", label: "Dashboard", shortLabel: "Ds" },
-  { id: "customers", label: "Clientes", shortLabel: "Cl" },
-  { id: "operations", label: "Operacoes", shortLabel: "Op" },
-  { id: "charges", label: "Cobrancas", shortLabel: "Cb", ownerOnly: true },
-  { id: "status", label: "Sistema", shortLabel: "St", ownerOnly: true }
+const SECTION_LABELS: Array<{ id: AppSection; label: string; icon: LucideIcon; ownerOnly?: boolean }> = [
+  { id: "dashboard", label: "Dashboard", icon: House },
+  { id: "customers", label: "Clientes", icon: Users },
+  { id: "operations", label: "Operacoes", icon: HandCoins },
+  { id: "charges", label: "Cobrancas", icon: MessageCircle, ownerOnly: true },
+  { id: "status", label: "Sistema", icon: Activity, ownerOnly: true }
 ];
 
 export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, pageKey, children }: AppShellProps) {
@@ -107,7 +108,9 @@ export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, p
               title={desktopCollapsed ? section.label : undefined}
               onClick={() => handleNavigate(section.id)}
             >
-              <span className="app-nav-icon" aria-hidden="true">{section.shortLabel}</span>
+              <span className="app-nav-icon" aria-hidden="true">
+                <section.icon className="app-nav-symbol" strokeWidth={2.1} />
+              </span>
               <span className="app-nav-label">{section.label}</span>
             </button>
           ))}

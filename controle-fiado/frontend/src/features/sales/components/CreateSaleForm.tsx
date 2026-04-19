@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { addDaysInputDateValue, todayInputDateValue } from "../../../shared/utils/date-input";
 import { createSale } from "../api/create-sale";
@@ -10,6 +11,7 @@ type CreateSaleFormProps = {
   createdById: string;
   onCreated: () => Promise<void> | void;
   onSuccess?: (message: string) => void;
+  onCancel?: () => void;
 };
 
 export function CreateSaleForm({
@@ -19,7 +21,8 @@ export function CreateSaleForm({
   onCustomerChange,
   createdById,
   onCreated,
-  onSuccess
+  onSuccess,
+  onCancel
 }: CreateSaleFormProps) {
   const [description, setDescription] = useState("Compra de balcao");
   const [originalAmount, setOriginalAmount] = useState("0");
@@ -77,10 +80,18 @@ export function CreateSaleForm({
       <div className="operation-header">
         <div>
           <div className="eyebrow">Nova venda</div>
-          <h3>Lancar fiado</h3>
+          <h3 id="sale-create-title">Lancar fiado</h3>
         </div>
-        <div className="operation-chip">{formatCurrency(projectedAmount)}</div>
+        {onCancel ? (
+          <button className="floating-form-close" type="button" aria-label="Fechar formulario de venda" onClick={onCancel}>
+            <X size={18} strokeWidth={2.2} />
+          </button>
+        ) : (
+          <div className="operation-chip">{formatCurrency(projectedAmount)}</div>
+        )}
       </div>
+
+      {onCancel ? <div className="operation-chip operation-chip-inline">{formatCurrency(projectedAmount)}</div> : null}
 
       <label className="field-block">
         <span className="label">Cliente</span>

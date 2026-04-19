@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CreateCustomerForm } from "../../features/customers/components/CreateCustomerForm";
 import { CustomerDetailPanel } from "../../features/customers/components/CustomerDetailPanel";
 import { CustomerList } from "../../features/customers/components/CustomerList";
@@ -31,6 +31,28 @@ export function CustomersSection({
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
+
+  useEffect(() => {
+    if (!showCreateForm) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowCreateForm(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showCreateForm]);
 
   function jumpToSection(sectionId: string) {
     const element = document.getElementById(sectionId);
@@ -74,7 +96,7 @@ export function CustomersSection({
             <h2>Consulta e acompanhamento</h2>
             <p className="page-description">Busque clientes, aplique filtros rapidos e abra a ficha sem trocar de tela.</p>
           </div>
-          <button className="auth-button" type="button" onClick={() => setShowCreateForm((current) => !current)}>
+          <button className="auth-button section-primary-action" type="button" onClick={() => setShowCreateForm((current) => !current)}>
             {showCreateForm ? "Fechar cadastro" : "Novo cliente"}
           </button>
         </div>
@@ -124,25 +146,13 @@ export function CustomersSection({
           <button className="ghost-button" type="button" onClick={() => jumpToSection("customer-detail-panel")}>
             Ficha
           </button>
-          <button className="ghost-button" type="button" onClick={() => jumpToSection("customer-create-panel")}>
+          <button className="ghost-button" type="button" onClick={() => setShowCreateForm(true)}>
             Cadastro
           </button>
         </div>
-
-        {showCreateForm ? (
-          <div className="collapsible-form" id="customer-create-panel">
-            <CreateCustomerForm
-              onSuccess={onSuccess}
-              onCreated={async (customer) => {
-                await onCustomerCreated(customer);
-                setShowCreateForm(false);
-              }}
-            />
-          </div>
-        ) : null}
       </section>
 
-      <section className="customers-workspace">
+      <section className="section-block customers-workspace">
         <div className="customers-list-panel dashboard-chart-card" id="customers-list-panel">
           <div className="dashboard-card-head">
             <div>
@@ -167,6 +177,21 @@ export function CustomersSection({
           )}
         </div>
       </section>
+
+      {showCreateForm ? (
+        <div className="floating-form-overlay" role="presentation" onClick={() => setShowCreateForm(false)}>
+          <div className="floating-form-shell" role="dialog" aria-modal="true" aria-labelledby="customer-create-title" onClick={(event) => event.stopPropagation()}>
+            <CreateCustomerForm
+              onCancel={() => setShowCreateForm(false)}
+              onSuccess={onSuccess}
+              onCreated={async (customer) => {
+                await onCustomerCreated(customer);
+                setShowCreateForm(false);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
