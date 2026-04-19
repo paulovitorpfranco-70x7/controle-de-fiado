@@ -38,16 +38,16 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
 
   return (
     <section className="section-block">
-      <div className="dashboard-panel">
+      <div className="dashboard-panel charges-panel-stack">
         <div className="dashboard-hero charges-hero">
           <article className="dashboard-chart-card">
             <div className="dashboard-card-head">
               <div>
                 <div className="eyebrow">Automacao</div>
                 <h3>Rotina diaria de cobranca</h3>
-                <p className="page-description">Dispara avisos de vencimento e atualiza o monitor operacional.</p>
+                <p className="page-description">Dispara avisos de vencimento, evita duplicidade e atualiza o monitor operacional.</p>
               </div>
-              <button className="auth-button" type="button" onClick={handleRun} disabled={loading || !canRun}>
+              <button className="auth-button compact-action-button" type="button" onClick={handleRun} disabled={loading || !canRun}>
                 {loading ? "Executando..." : "Executar agora"}
               </button>
             </div>
@@ -81,6 +81,7 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
               <div>
                 <div className="eyebrow">Monitor</div>
                 <h3>Saude da automacao</h3>
+                <p className="page-description">Leitura rapida da ultima execucao e do nivel de falha recente.</p>
               </div>
             </div>
 
@@ -92,7 +93,6 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
                 </article>
                 <article className="dashboard-kpi-card">
                   <span className="label">Status</span>
-                  <strong>{renderStatus(monitor.lastRunStatus)}</strong>
                   <span className={`customer-tag ${getStatusTone(monitor.lastRunStatus)}`}>{renderStatus(monitor.lastRunStatus)}</span>
                 </article>
                 <article className="dashboard-kpi-card">
@@ -120,10 +120,7 @@ export function ChargeAutomationPanel({ onCompleted, onSuccess, monitor, canRun 
         {result ? (
           <div className="operation-notice success">
             <span className="operation-notice-label">Resumo da execucao</span>
-            <strong>
-              {result.auto3DaysSent + result.autoDueDateSent} mensagem(ns) preparada(s), {result.failedMessages} falha(s), {result.skippedDuplicates} duplicata(s)
-              {" "}ignorada(s).
-            </strong>
+            <strong>{summarizeExecution(result)}</strong>
           </div>
         ) : null}
 
@@ -137,4 +134,18 @@ function renderStatus(status: DailyChargeJobMonitor["lastRunStatus"]) {
   if (status === "success") return "Sucesso";
   if (status === "failed") return "Falhou";
   return "Nunca executado";
+}
+
+function summarizeExecution(result: DailyChargeJobResult) {
+  const preparedMessages = result.auto3DaysSent + result.autoDueDateSent;
+
+  if (preparedMessages === 0 && result.failedMessages === 0 && result.skippedDuplicates === 0) {
+    return "Nenhuma nova mensagem foi preparada nesta execucao.";
+  }
+
+  if (preparedMessages === 0 && result.failedMessages === 0) {
+    return `${result.skippedDuplicates} duplicata(s) foi(ram) ignorada(s). Nenhuma nova mensagem precisou ser preparada.`;
+  }
+
+  return `${preparedMessages} mensagem(ns) preparada(s), ${result.failedMessages} falha(s) e ${result.skippedDuplicates} duplicata(s) ignorada(s).`;
 }

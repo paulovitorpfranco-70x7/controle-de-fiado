@@ -42,63 +42,67 @@ export function ChargesSection({
 
   return (
     <>
-      <section className="section-block">
-        <div className="dashboard-chart-card">
-          <div className="page-header page-header-section">
-            <div>
-              <div className="eyebrow">Cobrancas</div>
-              <h2>Operacao de cobranca</h2>
-              <p className="page-description">Automacao, fila ativa, preparo manual e historico recente no mesmo painel.</p>
-            </div>
+      <section className="section-block charges-command-panel">
+        <div className="page-header page-header-section">
+          <div>
+            <div className="eyebrow">Cobrancas</div>
+            <h2>Operacao de cobranca</h2>
+            <p className="page-description">Fila, contato manual e historico recente sem excesso de informacao.</p>
           </div>
+          <div className="status-card charges-status-card">
+            <span className="status-dot" />
+            {hasChargeableCustomer ? "Cliente pronto" : "Selecione na fila"}
+          </div>
+        </div>
 
-          <div className="section-context-nav" aria-label="Atalhos da area de cobrancas">
-            <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-automation-panel")}>
-              Automacao
-            </button>
-            <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-manual-panel")}>
-              Manual
-            </button>
-            <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-overview-panel")}>
-              Fila
-            </button>
-            <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-history-panel")}>
-              Historico
-            </button>
-          </div>
+        <div className="section-context-nav" aria-label="Atalhos da area de cobrancas">
+          <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-automation-panel")}>
+            Automacao
+          </button>
+          <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-manual-panel")}>
+            Contato manual
+          </button>
+          <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-overview-panel")}>
+            Fila operacional
+          </button>
+          <button className="ghost-button" type="button" onClick={() => jumpToSection("charges-history-panel")}>
+            Historico
+          </button>
         </div>
       </section>
 
-      <div id="charges-automation-panel">
-        <ChargeAutomationPanel
-          canRun={authUser.role === "OWNER"}
-          monitor={dailyChargeJobMonitor}
-          onSuccess={onSuccess}
-          onCompleted={onChargeDataRefresh}
-        />
-      </div>
-
-      {hasChargeableCustomer && customerDetail ? (
-        <div id="charges-manual-panel">
-          <ManualChargeForm
-            customerId={customerDetail.id}
-            customerName={customerDetail.name}
-            customerPhone={customerDetail.phone}
-            customerPhoneE164={customerDetail.phoneE164}
-            saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
-            openBalance={customerDetail.openBalance}
-            createdById={authUser.id}
+      <section className="section-block charges-workspace">
+        <div id="charges-automation-panel">
+          <ChargeAutomationPanel
+            canRun={authUser.role === "OWNER"}
+            monitor={dailyChargeJobMonitor}
             onSuccess={onSuccess}
-            onSent={async () => {
-              await onOperationalRefresh(customerDetail.id);
-            }}
+            onCompleted={onChargeDataRefresh}
           />
         </div>
-      ) : (
-        <section className="section-block" id="charges-manual-panel">
-          <div className="empty-card">Selecione na fila um cliente com saldo aberto para preparar a cobranca manual e abrir o WhatsApp.</div>
-        </section>
-      )}
+
+        {hasChargeableCustomer && customerDetail ? (
+          <div id="charges-manual-panel">
+            <ManualChargeForm
+              customerId={customerDetail.id}
+              customerName={customerDetail.name}
+              customerPhone={customerDetail.phone}
+              customerPhoneE164={customerDetail.phoneE164}
+              saleId={customerDetail.sales.find((sale) => sale.remainingAmount > 0)?.id}
+              openBalance={customerDetail.openBalance}
+              createdById={authUser.id}
+              onSuccess={onSuccess}
+              onSent={async () => {
+                await onOperationalRefresh(customerDetail.id);
+              }}
+            />
+          </div>
+        ) : (
+          <section className="section-block" id="charges-manual-panel">
+            <div className="empty-card">Selecione na fila um cliente com saldo aberto para preparar a cobranca manual e abrir o WhatsApp.</div>
+          </section>
+        )}
+      </section>
 
       {chargeOverview ? (
         <div id="charges-overview-panel">

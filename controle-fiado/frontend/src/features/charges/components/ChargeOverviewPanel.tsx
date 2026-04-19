@@ -77,7 +77,7 @@ export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCust
     handleSelect?: (customerId: string) => void
   ) {
     return (
-      <article className="dashboard-chart-card charges-lane">
+      <article className={`dashboard-chart-card charges-lane ${tone}`}>
         <div className="dashboard-card-head">
           <div>
             <div className="eyebrow">{title}</div>
@@ -92,44 +92,34 @@ export function ChargeOverviewPanel({ overview, selectedCustomerId, onSelectCust
         <div className="customer-stream-list">
           {items.length ? (
             items.map((item) => (
-              <article key={item.saleId} className={`stream-card queue-item ${tone}`}>
+              <article key={item.saleId} className={`stream-card queue-item selectable-card ${tone}`}>
                 <div className="stream-card-head">
                   <div className="stream-card-copy">
-                    <div className="stream-kicker">Cliente</div>
                     <div className="stream-title">{item.customerName}</div>
-                    <div className="customer-meta">
-                      {item.phone} | vence {formatDate(item.dueDate)}
-                    </div>
-                    <div className="customer-card-tags">
-                      <span className={`customer-tag ${item.phoneE164 ? "" : "warning"}`}>{item.phoneE164 ? "WhatsApp pronto" : "Sem WhatsApp"}</span>
-                      <span className="customer-tag">Venda {item.saleId.slice(0, 8)}</span>
+                    <div className="queue-item-meta">
+                      <span>{item.phone}</span>
+                      <span>Vence {formatDate(item.dueDate)}</span>
                     </div>
                   </div>
-                  <div className={currentSelectedCustomerId === item.customerId ? "badge success" : "badge warning"}>
-                    {currentSelectedCustomerId === item.customerId ? "Selecionado" : "Na fila"}
-                  </div>
-                </div>
-
-                <div className="stream-metrics-grid">
-                  <div>
+                  <div className="queue-balance-block">
                     <span className="label">Saldo</span>
                     <strong>{formatMoney(item.remainingAmount)}</strong>
                   </div>
-                  <div>
-                    <span className="label">Status</span>
-                    <strong>{item.status}</strong>
-                  </div>
-                  <div>
-                    <span className="label">Venda</span>
-                    <strong>{item.saleId.slice(0, 8)}</strong>
-                  </div>
+                </div>
+
+                <div className="customer-card-tags">
+                  <span className={`customer-tag ${item.phoneE164 ? "" : "warning"}`}>{item.phoneE164 ? "WhatsApp pronto" : "Sem WhatsApp"}</span>
+                  <span className="customer-tag">{item.status}</span>
                 </div>
 
                 {handleSelect ? (
                   <div className="queue-actions">
                     <button className="ghost-button" type="button" onClick={() => handleSelect(item.customerId)}>
-                      Abrir cliente
+                      Selecionar
                     </button>
+                    <div className={currentSelectedCustomerId === item.customerId ? "badge success" : "badge warning"}>
+                      {currentSelectedCustomerId === item.customerId ? "Selecionado" : "Na fila"}
+                    </div>
                   </div>
                 ) : null}
               </article>

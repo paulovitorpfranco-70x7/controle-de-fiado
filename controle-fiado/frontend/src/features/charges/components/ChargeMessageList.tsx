@@ -85,13 +85,18 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
           <div>
             <div className="eyebrow">Historico</div>
             <h3>Mensagens recentes</h3>
-            <p className="page-description">Acompanhe o que foi enviado, o que ainda esta pendente e o que falhou.</p>
+            <p className="page-description">So o essencial: status, horario, mensagem e proxima acao.</p>
           </div>
         </div>
 
         <div className="customer-stream-list">
           {messages.map((message) => (
-            <article key={message.id} className="stream-card charge-message-card">
+            <article
+              key={message.id}
+              className={`stream-card charge-message-card ${
+                message.sendStatus === "FAILED" ? "failed" : message.sendStatus === "PENDING" ? "pending" : "sent"
+              }`}
+            >
               <div className="stream-card-head">
                 <div className="stream-card-copy">
                   <div className="stream-kicker">Mensagem</div>
@@ -117,34 +122,28 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
               </div>
 
               <div className="message-copy charge-message-copy">{message.messageBody}</div>
-              <div className="stream-metrics-grid">
-                <div>
-                  <span className="label">Cliente</span>
-                  <strong>{message.customerName ?? "Nao vinculado"}</strong>
-                </div>
-                <div>
-                  <span className="label">Telefone</span>
-                  <strong>{message.phone ?? "Nao informado"}</strong>
-                </div>
-                <div>
-                  <span className="label">Envio</span>
-                  <strong>{message.sentAt ? formatDate(message.sentAt) : "Aguardando"}</strong>
-                </div>
+              <div className="customer-meta">
+                {message.phone ?? "Telefone nao informado"} | {message.sentAt ? `enviada ${formatDate(message.sentAt)}` : "aguardando envio"}
               </div>
-              {message.providerResponse ? <div className="customer-meta">{message.providerResponse}</div> : null}
+              {message.providerResponse ? <div className="customer-meta charge-provider-note">{message.providerResponse}</div> : null}
 
               <div className="form-actions-row">
                 {message.sendStatus === "PENDING" ? (
                   <>
                     {message.phoneE164 ? (
-                      <a className="ghost-button inline-link-button" href={buildWhatsAppUrl(message.phoneE164, message.messageBody)} target="_blank" rel="noreferrer">
+                      <a
+                        className="ghost-button inline-link-button compact-action-button"
+                        href={buildWhatsAppUrl(message.phoneE164, message.messageBody)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         Abrir no WhatsApp
                       </a>
                     ) : (
                       <span className="error-copy">Cliente sem telefone valido.</span>
                     )}
                     <button
-                      className="ghost-button"
+                      className="ghost-button compact-action-button"
                       type="button"
                       onClick={() => handleOpenAndMark(message)}
                       disabled={markingId === message.id}
@@ -155,7 +154,7 @@ export function ChargeMessageList({ messages, canRetry, onRetried, onCompleted }
                 ) : null}
                 {message.sendStatus === "FAILED" && canRetry ? (
                   <button
-                    className="auth-button"
+                    className="auth-button compact-action-button"
                     type="button"
                     onClick={() => handleRetry(message.id)}
                     disabled={retryingId === message.id}

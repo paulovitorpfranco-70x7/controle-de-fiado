@@ -471,6 +471,7 @@ img {
 .dashboard-kpi-card::after,
 .dashboard-chart-card::after,
 .customers-command-panel::after,
+.charges-command-panel::after,
 .support-card::after,
 .summary-pill::after,
 .customer-stat-card::after,
@@ -875,7 +876,8 @@ img {
 }
 
 .dashboard-kpi-card,
-.dashboard-chart-card {
+.dashboard-chart-card,
+.charges-command-panel {
   position: relative;
   overflow: hidden;
   padding: 18px;
@@ -889,6 +891,7 @@ img {
 .dashboard-kpi-card:hover,
 .dashboard-chart-card:hover,
 .customers-command-panel:hover,
+.charges-command-panel:hover,
 .support-card:hover,
 .summary-pill:hover,
 .customer-stat-card:hover,
@@ -938,7 +941,10 @@ img {
   gap: 16px;
 }
 
-.charges-hero,
+.charges-hero {
+  grid-template-columns: 1fr;
+}
+
 .status-hero {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1638,6 +1644,51 @@ img {
   text-align: right;
 }
 
+.queue-lane-total span {
+  display: block;
+}
+
+.queue-lane-total strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.queue-balance-block {
+  text-align: right;
+}
+
+.queue-balance-block span {
+  display: block;
+}
+
+.queue-balance-block strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.queue-item {
+  display: grid;
+  gap: 12px;
+}
+
+.queue-item-meta {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.queue-item .queue-actions {
+  justify-content: space-between;
+  align-items: center;
+}
+
 .operation-header {
   display: flex;
   justify-content: space-between;
@@ -2045,6 +2096,13 @@ select.customer-selector option {
   align-items: start;
 }
 
+.charges-workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
 .customers-command-panel {
   position: relative;
   overflow: hidden;
@@ -2053,6 +2111,29 @@ select.customer-selector option {
   border: 1px solid var(--line);
   background: var(--glass-panel-soft);
   box-shadow: var(--glass-highlight), var(--shadow-md);
+}
+
+.charges-command-panel {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--glass-panel-soft);
+  box-shadow: var(--glass-highlight), var(--shadow-md);
+}
+
+.charges-command-panel .page-header {
+  align-items: center;
+  gap: 20px;
+}
+
+.charges-command-panel .page-header > div:first-child {
+  max-width: 720px;
+}
+
+.charges-command-panel .page-header h2 {
+  font-size: clamp(1.8rem, 2.8vw, 2.6rem);
 }
 
 .customers-command-panel .page-header {
@@ -2079,6 +2160,10 @@ select.customer-selector option {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 14px;
+}
+
+.charges-status-card {
+  justify-self: start;
 }
 
 .section-context-nav {
@@ -2531,14 +2616,23 @@ select.customer-selector option {
 
 .queue-item.warning {
   border-color: rgba(250, 204, 21, 0.22);
+  background:
+    linear-gradient(180deg, rgba(250, 204, 21, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(14, 14, 22, 0.74);
 }
 
 .queue-item.danger {
   border-color: rgba(251, 113, 133, 0.22);
+  background:
+    linear-gradient(180deg, rgba(251, 113, 133, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(14, 14, 22, 0.74);
 }
 
 .queue-item.neutral {
   border-color: rgba(96, 165, 250, 0.2);
+  background:
+    linear-gradient(180deg, rgba(96, 165, 250, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(14, 14, 22, 0.74);
 }
 
 .inline-link-button {
@@ -2593,6 +2687,18 @@ select.customer-selector option {
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
+.charges-lane.warning {
+  border-color: rgba(250, 204, 21, 0.18);
+}
+
+.charges-lane.danger {
+  border-color: rgba(251, 113, 133, 0.18);
+}
+
+.charges-lane.neutral {
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
 .manual-charge-card:hover,
 .charge-message-card:hover,
 .empty-card:hover {
@@ -2618,6 +2724,29 @@ select.customer-selector option {
 .charge-message-copy {
   margin-top: 12px;
   padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.charge-message-card.pending {
+  border-color: rgba(250, 204, 21, 0.16);
+}
+
+.charge-message-card.failed {
+  border-color: rgba(251, 113, 133, 0.18);
+}
+
+.charge-message-card.sent {
+  border-color: rgba(52, 211, 153, 0.16);
+}
+
+.charge-provider-note {
+  padding: 10px 12px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.03);
@@ -2834,6 +2963,7 @@ select.customer-selector option {
   .status-grid,
   .customer-detail-columns,
   .customers-workspace,
+  .charges-workspace,
   .operation-grid,
   .detail-columns {
     grid-template-columns: 1fr;
@@ -3169,6 +3299,7 @@ select.customer-selector option {
   }
 
   .customers-summary-bar,
+  .charges-summary-bar,
   .customer-list-stats {
     grid-template-columns: 1fr;
   }

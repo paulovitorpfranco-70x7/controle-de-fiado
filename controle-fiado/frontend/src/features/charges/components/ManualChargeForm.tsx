@@ -91,6 +91,7 @@ export function ManualChargeForm({
             <h3>Preparar mensagem</h3>
             <p className="page-description">Monte o texto final, confira o contato e abra a conversa com um clique.</p>
           </div>
+          <span className={`customer-tag ${hasWhatsAppTarget ? "success" : "warning"}`}>{hasWhatsAppTarget ? "WhatsApp pronto" : "Sem WhatsApp"}</span>
         </div>
 
         <div className="operation-support-grid">
@@ -105,10 +106,6 @@ export function ManualChargeForm({
           <div className="support-card">
             <span className="label">WhatsApp</span>
             <strong>{customerPhoneE164 ?? customerPhone ?? "Nao informado"}</strong>
-          </div>
-          <div className="support-card">
-            <span className="label">Venda alvo</span>
-            <strong>{saleId ? saleId.slice(0, 8) : "Sem venda especifica"}</strong>
           </div>
         </div>
 
@@ -125,17 +122,17 @@ export function ManualChargeForm({
         </label>
 
         <div className="charge-preview-card">
-          <span className="label">Preview rapido</span>
+          <span className="label">Mensagem final</span>
           <strong>{customerName}</strong>
           <p className="message-copy">{messageBody}</p>
         </div>
 
         <div className="form-actions-row">
-          <button className="auth-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
+          <button className="auth-button compact-action-button" type="submit" disabled={loading || !hasWhatsAppTarget}>
             {loading ? "Preparando..." : "Preparar cobranca"}
           </button>
           {whatsappUrl ? (
-            <a className="ghost-button inline-link-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+            <a className="ghost-button inline-link-button compact-action-button" href={whatsappUrl} target="_blank" rel="noreferrer">
               Abrir no WhatsApp
             </a>
           ) : null}
