@@ -10,12 +10,20 @@ type SaleOverviewRow = {
   due_date: string;
   remaining_amount_cents: number;
   status: "OPEN" | "PARTIAL" | "OVERDUE" | "PAID" | "CANCELED";
-  customers?: {
-    id: string;
-    name: string;
-    phone: string;
-    phone_e164: string | null;
-  }[] | null;
+  customers?:
+    | {
+        id: string;
+        name: string;
+        phone: string;
+        phone_e164: string | null;
+      }
+    | {
+        id: string;
+        name: string;
+        phone: string;
+        phone_e164: string | null;
+      }[]
+    | null;
 };
 
 type MessageRow = {
@@ -32,11 +40,18 @@ type MessageRow = {
   sent_at: string | null;
   created_by_profile_id: string | null;
   created_at: string;
-  customers?: {
-    name: string;
-    phone: string;
-    phone_e164: string | null;
-  }[] | null;
+  customers?:
+    | {
+        name: string;
+        phone: string;
+        phone_e164: string | null;
+      }
+    | {
+        name: string;
+        phone: string;
+        phone_e164: string | null;
+      }[]
+    | null;
 };
 
 type AuditRow = {
@@ -291,23 +306,23 @@ async function findChargeContext(customerId: string, saleId?: string) {
     return null;
   }
 
-  const customer = row.customers?.[0] ?? null;
+  const customer = extractCustomer(row.customers);
 
   return {
     customerId: row.customer_id,
     saleId: row.id,
     dueDate: row.due_date,
     remainingAmount: row.remaining_amount_cents / 100,
-    customerName: customer?.name ?? "Cliente"
+    customerName: customer?.name?.trim() || "Cliente"
   };
 }
 
 function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
-  const customer = sale.customers?.[0] ?? null;
+  const customer = extractCustomer(sale.customers);
 
   return {
     customerId: customer?.id ?? sale.customer_id,
-    customerName: customer?.name ?? "Cliente",
+    customerName: customer?.name?.trim() || "Cliente",
     phone: customer?.phone ?? "",
     phoneE164: customer?.phone_e164 ?? normalizeBrazilPhoneToE164(customer?.phone),
     saleId: sale.id,
@@ -318,12 +333,12 @@ function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
 }
 
 function mapMessageRow(message: MessageRow): ChargeMessage {
-  const customer = message.customers?.[0] ?? null;
+  const customer = extractCustomer(message.customers);
 
   return {
     id: message.id,
     customerId: message.customer_id,
-    customerName: customer?.name ?? null,
+    customerName: customer?.name?.trim() || null,
     phone: customer?.phone ?? null,
     phoneE164: customer?.phone_e164 ?? normalizeBrazilPhoneToE164(customer?.phone),
     saleId: message.sale_id,
@@ -351,6 +366,16 @@ function buildManualChargeMessage(customerName: string, openBalance: number, due
     : "";
 
   return `Ola ${customerName}, seu saldo em aberto no Mercadinho do Tonhao e de ${balance}${dueText}. Responda esta mensagem para combinar o pagamento.`;
+}
+
+function extractCustomer<T extends { name: string; phone: string; phone_e164: string | null }>(
+  value: T | T[] | null | undefined
+) {
+  if (!value) {
+    return null;
+  }
+
+  return Array.isArray(value) ? value[0] ?? null : value;
 }
 
 function startOfDay(date: Date) {
