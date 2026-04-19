@@ -10,7 +10,7 @@ type SaleOverviewRow = {
   due_date: string;
   remaining_amount_cents: number;
   status: "OPEN" | "PARTIAL" | "OVERDUE" | "PAID" | "CANCELED";
-  customers?:
+  customer?:
     | {
         id: string;
         name: string;
@@ -40,7 +40,7 @@ type MessageRow = {
   sent_at: string | null;
   created_by_profile_id: string | null;
   created_at: string;
-  customers?:
+  customer?:
     | {
         name: string;
         phone: string;
@@ -80,7 +80,7 @@ export async function fetchSupabaseChargeOverview(): Promise<ChargeOverview> {
     }),
     supabase!
       .from("sales")
-      .select("id, customer_id, due_date, remaining_amount_cents, status, customers(id, name, phone, phone_e164)")
+      .select("id, customer_id, due_date, remaining_amount_cents, status, customer:customers(id, name, phone, phone_e164)")
       .in("status", ["OPEN", "PARTIAL", "OVERDUE"])
       .gt("remaining_amount_cents", 0)
       .lt("due_date", todayStart)
@@ -103,7 +103,7 @@ export async function fetchSupabaseChargeMessages(customerId?: string): Promise<
 
   const query = supabase!
     .from("whatsapp_messages")
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
     .order("created_at", { ascending: false });
 
   const { data, error } = customerId ? await query.eq("customer_id", customerId) : await query;
@@ -208,7 +208,7 @@ export async function sendSupabaseManualCharge(input: {
       provider_response: "Mensagem preparada para envio manual.",
       created_by_profile_id: input.createdById
     })
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
     .single();
 
   throwIfError(error, "Falha ao criar mensagem manual.");
@@ -226,7 +226,7 @@ export async function markSupabaseChargeMessageSent(messageId: string) {
       sent_at: new Date().toISOString()
     })
     .eq("id", messageId)
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
     .single();
 
   throwIfError(error, "Falha ao marcar mensagem como enviada.");
@@ -238,7 +238,7 @@ export async function retrySupabaseFailedCharge(messageId: string) {
 
   const { data: existing, error: loadError } = await supabase!
     .from("whatsapp_messages")
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
     .eq("id", messageId)
     .single();
 
@@ -262,7 +262,7 @@ export async function retrySupabaseFailedCharge(messageId: string) {
       provider_response: "Mensagem recriada para novo envio manual.",
       created_by_profile_id: source.created_by_profile_id
     })
-    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customers(name, phone, phone_e164)")
+    .select("id, customer_id, sale_id, trigger_type, message_body, send_status, provider_name, provider_message_id, provider_response, scheduled_for, sent_at, created_by_profile_id, created_at, customer:customers(name, phone, phone_e164)")
     .single();
 
   throwIfError(error, "Falha ao reenviar mensagem.");
@@ -272,7 +272,7 @@ export async function retrySupabaseFailedCharge(messageId: string) {
 async function querySalesWindow(input: { from: string; to: string }) {
   return supabase!
     .from("sales")
-    .select("id, customer_id, due_date, remaining_amount_cents, status, customers(id, name, phone, phone_e164)")
+    .select("id, customer_id, due_date, remaining_amount_cents, status, customer:customers(id, name, phone, phone_e164)")
     .in("status", ["OPEN", "PARTIAL", "OVERDUE"])
     .gt("remaining_amount_cents", 0)
     .gte("due_date", input.from)
@@ -285,7 +285,7 @@ async function findChargeContext(customerId: string, saleId?: string) {
 
   let query = supabase!
     .from("sales")
-    .select("id, customer_id, due_date, remaining_amount_cents, status, customers(id, name, phone, phone_e164)")
+    .select("id, customer_id, due_date, remaining_amount_cents, status, customer:customers(id, name, phone, phone_e164)")
     .eq("customer_id", customerId)
     .in("status", ["OPEN", "PARTIAL", "OVERDUE"])
     .gt("remaining_amount_cents", 0)
@@ -306,7 +306,7 @@ async function findChargeContext(customerId: string, saleId?: string) {
     return null;
   }
 
-  const customer = extractCustomer(row.customers);
+  const customer = extractCustomer(row.customer);
 
   return {
     customerId: row.customer_id,
@@ -318,7 +318,7 @@ async function findChargeContext(customerId: string, saleId?: string) {
 }
 
 function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
-  const customer = extractCustomer(sale.customers);
+  const customer = extractCustomer(sale.customer);
 
   return {
     customerId: customer?.id ?? sale.customer_id,
@@ -333,7 +333,7 @@ function mapOverviewRow(sale: SaleOverviewRow): ChargeOverviewItem {
 }
 
 function mapMessageRow(message: MessageRow): ChargeMessage {
-  const customer = extractCustomer(message.customers);
+  const customer = extractCustomer(message.customer);
 
   return {
     id: message.id,
