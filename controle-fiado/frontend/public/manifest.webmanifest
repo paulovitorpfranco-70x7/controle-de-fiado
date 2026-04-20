@@ -11,14 +11,14 @@
   "theme_color": "#120d0b",
   "icons": [
     {
-      "src": "/assets/logo-mercadinho-tonhao-icon.png",
-      "sizes": "1024x1024",
+      "src": "/assets/logo-mercadinho-tonhao-app-icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/logo-mercadinho-tonhao-icon.png",
-      "sizes": "1024x1024",
+      "src": "/assets/logo-mercadinho-tonhao-app-icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }

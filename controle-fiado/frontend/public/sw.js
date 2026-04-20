@@ -1,6 +1,13 @@
 const STATIC_CACHE = "controle-fiado-static-v1";
 const RUNTIME_CACHE = "controle-fiado-runtime-v1";
-const APP_SHELL = ["/", "/index.html", "/manifest.webmanifest", "/assets/logo-mercadinho-tonhao-icon.png"];
+const APP_SHELL = [
+  "/",
+  "/index.html",
+  "/manifest.webmanifest",
+  "/assets/logo-mercadinho-tonhao-app-icon-64.png",
+  "/assets/logo-mercadinho-tonhao-app-icon-192.png",
+  "/assets/logo-mercadinho-tonhao-app-icon-512.png"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
