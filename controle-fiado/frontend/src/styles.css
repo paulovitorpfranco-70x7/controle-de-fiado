@@ -2939,6 +2939,7 @@ select.customer-selector option {
     align-items: center;
     justify-content: center;
     color: var(--text);
+    transition: transform 220ms ease, opacity 220ms ease, box-shadow 220ms ease;
   }
 
   .mobile-tab-bar {
@@ -2959,6 +2960,7 @@ select.customer-selector option {
       radial-gradient(circle at top left, rgba(249, 115, 22, 0.14), transparent 42%);
     backdrop-filter: blur(20px);
     box-shadow: var(--glass-highlight), var(--shadow-lg);
+    transition: transform 240ms ease, opacity 240ms ease, box-shadow 240ms ease;
   }
 
   .mobile-tab-bar button {
@@ -2995,6 +2997,20 @@ select.customer-selector option {
     background: linear-gradient(135deg, rgba(255, 205, 152, 0.16), rgba(249, 115, 22, 0.12));
     color: var(--text);
     box-shadow: var(--shadow-glow);
+  }
+
+  .page-shell.mobile-chrome-hidden .mobile-tab-bar {
+    opacity: 0;
+    transform: translateY(18px);
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  .page-shell.mobile-chrome-hidden .mobile-logout-button {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    box-shadow: none;
   }
 
   .login-page-panel {

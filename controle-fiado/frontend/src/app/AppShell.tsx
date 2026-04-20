@@ -37,6 +37,7 @@ export function AppShell({ authUser, activeSection, onNavigate, onLogout, sideba
 
     return window.innerWidth >= 1180;
   });
+  const [mobileChromeVisible, setMobileChromeVisible] = useState(true);
   const isOwner = authUser.role === "OWNER";
 
   useEffect(() => {
@@ -47,13 +48,74 @@ export function AppShell({ authUser, activeSection, onNavigate, onLogout, sideba
     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, desktopCollapsed ? "1" : "0");
   }, [desktopCollapsed]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 1180px)");
+    let hideTimer: number | undefined;
+
+    const clearHideTimer = () => {
+      if (hideTimer !== undefined) {
+        window.clearTimeout(hideTimer);
+      }
+    };
+
+    const scheduleHide = () => {
+      clearHideTimer();
+
+      if (!mediaQuery.matches) {
+        setMobileChromeVisible(true);
+        return;
+      }
+
+      hideTimer = window.setTimeout(() => {
+        setMobileChromeVisible(false);
+      }, 2400);
+    };
+
+    const revealChrome = () => {
+      setMobileChromeVisible(true);
+      scheduleHide();
+    };
+
+    const handlePointerDown = () => {
+      revealChrome();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!mediaQuery.matches) {
+        setMobileChromeVisible(true);
+        clearHideTimer();
+        return;
+      }
+
+      scheduleHide();
+    };
+
+    revealChrome();
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    window.addEventListener("resize", handleVisibilityChange);
+
+    return () => {
+      clearHideTimer();
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("resize", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    setMobileChromeVisible(true);
+  }, [activeSection]);
+
   function handleNavigate(section: AppSection) {
     onNavigate(section);
     setMenuOpen(false);
   }
 
   return (
-    <div className={`page-shell ${desktopCollapsed ? "desktop-nav-collapsed" : ""}`}>
+    <div className={`page-shell ${desktopCollapsed ? "desktop-nav-collapsed" : ""} ${mobileChromeVisible ? "mobile-chrome-visible" : "mobile-chrome-hidden"}`}>
       <button className={`app-overlay ${menuOpen ? "visible" : ""}`} type="button" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} />
 
       {onLogout ? (
