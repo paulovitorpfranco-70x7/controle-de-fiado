@@ -138,6 +138,7 @@ export function App() {
       authUser={state.authUser}
       activeSection={activeSection}
       onNavigate={navigateToSection}
+      onLogout={actions.logout}
       pageKey={location.pathname}
       sidebarFooter={<AuthPanel user={state.authUser} onLogin={actions.login} onLogout={actions.logout} />}
     >

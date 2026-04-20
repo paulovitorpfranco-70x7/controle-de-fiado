@@ -1,4 +1,4 @@
-import { Activity, HandCoins, House, MessageCircle, Users, type LucideIcon } from "lucide-react";
+import { Activity, HandCoins, House, LogOut, MessageCircle, Users, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type PropsWithChildren, type ReactNode } from "react";
 import type { AuthUser } from "../features/auth/types/auth";
 import type { AppSection } from "./types";
@@ -7,6 +7,7 @@ type AppShellProps = PropsWithChildren<{
   authUser: AuthUser;
   activeSection: AppSection;
   onNavigate: (section: AppSection) => void;
+  onLogout?: () => void;
   sidebarFooter?: ReactNode;
   pageKey?: string;
 }>;
@@ -21,7 +22,7 @@ const SECTION_LABELS: Array<{ id: AppSection; label: string; icon: LucideIcon; o
   { id: "status", label: "Sistema", icon: Activity, ownerOnly: true }
 ];
 
-export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, pageKey, children }: AppShellProps) {
+export function AppShell({ authUser, activeSection, onNavigate, onLogout, sidebarFooter, pageKey, children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(() => {
     if (typeof window === "undefined") {
@@ -53,19 +54,13 @@ export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, p
 
   return (
     <div className={`page-shell ${desktopCollapsed ? "desktop-nav-collapsed" : ""}`}>
-      <button
-        className="mobile-menu-button"
-        type="button"
-        aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-        aria-expanded={menuOpen}
-        onClick={() => setMenuOpen((current) => !current)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
-
       <button className={`app-overlay ${menuOpen ? "visible" : ""}`} type="button" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} />
+
+      {onLogout ? (
+        <button className="mobile-logout-button" type="button" aria-label="Sair do app" onClick={onLogout}>
+          <LogOut className="mobile-logout-icon" strokeWidth={2.1} />
+        </button>
+      ) : null}
 
       <aside className={`side-panel ${menuOpen ? "menu-open" : ""} ${desktopCollapsed ? "is-collapsed" : ""}`}>
         <div className="side-panel-topbar">
@@ -124,6 +119,21 @@ export function AppShell({ authUser, activeSection, onNavigate, sidebarFooter, p
           {children}
         </div>
       </main>
+
+      <nav className="mobile-tab-bar" aria-label="Navegacao inferior">
+        {SECTION_LABELS.filter((section) => !section.ownerOnly || isOwner).map((section) => (
+          <button
+            key={section.id}
+            className={activeSection === section.id ? "active" : ""}
+            type="button"
+            aria-label={section.label}
+            onClick={() => handleNavigate(section.id)}
+          >
+            <section.icon className="mobile-tab-icon" strokeWidth={2.1} />
+            <span>{section.label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }

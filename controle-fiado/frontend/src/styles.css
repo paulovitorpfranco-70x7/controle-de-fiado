@@ -1838,8 +1838,16 @@ img {
 }
 
 .mobile-menu-button,
-.app-overlay {
+.app-overlay,
+.mobile-tab-bar,
+.mobile-logout-button {
   display: none;
+}
+
+.mobile-logout-icon,
+.mobile-tab-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .ghost-button,
@@ -2903,17 +2911,7 @@ select.customer-selector option {
   }
 
   .side-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: min(320px, calc(100vw - 36px));
-    max-height: 100dvh;
-    min-height: 100vh;
-    border-right: 1px solid var(--line);
-    border-bottom: 0;
-    transform: translateX(-104%);
-    transition: transform 220ms ease;
-    z-index: 30;
+    display: none;
   }
 
   .side-panel-topbar,
@@ -2921,90 +2919,71 @@ select.customer-selector option {
     display: none;
   }
 
-  .side-panel.menu-open {
-    transform: translateX(0);
-  }
-
-  .page-shell.desktop-nav-collapsed .side-panel {
-    padding: 16px 14px 18px;
-    gap: 14px;
-  }
-
-  .page-shell.desktop-nav-collapsed .brand-block {
-    justify-items: start;
-    gap: 10px;
-  }
-
-  .page-shell.desktop-nav-collapsed .brand-media {
-    min-height: 72px;
-    width: 72px;
-    height: 72px;
-    border-radius: 18px;
-  }
-
-  .page-shell.desktop-nav-collapsed .brand-image-full,
-  .page-shell.desktop-nav-collapsed .brand-block .eyebrow,
-  .page-shell.desktop-nav-collapsed .brand-block h1,
-  .page-shell.desktop-nav-collapsed .brand-block p,
-  .page-shell.desktop-nav-collapsed .operator-card > div,
-  .page-shell.desktop-nav-collapsed .auth-panel .eyebrow,
-  .page-shell.desktop-nav-collapsed .auth-panel strong,
-  .page-shell.desktop-nav-collapsed .auth-panel .customer-meta {
-    display: none;
-  }
-
-  .page-shell.desktop-nav-collapsed .brand-image-compact {
-    display: block;
-    width: 52px;
-    height: 52px;
-    margin: 10px;
-    object-fit: contain;
-  }
-
-  .page-shell.desktop-nav-collapsed .operator-card {
-    justify-content: center;
-    padding: 10px 12px;
-  }
-
-  .page-shell.desktop-nav-collapsed .app-nav {
-    gap: 10px;
-    margin-top: 2px;
-  }
-
-  .page-shell.desktop-nav-collapsed .app-nav button {
-    justify-content: flex-start;
-    min-height: 52px;
-    padding: 0 16px;
-    border-radius: 18px;
-  }
-
-  .page-shell.desktop-nav-collapsed .app-nav-label {
-    display: block;
-  }
-
-  .page-shell.desktop-nav-collapsed .app-nav-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
-  }
-
-  .page-shell.desktop-nav-collapsed .app-nav-symbol {
-    width: 17px;
-    height: 17px;
-  }
-
-  .page-shell.desktop-nav-collapsed .app-nav button.active {
-    transform: translateX(4px);
-  }
-
-  .page-shell.desktop-nav-collapsed .auth-panel {
-    margin-top: auto;
-    padding: 12px;
-    justify-items: stretch;
-  }
-
   .content-panel {
-    padding-top: 86px;
+    padding: 86px 24px 108px;
+  }
+
+  .mobile-logout-button {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 32;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: rgba(14, 14, 22, 0.88);
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+  }
+
+  .mobile-tab-bar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 32;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      linear-gradient(180deg, rgba(22, 18, 16, 0.94), rgba(9, 8, 10, 0.98)),
+      radial-gradient(circle at top left, rgba(249, 115, 22, 0.14), transparent 42%);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--glass-highlight), var(--shadow-lg);
+  }
+
+  .mobile-tab-bar button {
+    min-height: 58px;
+    padding: 8px 6px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-soft);
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-align: center;
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .mobile-tab-bar button.active {
+    border-color: rgba(249, 115, 22, 0.24);
+    background: linear-gradient(135deg, rgba(255, 205, 152, 0.16), rgba(249, 115, 22, 0.12));
+    color: var(--text);
+    box-shadow: var(--shadow-glow);
   }
 
   .login-page-panel {
@@ -3029,40 +3008,8 @@ select.customer-selector option {
     grid-template-columns: 1fr;
   }
 
-  .mobile-menu-button {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 32;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    background: rgba(14, 14, 22, 0.88);
-    backdrop-filter: blur(18px);
-    box-shadow: var(--shadow-md);
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .mobile-menu-button span {
-    display: block;
-    width: 18px;
-    height: 2px;
-    border-radius: 999px;
-    background: var(--text);
-  }
-
   .app-overlay.visible {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 20;
-    border: 0;
-    background: rgba(0, 0, 0, 0.52);
+    display: none;
   }
 }
 
@@ -3108,7 +3055,6 @@ select.customer-selector option {
   .page-header {
     gap: 10px;
     margin-bottom: 16px;
-    padding-left: 54px;
     min-height: 48px;
   }
 
