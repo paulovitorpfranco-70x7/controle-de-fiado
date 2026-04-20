@@ -58,6 +58,9 @@ Guia:
 
 - `docs/setup-vercel-preview.md`
 - `docs/go-live-checklist.md`
+- `docs/manual-usuario-final.md`
+- `docs/manual-administrador.md`
+- `docs/proposta-entrega-final.md`
 
 ## Operacao local
 
