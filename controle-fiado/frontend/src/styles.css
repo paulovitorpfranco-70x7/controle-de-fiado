@@ -2964,6 +2964,7 @@ select.customer-selector option {
   .mobile-tab-bar button {
     min-height: 58px;
     padding: 8px 6px;
+    min-width: 0;
     border-radius: 16px;
     border: 1px solid transparent;
     background: transparent;
@@ -2977,6 +2978,16 @@ select.customer-selector option {
     letter-spacing: 0.02em;
     text-align: center;
     transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .mobile-tab-label {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 1;
   }
 
   .mobile-tab-bar button.active {

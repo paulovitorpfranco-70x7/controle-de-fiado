@@ -14,12 +14,12 @@ type AppShellProps = PropsWithChildren<{
 
 const SIDEBAR_STORAGE_KEY = "controle-fiado-sidebar-collapsed";
 
-const SECTION_LABELS: Array<{ id: AppSection; label: string; icon: LucideIcon; ownerOnly?: boolean }> = [
-  { id: "dashboard", label: "Dashboard", icon: House },
-  { id: "customers", label: "Clientes", icon: Users },
-  { id: "operations", label: "Operacoes", icon: HandCoins },
-  { id: "charges", label: "Cobrancas", icon: MessageCircle, ownerOnly: true },
-  { id: "status", label: "Sistema", icon: Activity, ownerOnly: true }
+const SECTION_LABELS: Array<{ id: AppSection; label: string; mobileLabel: string; icon: LucideIcon; ownerOnly?: boolean }> = [
+  { id: "dashboard", label: "Dashboard", mobileLabel: "Inicio", icon: House },
+  { id: "customers", label: "Clientes", mobileLabel: "Clientes", icon: Users },
+  { id: "operations", label: "Operacoes", mobileLabel: "Vendas", icon: HandCoins },
+  { id: "charges", label: "Cobrancas", mobileLabel: "Cobrar", icon: MessageCircle, ownerOnly: true },
+  { id: "status", label: "Sistema", mobileLabel: "Sistema", icon: Activity, ownerOnly: true }
 ];
 
 export function AppShell({ authUser, activeSection, onNavigate, onLogout, sidebarFooter, pageKey, children }: AppShellProps) {
@@ -130,7 +130,7 @@ export function AppShell({ authUser, activeSection, onNavigate, onLogout, sideba
             onClick={() => handleNavigate(section.id)}
           >
             <section.icon className="mobile-tab-icon" strokeWidth={2.1} />
-            <span>{section.label}</span>
+            <span className="mobile-tab-label">{section.mobileLabel}</span>
           </button>
         ))}
       </nav>
