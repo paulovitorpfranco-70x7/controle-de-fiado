@@ -57,6 +57,7 @@ O deploy de preview na Vercel deve apontar para:
 Guia:
 
 - `docs/setup-vercel-preview.md`
+- `docs/go-live-checklist.md`
 
 ## Operacao local
 
