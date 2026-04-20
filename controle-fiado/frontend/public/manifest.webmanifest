@@ -1,0 +1,26 @@
+{
+  "name": "Controle de Fiado",
+  "short_name": "Fiado",
+  "description": "Painel operacional para consulta de clientes, vendas, pagamentos e cobrancas.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#120d0b",
+  "theme_color": "#120d0b",
+  "icons": [
+    {
+      "src": "/assets/logo-mercadinho-tonhao-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/logo-mercadinho-tonhao-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
