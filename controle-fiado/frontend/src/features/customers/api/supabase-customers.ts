@@ -1,8 +1,10 @@
 import { supabase } from "../../../shared/supabase/client";
 import { normalizeBrazilPhoneToE164 } from "../../../shared/utils/phone";
+import { parseSaleDescription } from "../../sales/utils/sale-items";
 import type { Customer } from "../types/customer";
 import type { CustomerDetail } from "../types/customer-detail";
 import type { CreateCustomerPayload } from "./create-customer";
+import type { UpdateCustomerPayload } from "./update-customer";
 
 type CustomerBaseRow = {
   id: string;
@@ -104,6 +106,47 @@ export async function createSupabaseCustomer(payload: CreateCustomerPayload): Pr
   };
 }
 
+export async function updateSupabaseCustomer(customerId: string, payload: UpdateCustomerPayload): Promise<Customer> {
+  ensureSupabase();
+
+  const updatePayload: Record<string, unknown> = {};
+
+  if (payload.name !== undefined) updatePayload.name = payload.name;
+  if (payload.phone !== undefined) {
+    updatePayload.phone = payload.phone;
+    updatePayload.phone_e164 = normalizeBrazilPhoneToE164(payload.phone);
+  }
+  if (payload.address !== undefined) updatePayload.address = payload.address || null;
+  if (payload.creditLimit !== undefined) updatePayload.credit_limit_cents = Math.round(payload.creditLimit * 100);
+  if (payload.notes !== undefined) updatePayload.notes = payload.notes || null;
+  if (payload.isActive !== undefined) updatePayload.is_active = payload.isActive;
+
+  const { data, error } = await supabase!
+    .from("customers")
+    .update(updatePayload)
+    .eq("id", customerId)
+    .select("id, name, phone, phone_e164, address, credit_limit_cents, notes, is_active, created_at")
+    .single();
+
+  if (error) {
+    throw new Error(error.message || "Falha ao atualizar cliente no Supabase.");
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    phone: data.phone,
+    phoneE164: data.phone_e164 ?? normalizeBrazilPhoneToE164(data.phone),
+    address: data.address,
+    creditLimit: toMoney(data.credit_limit_cents),
+    notes: data.notes,
+    isActive: data.is_active,
+    openBalance: 0,
+    overdueSalesCount: 0,
+    createdAt: data.created_at
+  };
+}
+
 export async function fetchSupabaseCustomerDetail(customerId: string): Promise<CustomerDetail> {
   ensureSupabase();
 
@@ -148,20 +191,25 @@ function mapCustomerDetailRow(customer: CustomerDetailRow): CustomerDetail {
   const sales = (customer.sales ?? [])
     .slice()
     .sort((left, right) => new Date(right.sale_date).getTime() - new Date(left.sale_date).getTime())
-    .map((sale) => ({
-      id: sale.id,
-      customerId: sale.customer_id,
-      description: sale.description,
-      originalAmount: sale.original_amount_cents / 100,
-      feeAmount: sale.fee_amount_cents / 100,
-      finalAmount: sale.final_amount_cents / 100,
-      remainingAmount: sale.remaining_amount_cents / 100,
-      saleDate: sale.sale_date,
-      dueDate: sale.due_date,
-      status: sale.status,
-      createdById: sale.created_by_profile_id,
-      createdAt: sale.created_at
-    }));
+    .map((sale) => {
+      const parsedDescription = parseSaleDescription(sale.description);
+
+      return {
+        id: sale.id,
+        customerId: sale.customer_id,
+        description: parsedDescription.description,
+        saleItems: parsedDescription.saleItems,
+        originalAmount: sale.original_amount_cents / 100,
+        feeAmount: sale.fee_amount_cents / 100,
+        finalAmount: sale.final_amount_cents / 100,
+        remainingAmount: sale.remaining_amount_cents / 100,
+        saleDate: sale.sale_date,
+        dueDate: sale.due_date,
+        status: sale.status,
+        createdById: sale.created_by_profile_id,
+        createdAt: sale.created_at
+      };
+    });
 
   const payments = (customer.payments ?? [])
     .slice()

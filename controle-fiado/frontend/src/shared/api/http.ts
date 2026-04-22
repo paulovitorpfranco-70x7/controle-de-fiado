@@ -34,3 +34,21 @@ export async function httpPost<T>(path: string, body: unknown): Promise<T> {
 
   return response.json() as Promise<T>;
 }
+
+export async function httpPatch<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(payload?.message ?? "Falha ao atualizar dados na API.");
+  }
+
+  return response.json() as Promise<T>;
+}

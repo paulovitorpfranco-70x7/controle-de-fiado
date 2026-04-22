@@ -1,9 +1,16 @@
 export type SaleStatus = "OPEN" | "PARTIAL" | "PAID" | "OVERDUE" | "CANCELED";
 
+export type SaleItem = {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+};
+
 export type Sale = {
   id: string;
   customerId: string;
   description: string;
+  saleItems: SaleItem[];
   originalAmount: number;
   feeAmount: number;
   finalAmount: number;

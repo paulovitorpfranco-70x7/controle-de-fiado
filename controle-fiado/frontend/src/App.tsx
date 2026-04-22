@@ -56,8 +56,8 @@ function getPageTitle(section: AppSection) {
     },
     customers: {
       kicker: "CLIENTES",
-      title: "Busca e ficha do cliente",
-      description: "Localize rapidamente cada cliente e entenda saldo, atraso e historico em um so lugar."
+      title: "Carteira de clientes",
+      description: "Encontre o cliente, abra o detalhe quando precisar e mantenha a operacao mais limpa."
     },
     operations: {
       kicker: "OPERACOES",
@@ -196,6 +196,9 @@ export function App() {
                   onNavigate={navigateToSection}
                   onCustomerCreated={async (customer) => {
                     await actions.refreshOperationalData(customer.id);
+                  }}
+                  onCustomerUpdated={async (customerId) => {
+                    await actions.refreshOperationalData(customerId);
                   }}
                   onSuccess={(message) => actions.setNotice({ tone: "success", message })}
                 />

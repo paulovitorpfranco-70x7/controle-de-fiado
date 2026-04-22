@@ -6,4 +6,6 @@ export type CreateCustomerInput = {
   notes?: string;
 };
 
-export type UpdateCustomerInput = Partial<CreateCustomerInput>;
+export type UpdateCustomerInput = Partial<CreateCustomerInput> & {
+  isActive?: boolean;
+};

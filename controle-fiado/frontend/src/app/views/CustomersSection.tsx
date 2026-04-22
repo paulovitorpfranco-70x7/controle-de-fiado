@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { CreateCustomerForm } from "../../features/customers/components/CreateCustomerForm";
 import { CustomerDetailPanel } from "../../features/customers/components/CustomerDetailPanel";
 import { CustomerList } from "../../features/customers/components/CustomerList";
+import { EditCustomerForm } from "../../features/customers/components/EditCustomerForm";
+import { updateCustomer } from "../../features/customers/api/update-customer";
 import type { CustomerDetail } from "../../features/customers/types/customer-detail";
 import type { Customer } from "../../features/customers/types/customer";
+import type { Sale } from "../../features/sales/types/sale";
 
 type CustomerFilter = "all" | "open" | "overdue" | "clear";
 
@@ -15,6 +18,7 @@ type CustomersSectionProps = {
   onSelectCustomer: (customerId: string) => void;
   onNavigate: (section: "operations" | "charges") => void;
   onCustomerCreated: (customer: Customer) => Promise<void>;
+  onCustomerUpdated: (customerId: string) => Promise<void>;
   onSuccess: (message: string) => void;
 };
 
@@ -26,12 +30,15 @@ export function CustomersSection({
   onSelectCustomer,
   onNavigate,
   onCustomerCreated,
+  onCustomerUpdated,
   onSuccess
 }: CustomersSectionProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CustomerFilter>("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showMobileDetail, setShowMobileDetail] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [saleItemsTarget, setSaleItemsTarget] = useState<Sale | null>(null);
   const [isMobile, setIsMobile] = useState(() => globalThis.matchMedia?.("(max-width: 860px)").matches ?? false);
 
   useEffect(() => {
@@ -54,7 +61,7 @@ export function CustomersSection({
   }, []);
 
   useEffect(() => {
-    if (!showCreateForm && !showMobileDetail) {
+    if (!showCreateForm && !showDetail && !showEditForm && !saleItemsTarget) {
       return;
     }
 
@@ -64,7 +71,9 @@ export function CustomersSection({
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setShowCreateForm(false);
-        setShowMobileDetail(false);
+        setShowEditForm(false);
+        setSaleItemsTarget(null);
+        setShowDetail(false);
       }
     }
 
@@ -74,13 +83,7 @@ export function CustomersSection({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showCreateForm, showMobileDetail]);
-
-  useEffect(() => {
-    if (!isMobile) {
-      setShowMobileDetail(false);
-    }
-  }, [isMobile]);
+  }, [saleItemsTarget, showCreateForm, showDetail, showEditForm]);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -110,22 +113,36 @@ export function CustomersSection({
     });
   }, [customers, filter, search]);
 
+  const selectedCustomerSummary = customers.find((customer) => customer.id === selectedCustomerId) ?? null;
+
   function handleSelectCustomer(customerId: string) {
     onSelectCustomer(customerId);
+    setShowDetail(true);
+  }
 
-    if (isMobile) {
-      setShowMobileDetail(true);
+  async function handleToggleCustomerActive() {
+    if (!customerDetail) {
+      return;
+    }
+
+    try {
+      await updateCustomer(customerDetail.id, {
+        isActive: !customerDetail.isActive
+      });
+      onSuccess(customerDetail.isActive ? "Cliente inativado com sucesso." : "Cliente reativado com sucesso.");
+      await onCustomerUpdated(customerDetail.id);
+    } catch (error) {
+      onSuccess(error instanceof Error ? error.message : "Falha ao atualizar status do cliente.");
     }
   }
 
   return (
     <>
       <section className="section-block customers-command-panel">
-        <div className="page-header page-header-section">
+        <div className="section-inline-header">
           <div>
-            <div className="eyebrow">Clientes</div>
-            <h2>Encontre o cliente</h2>
-            <p className="page-description">Busque, filtre e abra a ficha para vender, receber ou cobrar.</p>
+            <div className="eyebrow">Operacao da carteira</div>
+            <p className="page-description">Busque o cliente e abra os detalhes somente quando precisar operar ou consultar historico.</p>
           </div>
           <button className="auth-button section-primary-action" type="button" onClick={() => setShowCreateForm(true)}>
             Novo cliente
@@ -153,36 +170,23 @@ export function CustomersSection({
             <button className={filter === "overdue" ? "active" : ""} type="button" onClick={() => setFilter("overdue")}>
               Em atraso
             </button>
+            <button className={filter === "clear" ? "active" : ""} type="button" onClick={() => setFilter("clear")}>
+              Sem saldo
+            </button>
           </div>
         </div>
       </section>
 
-      <section className="section-block customers-workspace">
+      <section className="section-block customers-workspace customers-workspace-lean">
         <div className="customers-list-panel dashboard-chart-card" id="customers-list-panel">
           <div className="dashboard-card-head">
             <div>
               <div className="eyebrow">Carteira</div>
-              <h3>Clientes encontrados</h3>
+              <h3>{`${filteredCustomers.length} cliente(s) encontrados`}</h3>
             </div>
           </div>
           <CustomerList customers={filteredCustomers} selectedCustomerId={selectedCustomerId} onSelectCustomer={handleSelectCustomer} />
         </div>
-
-        {!isMobile ? (
-          <div className="customer-detail-slot" id="customer-detail-panel">
-            {customerDetail ? (
-              <CustomerDetailPanel
-                customer={customerDetail}
-                canViewPayments={isOwner}
-                onCreateSale={() => onNavigate("operations")}
-                onRegisterPayment={isOwner ? () => onNavigate("operations") : undefined}
-                onChargeCustomer={isOwner ? () => onNavigate("charges") : undefined}
-              />
-            ) : (
-              <div className="empty-card">Selecione um cliente para abrir a ficha completa.</div>
-            )}
-          </div>
-        ) : null}
       </section>
 
       {showCreateForm ? (
@@ -194,44 +198,128 @@ export function CustomersSection({
               onCreated={async (customer) => {
                 await onCustomerCreated(customer);
                 setShowCreateForm(false);
+                setShowDetail(true);
               }}
             />
           </div>
         </div>
       ) : null}
 
-      {isMobile && showMobileDetail && customerDetail ? (
-        <div className="floating-form-overlay" role="presentation" onClick={() => setShowMobileDetail(false)}>
-          <div className="floating-form-shell" role="dialog" aria-modal="true" aria-labelledby="customer-mobile-title" onClick={(event) => event.stopPropagation()}>
-            <CustomerDetailPanel
+      {showDetail ? (
+        <div className="floating-form-overlay customer-detail-drawer-overlay" role="presentation" onClick={() => setShowDetail(false)}>
+          <div
+            className={`floating-form-shell customer-detail-drawer-shell ${isMobile ? "customer-detail-drawer-shell-mobile" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={isMobile ? "customer-mobile-title" : "customer-drawer-title"}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {customerDetail && customerDetail.id === selectedCustomerId ? (
+              <CustomerDetailPanel
+                customer={customerDetail}
+                canViewPayments={isOwner}
+                isCompactMobile={isMobile}
+                onClose={() => setShowDetail(false)}
+                onCreateSale={() => {
+                  setShowDetail(false);
+                  onNavigate("operations");
+                }}
+                onRegisterPayment={
+                  isOwner
+                    ? () => {
+                        setShowDetail(false);
+                        onNavigate("operations");
+                      }
+                    : undefined
+                }
+                onChargeCustomer={
+                  isOwner
+                    ? () => {
+                        setShowDetail(false);
+                        onNavigate("charges");
+                      }
+                    : undefined
+                }
+                onEditCustomer={() => setShowEditForm(true)}
+                onToggleActive={handleToggleCustomerActive}
+                onViewSaleItems={(sale) => setSaleItemsTarget(sale)}
+              />
+            ) : (
+              <div className="customer-detail-loading">
+                <div className="eyebrow">Detalhes</div>
+                <h3>{selectedCustomerSummary?.name ?? "Carregando cliente"}</h3>
+                <p className="page-description">Buscando ficha completa do cliente selecionado.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {showEditForm && customerDetail ? (
+        <div className="floating-form-overlay" role="presentation" onClick={() => setShowEditForm(false)}>
+          <div className="floating-form-shell" role="dialog" aria-modal="true" aria-labelledby="customer-edit-title" onClick={(event) => event.stopPropagation()}>
+            <EditCustomerForm
               customer={customerDetail}
-              canViewPayments={isOwner}
-              isCompactMobile
-              onClose={() => setShowMobileDetail(false)}
-              onCreateSale={() => {
-                setShowMobileDetail(false);
-                onNavigate("operations");
+              onCancel={() => setShowEditForm(false)}
+              onSuccess={onSuccess}
+              onUpdated={async () => {
+                await onCustomerUpdated(customerDetail.id);
+                setShowEditForm(false);
               }}
-              onRegisterPayment={
-                isOwner
-                  ? () => {
-                      setShowMobileDetail(false);
-                      onNavigate("operations");
-                    }
-                  : undefined
-              }
-              onChargeCustomer={
-                isOwner
-                  ? () => {
-                      setShowMobileDetail(false);
-                      onNavigate("charges");
-                    }
-                  : undefined
-              }
             />
+          </div>
+        </div>
+      ) : null}
+
+      {saleItemsTarget ? (
+        <div className="floating-form-overlay" role="presentation" onClick={() => setSaleItemsTarget(null)}>
+          <div className="floating-form-shell sale-items-dialog-shell" role="dialog" aria-modal="true" aria-labelledby="sale-items-dialog-title" onClick={(event) => event.stopPropagation()}>
+            <section className="operation-form sale-items-dialog">
+              <div className="operation-header">
+                <div>
+                  <div className="eyebrow">Itens da venda</div>
+                  <h3 id="sale-items-dialog-title">{saleItemsTarget.description}</h3>
+                </div>
+                <button className="floating-form-close" type="button" aria-label="Fechar itens da venda" onClick={() => setSaleItemsTarget(null)}>
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+
+              <div className="sale-items-dialog-list">
+                {saleItemsTarget.saleItems.map((item, index) => (
+                  <div key={`${saleItemsTarget.id}-${index}`} className="sale-items-dialog-row">
+                    <div>
+                      <strong>{item.name}</strong>
+                      <div className="customer-meta">{`${formatSaleItemQuantity(item.quantity)} x ${formatMoney(item.unitPrice)}`}</div>
+                    </div>
+                    <strong>{formatMoney(item.quantity * item.unitPrice)}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className="sale-items-dialog-total">
+                <span>Total dos itens</span>
+                <strong>
+                  {formatMoney(
+                    saleItemsTarget.saleItems.reduce((total, item) => total + item.quantity * item.unitPrice, 0)
+                  )}
+                </strong>
+              </div>
+            </section>
           </div>
         </div>
       ) : null}
     </>
   );
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value);
+}
+
+function formatSaleItemQuantity(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toLocaleString("pt-BR");
 }

@@ -2,6 +2,7 @@ import { calculateSaleAmounts, resolveSaleStatus } from "../../../domain/sales/s
 import type { AuditLogService } from "../../ports/audit-log-service.js";
 import type { SaleRepository } from "../../ports/sale-repository.js";
 import type { CreateSaleInput } from "../dto/create-sale.dto.js";
+import { normalizeSaleItems, serializeSaleDescription } from "../utils/sale-items.js";
 
 export class CreateSaleUseCase {
   constructor(
@@ -16,8 +17,12 @@ export class CreateSaleUseCase {
       feePercent: input.feePercent
     });
 
+    const saleItems = normalizeSaleItems(input.saleItems ?? []);
+
     const sale = await this.saleRepository.create({
       ...input,
+      description: serializeSaleDescription(input.description, saleItems),
+      saleItems,
       originalAmount: amounts.originalAmount,
       feeAmount: amounts.feeAmount
     });

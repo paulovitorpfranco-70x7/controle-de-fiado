@@ -2,6 +2,8 @@ import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { addDaysInputDateValue, todayInputDateValue } from "../../../shared/utils/date-input";
 import { createSale } from "../api/create-sale";
+import type { SaleItem } from "../types/sale";
+import { getSaleItemsTotal, normalizeSaleItemDraft } from "../utils/sale-items";
 
 type CreateSaleFormProps = {
   customerId: string;
@@ -25,6 +27,7 @@ export function CreateSaleForm({
   onCancel
 }: CreateSaleFormProps) {
   const [description, setDescription] = useState("Compra de balcao");
+  const [saleItems, setSaleItems] = useState<Array<{ name: string; quantity: string; unitPrice: string }>>([createEmptySaleItem()]);
   const [originalAmount, setOriginalAmount] = useState("0");
   const [feePercent, setFeePercent] = useState("0");
   const [saleDate, setSaleDate] = useState(todayInputDateValue());
@@ -43,6 +46,19 @@ export function CreateSaleForm({
 
     return baseAmount + (baseAmount * fee) / 100;
   }, [feePercent, originalAmount]);
+
+  const saleItemsTotal = useMemo(
+    () =>
+      getSaleItemsTotal(
+        saleItems.map((item) => ({
+          name: item.name,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unitPrice)
+        }))
+      ),
+    [saleItems]
+  );
+
   const projectedFeeAmount = Math.max(projectedAmount - (Number(originalAmount) || 0), 0);
   const daysUntilDue = getDateDiffInDays(saleDate, dueDate);
 
@@ -53,9 +69,12 @@ export function CreateSaleForm({
     setSuccess(null);
 
     try {
+      const normalizedSaleItems = getValidatedSaleItems(saleItems);
+
       await createSale({
         customerId,
         description,
+        saleItems: normalizedSaleItems,
         originalAmount: Number(originalAmount),
         feePercent: Number(feePercent),
         saleDate,
@@ -65,6 +84,7 @@ export function CreateSaleForm({
 
       setOriginalAmount("0");
       setFeePercent("0");
+      setSaleItems([createEmptySaleItem()]);
       setSuccess("Venda registrada com sucesso.");
       onSuccess?.("Venda registrada com sucesso.");
       await onCreated();
@@ -73,6 +93,18 @@ export function CreateSaleForm({
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleAddSaleItem() {
+    setSaleItems((current) => [...current, createEmptySaleItem()]);
+  }
+
+  function handleRemoveSaleItem(index: number) {
+    setSaleItems((current) => (current.length === 1 ? current : current.filter((_, itemIndex) => itemIndex !== index)));
+  }
+
+  function handleSaleItemChange(index: number, field: "name" | "quantity" | "unitPrice", value: string) {
+    setSaleItems((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item)));
   }
 
   return (
@@ -122,6 +154,64 @@ export function CreateSaleForm({
           placeholder="Ex.: compra do mes"
         />
       </label>
+
+      <section className="field-block sale-items-shell">
+        <div className="sale-items-head">
+          <div>
+            <span className="label">Itens vendidos</span>
+            <div className="helper-copy">Registre os produtos para identificar a composicao da venda.</div>
+          </div>
+          <button className="ghost-button mini-inline-button" type="button" onClick={handleAddSaleItem}>
+            Adicionar item
+          </button>
+        </div>
+
+        <div className="sale-items-list">
+          {saleItems.map((item, index) => (
+            <div key={`sale-item-${index}`} className="sale-item-row">
+              <input
+                className="customer-selector"
+                value={item.name}
+                onChange={(event) => handleSaleItemChange(index, "name", event.target.value)}
+                placeholder="Produto"
+              />
+              <input
+                className="customer-selector"
+                type="number"
+                min="0.001"
+                step="0.001"
+                value={item.quantity}
+                onChange={(event) => handleSaleItemChange(index, "quantity", event.target.value)}
+                placeholder="Qtd."
+              />
+              <input
+                className="customer-selector"
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={item.unitPrice}
+                onChange={(event) => handleSaleItemChange(index, "unitPrice", event.target.value)}
+                placeholder="Valor unit."
+              />
+              <button
+                className="ghost-button sale-item-remove"
+                type="button"
+                onClick={() => handleRemoveSaleItem(index)}
+                disabled={saleItems.length === 1}
+              >
+                Remover
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="sale-items-summary">
+          <span>Total dos itens: {formatCurrency(saleItemsTotal)}</span>
+          <button className="mini-chip-button" type="button" onClick={() => setOriginalAmount(String(saleItemsTotal || 0))}>
+            Usar total dos itens
+          </button>
+        </div>
+      </section>
 
       <div className="form-grid">
         <label className="field-block">
@@ -219,4 +309,33 @@ function getDateDiffInDays(startValue: string, endValue: string) {
   const diff = end.getTime() - start.getTime();
 
   return Number.isNaN(diff) ? 0 : Math.max(Math.round(diff / 86400000), 0);
+}
+
+function createEmptySaleItem() {
+  return {
+    name: "",
+    quantity: "",
+    unitPrice: ""
+  };
+}
+
+function getValidatedSaleItems(items: Array<{ name: string; quantity: string; unitPrice: string }>): SaleItem[] {
+  const hasIncompleteRow = items.some((item) => {
+    const hasAnyValue = item.name.trim() || item.quantity.trim() || item.unitPrice.trim();
+    const isComplete = item.name.trim() && Number(item.quantity) > 0 && Number(item.unitPrice) > 0;
+
+    return Boolean(hasAnyValue) && !isComplete;
+  });
+
+  if (hasIncompleteRow) {
+    throw new Error("Preencha nome, quantidade e valor unitario do item ou remova a linha incompleta.");
+  }
+
+  return normalizeSaleItemDraft(
+    items.map((item) => ({
+      name: item.name,
+      quantity: Number(item.quantity),
+      unitPrice: Number(item.unitPrice)
+    }))
+  );
 }

@@ -68,7 +68,8 @@ export class PrismaCustomerRepository implements CustomerRepository {
         ...(input.phone !== undefined ? { phone: input.phone, phoneE164: toPhoneE164(input.phone) } : {}),
         ...(input.address !== undefined ? { address: input.address } : {}),
         ...(input.creditLimit !== undefined ? { creditLimitCents: toCents(input.creditLimit) } : {}),
-        ...(input.notes !== undefined ? { notes: input.notes } : {})
+        ...(input.notes !== undefined ? { notes: input.notes } : {}),
+        ...(input.isActive !== undefined ? { isActive: input.isActive } : {})
       }
     });
 

@@ -1,6 +1,7 @@
 import { supabase } from "../../../shared/supabase/client";
 import { parseLocalDateInput, parseLocalEndOfDayInput } from "../../../shared/utils/date-db";
-import type { Sale } from "../types/sale";
+import type { Sale, SaleItem } from "../types/sale";
+import { parseSaleDescription, serializeSaleDescription } from "../utils/sale-items";
 
 type SaleRow = {
   id: string;
@@ -20,6 +21,7 @@ type SaleRow = {
 export type CreateSupabaseSalePayload = {
   customerId: string;
   description: string;
+  saleItems?: SaleItem[];
   originalAmount: number;
   feeAmount?: number;
   feePercent?: number;
@@ -69,7 +71,7 @@ export async function createSupabaseSale(payload: CreateSupabaseSalePayload) {
     .from("sales")
     .insert({
       customer_id: payload.customerId,
-      description: payload.description,
+      description: serializeSaleDescription(payload.description, payload.saleItems ?? []),
       original_amount_cents: toCents(amounts.originalAmount),
       fee_amount_cents: toCents(amounts.feeAmount),
       final_amount_cents: toCents(amounts.finalAmount),
@@ -90,10 +92,13 @@ export async function createSupabaseSale(payload: CreateSupabaseSalePayload) {
 }
 
 function mapSaleRow(sale: SaleRow): Sale {
+  const parsedDescription = parseSaleDescription(sale.description);
+
   return {
     id: sale.id,
     customerId: sale.customer_id,
-    description: sale.description,
+    description: parsedDescription.description,
+    saleItems: parsedDescription.saleItems,
     originalAmount: sale.original_amount_cents / 100,
     feeAmount: sale.fee_amount_cents / 100,
     finalAmount: sale.final_amount_cents / 100,

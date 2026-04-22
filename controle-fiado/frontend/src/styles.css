@@ -1874,6 +1874,17 @@ img {
   box-shadow: var(--shadow-glow);
 }
 
+.ghost-button.danger {
+  border-color: rgba(248, 113, 113, 0.18);
+  color: #ffd7d7;
+}
+
+.ghost-button.danger:hover {
+  border-color: rgba(248, 113, 113, 0.3);
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.16), rgba(185, 28, 28, 0.12));
+  color: #fff3f3;
+}
+
 .auth-button {
   min-height: 48px;
   border: 0;
@@ -2092,6 +2103,10 @@ select.customer-selector option {
   align-items: start;
 }
 
+.customers-workspace-lean {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .charges-workspace {
   display: grid;
   grid-template-columns: 1fr;
@@ -2139,6 +2154,21 @@ select.customer-selector option {
 .customers-command-panel .page-header {
   align-items: center;
   gap: 20px;
+}
+
+.section-inline-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.section-inline-header > div:first-child {
+  max-width: 680px;
+}
+
+.section-inline-header .page-description {
+  margin: 6px 0 0;
 }
 
 .customers-command-panel .page-header > div:first-child {
@@ -2236,6 +2266,36 @@ select.customer-selector option {
   line-height: 1.1;
 }
 
+.customer-results-list {
+  gap: 14px;
+}
+
+.customer-row-card {
+  padding: 18px 20px;
+}
+
+.customer-main-lean {
+  align-items: center;
+}
+
+.customer-card-side-lean {
+  min-width: 120px;
+  gap: 10px;
+}
+
+.customer-inline-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-row-open-copy {
+  color: rgba(242, 232, 225, 0.58);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .customer-card-tags {
   grid-auto-flow: column;
   grid-auto-columns: max-content;
@@ -2326,6 +2386,166 @@ select.customer-selector option {
 .customer-detail-shell {
   display: grid;
   gap: 20px;
+}
+
+.customer-detail-drawer-overlay {
+  padding: 0;
+  place-items: stretch;
+}
+
+.customer-detail-drawer-shell {
+  width: min(760px, 100vw);
+  max-height: 100vh;
+  margin-left: auto;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.customer-detail-drawer-shell-mobile {
+  width: 100vw;
+  max-height: 100vh;
+}
+
+.customer-detail-loading {
+  min-height: 100vh;
+  padding: 32px 28px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  background:
+    linear-gradient(180deg, rgba(26, 18, 16, 0.98), rgba(12, 11, 18, 0.98)),
+    rgba(8, 8, 14, 0.98);
+}
+
+.customer-drawer-panel {
+  min-height: 100vh;
+  display: grid;
+  gap: 22px;
+  padding: 28px;
+  background:
+    linear-gradient(180deg, rgba(26, 18, 16, 0.98), rgba(12, 11, 18, 0.98)),
+    rgba(8, 8, 14, 0.98);
+}
+
+.customer-drawer-panel-mobile {
+  padding: 20px 16px 28px;
+  gap: 18px;
+}
+
+.customer-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.customer-drawer-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.customer-drawer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.customer-drawer-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.customer-drawer-card {
+  padding: 20px;
+}
+
+.customer-info-stack,
+.customer-drawer-stream {
+  display: grid;
+  gap: 12px;
+}
+
+.customer-info-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: rgba(242, 232, 225, 0.84);
+}
+
+.customer-info-row svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: rgba(255, 194, 132, 0.92);
+}
+
+.customer-sale-entry {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.customer-sale-entry-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.customer-sale-title {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.customer-sale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customer-drawer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.sale-items-dialog-shell {
+  width: min(580px, calc(100vw - 28px));
+}
+
+.sale-items-dialog {
+  gap: 18px;
+}
+
+.sale-items-dialog-list {
+  display: grid;
+  gap: 10px;
+}
+
+.sale-items-dialog-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sale-items-dialog-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 193, 132, 0.12);
+  background: linear-gradient(135deg, rgba(255, 205, 152, 0.08), rgba(249, 115, 22, 0.1));
 }
 
 .customer-profile-hero {
@@ -3371,5 +3591,81 @@ select.customer-selector option {
 
   .operation-header {
     flex-direction: column;
+  }
+}
+
+.sale-items-shell {
+  gap: 0.9rem;
+}
+
+.sale-items-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sale-items-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sale-item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) repeat(2, minmax(110px, 0.9fr)) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.sale-item-remove,
+.mini-inline-button {
+  align-self: stretch;
+}
+
+.sale-items-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: rgba(242, 232, 225, 0.84);
+  font-size: 0.94rem;
+}
+
+.sale-item-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.sale-item-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(246, 237, 231, 0.88);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 760px) {
+  .sale-items-head,
+  .sale-items-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sale-item-row {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-sale-entry-head,
+  .sale-items-dialog-row,
+  .sale-items-dialog-total,
+  .customer-drawer-footer {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

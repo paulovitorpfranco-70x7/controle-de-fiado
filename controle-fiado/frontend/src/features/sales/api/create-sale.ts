@@ -1,11 +1,13 @@
 import { httpPost } from "../../../shared/api/http";
 import { isSupabaseDataEnabled } from "../../../shared/config/data";
-import type { Sale } from "../types/sale";
+import type { Sale, SaleItem } from "../types/sale";
+import { normalizeSale } from "../utils/sale-items";
 import { createSupabaseSale } from "./supabase-sales";
 
 export type CreateSalePayload = {
   customerId: string;
   description: string;
+  saleItems?: SaleItem[];
   originalAmount: number;
   feeAmount?: number;
   feePercent?: number;
@@ -19,5 +21,5 @@ export function createSale(payload: CreateSalePayload) {
     return createSupabaseSale(payload);
   }
 
-  return httpPost<Sale>("/sales", payload);
+  return httpPost<Sale>("/sales", payload).then(normalizeSale);
 }

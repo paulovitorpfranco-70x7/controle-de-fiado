@@ -1,8 +1,9 @@
-import { prisma } from "../../../../lib/prisma.js";
 import type { CustomerDetailRepository } from "../../../../application/ports/customer-detail-repository.js";
+import { parseSaleDescription } from "../../../../application/sales/utils/sale-items.js";
 import { toCurrencyNumberFromCents } from "../../../../domain/customers/customer.js";
 import type { PaymentMethod } from "../../../../domain/payments/payment.js";
 import type { SaleStatus } from "../../../../domain/sales/sale.js";
+import { prisma } from "../../../../lib/prisma.js";
 
 function toMoneyFromCents(value: number) {
   return value / 100;
@@ -72,20 +73,25 @@ export function mapCustomerDetail(customer: {
     }>;
   }>;
 }) {
-  const sales = customer.sales.map((sale) => ({
-    id: sale.id,
-    customerId: sale.customerId,
-    description: sale.description,
-    originalAmount: toMoneyFromCents(sale.originalAmountCents),
-    feeAmount: toMoneyFromCents(sale.feeAmountCents),
-    finalAmount: toMoneyFromCents(sale.finalAmountCents),
-    remainingAmount: toMoneyFromCents(sale.remainingAmountCents),
-    saleDate: sale.saleDate,
-    dueDate: sale.dueDate,
-    status: sale.status,
-    createdById: sale.createdById,
-    createdAt: sale.createdAt
-  }));
+  const sales = customer.sales.map((sale) => {
+    const parsedDescription = parseSaleDescription(sale.description);
+
+    return {
+      id: sale.id,
+      customerId: sale.customerId,
+      description: parsedDescription.description,
+      saleItems: parsedDescription.saleItems,
+      originalAmount: toMoneyFromCents(sale.originalAmountCents),
+      feeAmount: toMoneyFromCents(sale.feeAmountCents),
+      finalAmount: toMoneyFromCents(sale.finalAmountCents),
+      remainingAmount: toMoneyFromCents(sale.remainingAmountCents),
+      saleDate: sale.saleDate,
+      dueDate: sale.dueDate,
+      status: sale.status,
+      createdById: sale.createdById,
+      createdAt: sale.createdAt
+    };
+  });
 
   const payments = customer.payments.map((payment) => ({
     id: payment.id,

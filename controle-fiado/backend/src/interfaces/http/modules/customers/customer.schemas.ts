@@ -8,4 +8,6 @@ export const createCustomerSchema = z.object({
   notes: z.string().optional()
 });
 
-export const updateCustomerSchema = createCustomerSchema.partial();
+export const updateCustomerSchema = createCustomerSchema.partial().extend({
+  isActive: z.boolean().optional()
+});

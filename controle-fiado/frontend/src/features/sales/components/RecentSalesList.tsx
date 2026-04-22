@@ -50,6 +50,7 @@ export function RecentSalesList({ sales }: RecentSalesListProps) {
                 <div className="customer-meta">
                   {formatDate(sale.saleDate)} | vence em {formatDate(sale.dueDate)}
                 </div>
+                {sale.saleItems.length ? <div className="customer-meta">{`${sale.saleItems.length} item(ns) registrados`}</div> : null}
               </div>
               <strong className="compact-stream-amount">{formatMoney(sale.finalAmount)}</strong>
             </div>

@@ -1,7 +1,8 @@
-import { prisma } from "../../../../lib/prisma.js";
-import { calculateSaleAmounts, resolveSaleStatus } from "../../../../domain/sales/sale.js";
-import type { SaleRepository } from "../../../../application/ports/sale-repository.js";
 import type { CreateSaleInput } from "../../../../application/sales/dto/create-sale.dto.js";
+import { parseSaleDescription } from "../../../../application/sales/utils/sale-items.js";
+import { calculateSaleAmounts, resolveSaleStatus } from "../../../../domain/sales/sale.js";
+import { prisma } from "../../../../lib/prisma.js";
+import type { SaleRepository } from "../../../../application/ports/sale-repository.js";
 
 function toMoneyFromCents(value: number) {
   return value / 100;
@@ -75,10 +76,13 @@ function mapSale(sale: {
   createdById: string;
   createdAt: Date;
 }) {
+  const parsedDescription = parseSaleDescription(sale.description);
+
   return {
     id: sale.id,
     customerId: sale.customerId,
-    description: sale.description,
+    description: parsedDescription.description,
+    saleItems: parsedDescription.saleItems,
     originalAmount: toMoneyFromCents(sale.originalAmountCents),
     feeAmount: toMoneyFromCents(sale.feeAmountCents),
     finalAmount: toMoneyFromCents(sale.finalAmountCents),

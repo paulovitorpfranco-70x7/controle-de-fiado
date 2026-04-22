@@ -1,7 +1,14 @@
+export type SaleItem = {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+};
+
 export type Sale = {
   id: string;
   customerId: string;
   description: string;
+  saleItems: SaleItem[];
   originalAmount: number;
   feeAmount: number;
   finalAmount: number;
