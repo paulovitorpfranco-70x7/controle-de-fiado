@@ -175,6 +175,30 @@ export function useFiadoApp() {
     }
   }, [isOwner, state.activeSection]);
 
+  useEffect(() => {
+    if (!state.notice) {
+      return;
+    }
+
+    const timeoutMs = state.notice.tone === "error" ? 4800 : 2600;
+    const timeoutId = window.setTimeout(() => {
+      setState((current) => {
+        if (!current.notice || current.notice.message !== state.notice?.message || current.notice.tone !== state.notice?.tone) {
+          return current;
+        }
+
+        return {
+          ...current,
+          notice: null
+        };
+      });
+    }, timeoutMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [state.notice]);
+
   const actions = useMemo(
     () => ({
       setActiveSection(section: AppSection) {
